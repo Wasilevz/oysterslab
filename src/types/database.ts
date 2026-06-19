@@ -65,6 +65,7 @@ export interface DashboardStats {
   totalEmployees: number;
   employeeHours: EmployeeHours[];
   monthRevenue: MonthRevenue[];
+  thisMonthPayroll: number;
 }
 
 export interface ActionResult<T = void> {

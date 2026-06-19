@@ -16,10 +16,6 @@ function formatMoney(amount: number): string {
 }
 
 export function StatsCards({ stats }: StatsCardsProps) {
-  const thisMonthRevenue =
-    stats.monthRevenue.length > 0
-      ? stats.monthRevenue[stats.monthRevenue.length - 1].amount
-      : 0;
   const thisMonthHours =
     stats.employeeHours.reduce((s, e) => s + e.hours, 0);
 
@@ -53,7 +49,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
     },
     {
       label: "Зарплата (мес)",
-      value: formatMoney(thisMonthRevenue),
+      value: formatMoney(stats.thisMonthPayroll),
       icon: Banknote,
       color: "text-blue-400",
       bg: "from-indigo-500/10 to-blue-600/5",

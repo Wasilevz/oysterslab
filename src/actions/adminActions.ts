@@ -40,7 +40,7 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
           .order("period_end", { ascending: false }),
         supabase
           .from("users")
-          .select("id")
+          .select("id, hourly_rate")
           .eq("role", "employee"),
         supabase
           .from("shifts")
@@ -79,6 +79,14 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
       .map((e) => ({ name: e.name, hours: Math.round(e.hours * 10) / 10 }))
       .sort((a, b) => b.hours - a.hours);
 
+    const employeesWithRate = employeesResult.data ?? [];
+    let thisMonthPayroll = 0;
+    for (const emp of employeesWithRate) {
+      const hours = hoursMap.get(emp.id)?.hours ?? 0;
+      thisMonthPayroll += hours * (emp.hourly_rate ?? 0);
+    }
+    thisMonthPayroll = Math.round(thisMonthPayroll);
+
     const revenueMap = new Map<string, { amount: number; hours: number }>();
     for (const row of payrollsAllResult.data ?? []) {
       const key = row.period_start;
@@ -107,6 +115,7 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
         totalEmployees: employeesResult.data?.length ?? 0,
         employeeHours,
         monthRevenue,
+        thisMonthPayroll,
       },
     };
   } catch (err) {
