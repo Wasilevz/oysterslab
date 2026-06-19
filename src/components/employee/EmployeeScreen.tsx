@@ -33,6 +33,15 @@ function formatMoney(amount: number): string {
   }).format(amount);
 }
 
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
 export function EmployeeScreen() {
   const user = useUserStore((s) => s.user);
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
@@ -87,12 +96,12 @@ export function EmployeeScreen() {
   if (loading) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4">
-        <Skeleton className="h-10 w-40" />
-        <div className="grid grid-cols-2 gap-2">
-          <Skeleton className="h-20 rounded-2xl" />
-          <Skeleton className="h-20 rounded-2xl" />
+        <Skeleton className="h-16 w-full rounded-2xl" />
+        <Skeleton className="h-40 w-full rounded-3xl" />
+        <div className="grid grid-cols-2 gap-3">
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
         </div>
-        <Skeleton className="h-40 w-full rounded-2xl" />
         <Skeleton className="h-32 w-full rounded-2xl" />
       </div>
     );
@@ -102,38 +111,134 @@ export function EmployeeScreen() {
 
   return (
     <div className="flex min-h-full flex-1 flex-col p-4 pb-8">
-      <header className="mb-4">
-        <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-600">
-          Привет
-        </p>
-        <h1 className="mt-0.5 text-xl font-bold text-white">{user?.full_name}</h1>
+      {/* Header */}
+      <header className="mb-5 flex items-center gap-3">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-bold text-white shadow-lg shadow-blue-500/20">
+          {user?.full_name ? getInitials(user.full_name) : "—"}
+        </div>
+        <div>
+          <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-600">
+            Привет
+          </p>
+          <h1 className="text-lg font-bold text-white">{user?.full_name}</h1>
+        </div>
       </header>
 
-      {/* Статы */}
+      {/* Карточка смены — главный элемент */}
+      <div
+        className={`relative mb-5 overflow-hidden rounded-3xl border transition-all duration-300 ${
+          isOnShift
+            ? "border-blue-500/30 bg-gradient-to-br from-blue-500/15 via-blue-600/5 to-transparent shadow-xl shadow-blue-500/5"
+            : "border-zinc-800/80 bg-zinc-900/40"
+        }`}
+      >
+        <div className="p-5">
+          {isOnShift && activeShift ? (
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-1 flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
+                </span>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-400">
+                  На смене
+                </p>
+              </div>
+
+              <ShiftTimer
+                clockIn={activeShift.clock_in}
+                className="font-mono text-5xl font-black tabular-nums tracking-tight text-white"
+              />
+
+              <p className="mt-2 text-xs text-zinc-500">
+                Начало в {format(new Date(activeShift.clock_in), "HH:mm")}
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-800/50">
+                <svg
+                  className="h-7 w-7 text-zinc-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <p className="text-sm font-semibold text-zinc-400">
+                Смена не начата
+              </p>
+              <p className="mt-1 text-xs text-zinc-600">
+                Нажмите кнопку ниже, чтобы начать
+              </p>
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={handleToggleShift}
+          disabled={isPending}
+          className={`w-full py-4 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
+            isOnShift
+              ? "bg-rose-500/15 text-rose-400 hover:bg-rose-500/25"
+              : "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+          }`}
+        >
+          {isPending ? "..." : isOnShift ? "Завершить смену" : "Начать смену"}
+        </button>
+
+        {actionError && (
+          <p className="px-5 pb-4 text-center text-xs text-rose-400">
+            {actionError}
+          </p>
+        )}
+        {success && (
+          <p className="px-5 pb-4 text-center text-xs text-blue-400">
+            {success}
+          </p>
+        )}
+      </div>
+
+      {/* Статистика */}
       {stats && (
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/20 p-3">
-            <p className="text-[10px] text-zinc-500">На этой неделе</p>
-            <p className="mt-0.5 font-mono text-lg font-bold text-white">
-              {stats.hoursThisWeek.toFixed(1)} <span className="text-xs font-normal text-zinc-500">ч</span>
+        <div className="mb-5 grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-4">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+              На неделе
+            </p>
+            <p className="mt-1 font-mono text-2xl font-bold text-white">
+              {stats.hoursThisWeek.toFixed(1)}
+              <span className="ml-1 text-xs font-normal text-zinc-500">
+                ч
+              </span>
             </p>
           </div>
-          <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/20 p-3">
-            <p className="text-[10px] text-zinc-500">За месяц</p>
-            <p className="mt-0.5 font-mono text-lg font-bold text-white">
-              {stats.hoursThisMonth.toFixed(1)} <span className="text-xs font-normal text-zinc-500">ч</span>
+          <div className="rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-4">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+              За месяц
+            </p>
+            <p className="mt-1 font-mono text-2xl font-bold text-white">
+              {stats.hoursThisMonth.toFixed(1)}
+              <span className="ml-1 text-xs font-normal text-zinc-500">
+                ч
+              </span>
             </p>
           </div>
-          <div className="rounded-xl border border-blue-500/10 bg-blue-500/5 p-3">
-            <p className="text-[10px] text-zinc-500">Ожидаемая зарплата</p>
-            <p className="mt-0.5 font-mono text-lg font-bold text-blue-400">
+          <div className="col-span-2 rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4">
+            <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+              Ожидаемая зарплата
+            </p>
+            <p className="mt-1 font-mono text-2xl font-bold text-blue-400">
               {formatMoney(stats.expectedSalary)}
             </p>
-          </div>
-          <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/20 p-3">
-            <p className="text-[10px] text-zinc-500">Смен</p>
-            <p className="mt-0.5 font-mono text-lg font-bold text-white">
-              {stats.totalShifts}
+            <p className="mt-0.5 text-[10px] text-zinc-600">
+              {stats.hourlyRate} л/ч · {stats.totalShifts} смен
             </p>
           </div>
         </div>
@@ -141,23 +246,28 @@ export function EmployeeScreen() {
 
       {/* График часов за неделю */}
       {stats && stats.weeklyHours.some((d) => d.hours > 0) && (
-        <div className="mb-4 rounded-xl border border-zinc-800/50 bg-zinc-900/20 p-3">
-          <p className="mb-2 text-[10px] text-zinc-500">Часы за неделю</p>
-          <ResponsiveContainer width="100%" height={100}>
-            <BarChart data={stats.weeklyHours} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+        <div className="mb-5 rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-4">
+          <p className="mb-3 text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+            Часы за неделю
+          </p>
+          <ResponsiveContainer width="100%" height={110}>
+            <BarChart
+              data={stats.weeklyHours}
+              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+            >
               <XAxis
                 dataKey="day"
-                tick={{ fill: "#52525b", fontSize: 10 }}
+                tick={{ fill: "#52525b", fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
               />
               <YAxis hide />
-              <Bar dataKey="hours" radius={[4, 4, 0, 0]} maxBarSize={24}>
+              <Bar dataKey="hours" radius={[6, 6, 0, 0]} maxBarSize={28}>
                 {stats.weeklyHours.map((entry, i) => (
                   <Cell
                     key={i}
                     fill={entry.hours > 0 ? "#3b82f6" : "#27272a"}
-                    fillOpacity={entry.hours > 0 ? 0.8 : 0.3}
+                    fillOpacity={entry.hours > 0 ? 0.9 : 0.3}
                   />
                 ))}
               </Bar>
@@ -166,116 +276,56 @@ export function EmployeeScreen() {
         </div>
       )}
 
-      {/* Карточка смены */}
-      <div
-        className={`relative overflow-hidden rounded-2xl border transition-colors ${
-          isOnShift
-            ? "border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-blue-600/5"
-            : "border-zinc-800 bg-zinc-900/30"
-        }`}
-      >
-        <div className="p-4">
-          {isOnShift && activeShift ? (
-            <>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
-                    <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
-                  </span>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-blue-400">
-                    На смене
-                  </p>
-                </div>
-                <span className="text-[10px] text-zinc-500">
-                  с {format(new Date(activeShift.clock_in), "HH:mm")}
-                </span>
-              </div>
-
-              <ShiftTimer
-                clockIn={activeShift.clock_in}
-                className="font-mono text-4xl font-black tabular-nums text-white"
-              />
-            </>
-          ) : (
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                  Смена не начата
-                </p>
-                <p className="mt-0.5 text-xs text-zinc-600">
-                  12:00 — 22:30
-                </p>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800/50">
-                <svg className="h-5 w-5 text-zinc-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Кнопка — маленькая, внизу карточки */}
-        <button
-          onClick={handleToggleShift}
-          disabled={isPending}
-          className={`w-full py-3 text-sm font-semibold transition-all active:scale-[0.98] disabled:opacity-50 ${
-            isOnShift
-              ? "bg-rose-600/20 text-rose-400 hover:bg-rose-600/30"
-              : "bg-blue-600/20 text-blue-400 hover:bg-blue-600/30"
-          }`}
-        >
-          {isPending ? "..." : isOnShift ? "Завершить смену" : "Начать смену"}
-        </button>
-
-        {actionError && (
-          <p className="px-4 pb-3 text-center text-xs text-rose-400">{actionError}</p>
-        )}
-        {success && (
-          <p className="px-4 pb-3 text-center text-xs text-blue-400">{success}</p>
-        )}
-      </div>
-
       {/* Последние смены */}
-      <section className="mt-5">
-        <h2 className="mb-2.5 text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
+      <section className="mb-5">
+        <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
           Последние смены
         </h2>
 
         {recentShifts.length === 0 ? (
-          <div className="rounded-xl border border-zinc-800/30 bg-zinc-900/20 p-5 text-center">
+          <div className="rounded-2xl border border-zinc-800/30 bg-zinc-900/20 p-8 text-center">
             <p className="text-xs text-zinc-600">Пока нет смен</p>
           </div>
         ) : (
-          <ul className="space-y-1">
+          <ul className="space-y-2">
             {recentShifts.map((shift) => {
               const hours =
                 shift.hours_worked ??
                 (shift.clock_out
-                  ? getElapsedSeconds(shift.clock_in, new Date(shift.clock_out)) / 3600
+                  ? getElapsedSeconds(shift.clock_in, new Date(shift.clock_out)) /
+                    3600
                   : 0);
 
               return (
                 <li
                   key={shift.id}
-                  className="flex items-center justify-between rounded-xl border border-zinc-800/30 bg-zinc-900/20 px-3.5 py-2.5"
+                  className="flex items-center justify-between rounded-2xl border border-zinc-800/30 bg-zinc-900/20 px-4 py-3"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 flex-col items-center justify-center rounded-lg bg-zinc-800/40 leading-none">
-                      <span className="text-[9px] font-bold text-zinc-400">
+                    <div className="flex h-10 w-10 flex-col items-center justify-center rounded-xl bg-zinc-800/40 leading-none">
+                      <span className="text-[10px] font-bold text-zinc-300">
                         {format(new Date(shift.clock_in), "d", { locale: ru })}
                       </span>
                       <span className="text-[8px] text-zinc-600">
-                        {format(new Date(shift.clock_in), "MMM", { locale: ru })}
+                        {format(new Date(shift.clock_in), "MMM", {
+                          locale: ru,
+                        })}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-400">
-                      {format(new Date(shift.clock_in), "HH:mm")}
-                      {shift.clock_out && ` — ${format(new Date(shift.clock_out), "HH:mm")}`}
-                    </p>
+                    <div>
+                      <p className="text-xs font-medium text-zinc-300">
+                        {format(new Date(shift.clock_in), "HH:mm")}
+                        {shift.clock_out &&
+                          ` — ${format(new Date(shift.clock_out), "HH:mm")}`}
+                      </p>
+                      <p className="text-[10px] text-zinc-600">
+                        {format(new Date(shift.clock_in), "EEEE", {
+                          locale: ru,
+                        })}
+                      </p>
+                    </div>
                   </div>
-                  <span className="font-mono text-xs font-bold text-zinc-300">
+                  <span className="font-mono text-sm font-bold text-white">
                     {formatHours(hours)}
                   </span>
                 </li>
