@@ -12,8 +12,6 @@ export function ShiftTimer({ clockIn, className }: ShiftTimerProps) {
   const [minutes, setMinutes] = useState(() => getElapsedMinutes(clockIn));
 
   useEffect(() => {
-    setMinutes(getElapsedMinutes(clockIn));
-
     const interval = setInterval(() => {
       setMinutes(getElapsedMinutes(clockIn));
     }, 1000);
