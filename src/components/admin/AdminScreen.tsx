@@ -5,8 +5,8 @@ import { getDashboardStats } from "@/actions/adminActions";
 import { ForgottenTab } from "@/components/admin/ForgottenTab";
 import { HoursChart } from "@/components/admin/HoursChart";
 import { LiveTab } from "@/components/admin/LiveTab";
-import { PayrollTab } from "@/components/admin/PayrollTab";
 import { RevenueChart } from "@/components/admin/RevenueChart";
+import { SalaryPage } from "@/components/admin/SalaryPage";
 import { StatsCards } from "@/components/admin/StatsCards";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -112,7 +112,7 @@ export function AdminScreen() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="payroll">Зарплаты</TabsTrigger>
+              <TabsTrigger value="salary">Выплаты</TabsTrigger>
             </TabsList>
           </div>
 
@@ -128,11 +128,8 @@ export function AdminScreen() {
               />
             </TabsContent>
 
-            <TabsContent value="payroll" className="flex-1">
-              <PayrollTab
-                payrolls={stats?.draftPayrolls ?? []}
-                onApproved={loadStats}
-              />
+            <TabsContent value="salary" className="flex-1">
+              <SalaryPage />
             </TabsContent>
           </div>
         </Tabs>

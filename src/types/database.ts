@@ -4,6 +4,8 @@ export type ShiftStatus = "ACTIVE" | "COMPLETED" | "AUTO_CLOSED" | "REVIEWED";
 
 export type PayrollStatus = "DRAFT" | "APPROVED";
 
+export type SalaryStatus = "pending" | "paid";
+
 export interface User {
   id: string;
   telegram_id: number;
@@ -34,11 +36,28 @@ export interface Payroll {
   created_at: string;
 }
 
+export interface SalaryPayment {
+  id: string;
+  user_id: string;
+  hours_worked: number;
+  hourly_rate: number;
+  total_amount: number;
+  status: SalaryStatus;
+  period_start: string;
+  period_end: string;
+  paid_at: string | null;
+  created_at: string;
+}
+
 export interface ShiftWithUser extends Shift {
   users: Pick<User, "id" | "full_name" | "telegram_id">;
 }
 
 export interface PayrollWithUser extends Payroll {
+  users: Pick<User, "id" | "full_name">;
+}
+
+export interface SalaryPaymentWithUser extends SalaryPayment {
   users: Pick<User, "id" | "full_name">;
 }
 
@@ -66,6 +85,12 @@ export interface DashboardStats {
   employeeHours: EmployeeHours[];
   monthRevenue: MonthRevenue[];
   thisMonthPayroll: number;
+}
+
+export interface SalaryStats {
+  payments: SalaryPaymentWithUser[];
+  totalPending: number;
+  totalPaid: number;
 }
 
 export interface ActionResult<T = void> {
