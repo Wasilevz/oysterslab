@@ -47,10 +47,24 @@ export interface ActiveShiftCard {
   user: Pick<User, "id" | "full_name">;
 }
 
+export interface EmployeeHours {
+  name: string;
+  hours: number;
+}
+
+export interface MonthRevenue {
+  month: string;
+  amount: number;
+  hours: number;
+}
+
 export interface DashboardStats {
   activeShifts: ActiveShiftCard[];
   autoClosedShifts: ShiftWithUser[];
   draftPayrolls: PayrollWithUser[];
+  totalEmployees: number;
+  employeeHours: EmployeeHours[];
+  monthRevenue: MonthRevenue[];
 }
 
 export interface ActionResult<T = void> {

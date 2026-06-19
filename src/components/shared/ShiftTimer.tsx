@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatDuration, getElapsedMinutes } from "@/lib/utils";
+import { formatDuration, getElapsedSeconds } from "@/lib/utils";
 
 interface ShiftTimerProps {
   clockIn: string;
@@ -9,11 +9,11 @@ interface ShiftTimerProps {
 }
 
 export function ShiftTimer({ clockIn, className }: ShiftTimerProps) {
-  const [minutes, setMinutes] = useState(() => getElapsedMinutes(clockIn));
+  const [seconds, setSeconds] = useState(() => getElapsedSeconds(clockIn));
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setMinutes(getElapsedMinutes(clockIn));
+      setSeconds(getElapsedSeconds(clockIn));
     }, 1000);
 
     return () => clearInterval(interval);
@@ -21,7 +21,7 @@ export function ShiftTimer({ clockIn, className }: ShiftTimerProps) {
 
   return (
     <span className={className} aria-live="polite">
-      {formatDuration(minutes)}
+      {formatDuration(seconds)}
     </span>
   );
 }

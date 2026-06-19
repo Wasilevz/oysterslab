@@ -12,7 +12,7 @@ import {
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDuration, getElapsedMinutes } from "@/lib/utils";
+import { formatHours, getElapsedSeconds } from "@/lib/utils";
 import { useUserStore } from "@/store/userStore";
 import type { Shift } from "@/types/database";
 
@@ -81,14 +81,16 @@ export function EmployeeScreen() {
   return (
     <div className="flex min-h-full flex-1 flex-col p-4 pb-8">
       <header className="mb-6">
-        <p className="text-sm text-zinc-500">Смена</p>
-        <h1 className="text-2xl font-bold text-white">{user?.full_name}</h1>
+        <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
+          Смена
+        </p>
+        <h1 className="mt-1 text-2xl font-bold text-white">{user?.full_name}</h1>
       </header>
 
       <div className="flex flex-1 flex-col items-center justify-center gap-6">
         {isOnShift && activeShift ? (
           <div className="text-center">
-            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-emerald-400">
+            <p className="mb-2 text-sm font-medium uppercase tracking-widest text-blue-400">
               На смене
             </p>
             <ShiftTimer
@@ -103,7 +105,7 @@ export function EmployeeScreen() {
         )}
 
         <Button
-          variant={isOnShift ? "rose" : "emerald"}
+          variant={isOnShift ? "rose" : "blue"}
           size="xl"
           disabled={isPending}
           onClick={handleToggleShift}
@@ -133,8 +135,8 @@ export function EmployeeScreen() {
               const hours =
                 shift.hours_worked ??
                 (shift.clock_out
-                  ? getElapsedMinutes(shift.clock_in, new Date(shift.clock_out)) /
-                    60
+                  ? getElapsedSeconds(shift.clock_in, new Date(shift.clock_out)) /
+                    3600
                   : 0);
 
               return (
@@ -153,7 +155,7 @@ export function EmployeeScreen() {
                     </p>
                   </div>
                   <span className="font-mono text-lg font-bold text-zinc-300">
-                    {formatDuration(Math.round(hours * 60))}
+                    {formatHours(hours)}
                   </span>
                 </li>
               );

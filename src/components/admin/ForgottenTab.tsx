@@ -63,19 +63,22 @@ export function ForgottenTab({ shifts, onReviewed }: ForgottenTabProps) {
 
   if (shifts.length === 0) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center px-4">
-        <p className="text-center text-zinc-500">Забытых смен нет</p>
+      <div className="flex min-h-[40vh] items-center justify-center px-4">
+        <div className="text-center">
+          <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-zinc-800/50" />
+          <p className="text-zinc-500">Забытых смен нет</p>
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="grid gap-3 px-4 pt-4">
+      <div className="grid gap-3 px-4">
         {shifts.map((shift) => (
           <article
             key={shift.id}
-            className="rounded-2xl border border-amber-900/50 bg-amber-950/20 p-4"
+            className="rounded-2xl border border-amber-500/10 bg-amber-500/5 p-4"
           >
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
@@ -88,7 +91,7 @@ export function ForgottenTab({ shifts, onReviewed }: ForgottenTabProps) {
                   })}
                 </p>
               </div>
-              <span className="rounded-lg bg-amber-900/40 px-2 py-1 text-xs font-semibold text-amber-300">
+              <span className="rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-400">
                 AUTO
               </span>
             </div>
@@ -128,14 +131,14 @@ export function ForgottenTab({ shifts, onReviewed }: ForgottenTabProps) {
             autoFocus
           />
 
-          {error && <p className="text-sm text-rose-400">{error}</p>}
+          {error && <p className="text-sm text-red-400">{error}</p>}
 
           <DialogFooter>
             <Button variant="ghost" onClick={closeDialog} disabled={isPending}>
               Отмена
             </Button>
             <Button
-              variant="emerald"
+              variant="blue"
               onClick={handleSubmit}
               disabled={isPending || !hours}
             >

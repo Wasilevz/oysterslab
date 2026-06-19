@@ -3,8 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { getDashboardStats } from "@/actions/adminActions";
 import { ForgottenTab } from "@/components/admin/ForgottenTab";
+import { HoursChart } from "@/components/admin/HoursChart";
 import { LiveTab } from "@/components/admin/LiveTab";
 import { PayrollTab } from "@/components/admin/PayrollTab";
+import { RevenueChart } from "@/components/admin/RevenueChart";
+import { StatsCards } from "@/components/admin/StatsCards";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserStore } from "@/store/userStore";
@@ -46,65 +49,94 @@ export function AdminScreen() {
   if (loading) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pb-24">
-        <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-12 w-48" />
+        <div className="grid grid-cols-2 gap-3">
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+        </div>
+        <Skeleton className="h-[250px] rounded-2xl" />
+        <Skeleton className="h-[250px] rounded-2xl" />
       </div>
     );
   }
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <header className="border-b border-zinc-800 px-4 py-4">
-        <p className="text-sm text-zinc-500">Панель шефа</p>
-        <h1 className="text-2xl font-bold text-white">{user?.full_name}</h1>
+      <header className="border-b border-zinc-800/60 px-4 py-5">
+        <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
+          Панель управления
+        </p>
+        <h1 className="mt-1 text-2xl font-bold text-white">
+          {user?.full_name}
+        </h1>
       </header>
 
       {error && (
-        <p className="mx-4 mt-4 rounded-xl bg-rose-950/40 px-4 py-3 text-sm text-rose-400">
-          {error}
-        </p>
+        <div className="mx-4 mt-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
+          <p className="text-sm text-red-400">{error}</p>
+        </div>
       )}
 
-      <Tabs defaultValue="live" className="flex-1">
-        <TabsContent value="live">
-          <LiveTab activeShifts={stats?.activeShifts ?? []} />
-        </TabsContent>
+      {stats && <StatsCards stats={stats} />}
 
-        <TabsContent value="forgotten">
-          <ForgottenTab
-            shifts={stats?.autoClosedShifts ?? []}
-            onReviewed={loadStats}
-          />
-        </TabsContent>
+      {stats && (stats.employeeHours.length > 0 || stats.monthRevenue.length > 0) && (
+        <div className="mt-6 space-y-4 px-4">
+          {stats.employeeHours.length > 0 && (
+            <HoursChart data={stats.employeeHours} />
+          )}
+          {stats.monthRevenue.length > 0 && (
+            <RevenueChart data={stats.monthRevenue} />
+          )}
+        </div>
+      )}
 
-        <TabsContent value="payroll">
-          <PayrollTab
-            payrolls={stats?.draftPayrolls ?? []}
-            onApproved={loadStats}
-          />
-        </TabsContent>
+      <div className="mt-6 flex-1">
+        <Tabs defaultValue="live" className="flex flex-1 flex-col">
+          <div className="px-4">
+            <TabsList>
+              <TabsTrigger value="live">
+                Лайв
+                {(stats?.activeShifts.length ?? 0) > 0 && (
+                  <span className="ml-1.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-blue-500/20 px-1 text-[10px] font-bold text-blue-400">
+                    {stats?.activeShifts.length}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="forgotten">
+                Забывашки
+                {(stats?.autoClosedShifts.length ?? 0) > 0 && (
+                  <span className="ml-1.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-amber-500/20 px-1 text-[10px] font-bold text-amber-400">
+                    {stats?.autoClosedShifts.length}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="payroll">Зарплаты</TabsTrigger>
+            </TabsList>
+          </div>
 
-        <TabsList>
-          <TabsTrigger value="live">
-            Лайв
-            {(stats?.activeShifts.length ?? 0) > 0 && (
-              <span className="mt-0.5 text-xs text-emerald-400">
-                {stats?.activeShifts.length}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="forgotten">
-            Забывашки
-            {(stats?.autoClosedShifts.length ?? 0) > 0 && (
-              <span className="mt-0.5 text-xs text-amber-400">
-                {stats?.autoClosedShifts.length}
-              </span>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="payroll">Зарплаты</TabsTrigger>
-        </TabsList>
-      </Tabs>
+          <div className="mt-4 flex-1">
+            <TabsContent value="live">
+              <LiveTab activeShifts={stats?.activeShifts ?? []} />
+            </TabsContent>
+
+            <TabsContent value="forgotten">
+              <ForgottenTab
+                shifts={stats?.autoClosedShifts ?? []}
+                onReviewed={loadStats}
+              />
+            </TabsContent>
+
+            <TabsContent value="payroll" className="flex-1">
+              <PayrollTab
+                payrolls={stats?.draftPayrolls ?? []}
+                onApproved={loadStats}
+              />
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
     </div>
   );
 }
