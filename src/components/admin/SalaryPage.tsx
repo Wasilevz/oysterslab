@@ -4,9 +4,9 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import {
+  approveSalary,
   generateSalaryForPeriod,
   getSalaryStats,
-  markSalaryPaid,
 } from "@/actions/salaryActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ function formatMoney(amount: number): string {
 export function SalaryPage() {
   const [payments, setPayments] = useState<SalaryPaymentWithUser[]>([]);
   const [totalPending, setTotalPending] = useState(0);
+  const [totalApproved, setTotalApproved] = useState(0);
   const [totalPaid, setTotalPaid] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,13 +32,14 @@ export function SalaryPage() {
   const [periodStart, setPeriodStart] = useState("");
   const [periodEnd, setPeriodEnd] = useState("");
   const [genResult, setGenResult] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "pending" | "paid">("all");
+  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "paid">("all");
 
   const loadData = useCallback(async () => {
     const result = await getSalaryStats();
     if (result.success && result.data) {
       setPayments(result.data.payments);
       setTotalPending(result.data.totalPending);
+      setTotalApproved(result.data.totalApproved);
       setTotalPaid(result.data.totalPaid);
     } else {
       setError(result.error ?? "Ошибка загрузки");
@@ -75,9 +77,9 @@ export function SalaryPage() {
     });
   };
 
-  const handleMarkPaid = (id: string) => {
+  const handleApprove = (id: string) => {
     startTransition(async () => {
-      const result = await markSalaryPaid(id);
+      const result = await approveSalary(id);
       if (!result.success) {
         setError(result.error ?? "Ошибка");
         return;
@@ -110,16 +112,22 @@ export function SalaryPage() {
         <h1 className="mt-1 text-2xl font-bold text-white">Выплаты</h1>
       </header>
 
-      <div className="mt-4 grid grid-cols-2 gap-3 px-4">
-        <div className="rounded-2xl border border-amber-500/10 bg-amber-500/5 p-4">
-          <p className="text-xs font-medium text-zinc-500">К выплате</p>
-          <p className="mt-1 text-xl font-bold text-amber-400">
+      <div className="mt-4 grid grid-cols-3 gap-2 px-4">
+        <div className="rounded-2xl border border-amber-500/10 bg-amber-500/5 p-3">
+          <p className="text-[10px] font-medium text-zinc-500">Ожидает</p>
+          <p className="mt-0.5 text-lg font-bold text-amber-400">
             {formatMoney(totalPending)}
           </p>
         </div>
-        <div className="rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4">
-          <p className="text-xs font-medium text-zinc-500">Выплачено</p>
-          <p className="mt-1 text-xl font-bold text-blue-400">
+        <div className="rounded-2xl border border-blue-500/10 bg-blue-500/5 p-3">
+          <p className="text-[10px] font-medium text-zinc-500">Одобрено</p>
+          <p className="mt-0.5 text-lg font-bold text-blue-400">
+            {formatMoney(totalApproved)}
+          </p>
+        </div>
+        <div className="rounded-2xl border border-emerald-500/10 bg-emerald-500/5 p-3">
+          <p className="text-[10px] font-medium text-zinc-500">Выплачено</p>
+          <p className="mt-0.5 text-lg font-bold text-emerald-400">
             {formatMoney(totalPaid)}
           </p>
         </div>
@@ -166,18 +174,18 @@ export function SalaryPage() {
         </div>
       )}
 
-      <div className="mt-4 flex gap-2 px-4">
-        {(["all", "pending", "paid"] as const).map((f) => (
+      <div className="mt-4 flex gap-1.5 px-4 overflow-x-auto">
+        {(["all", "pending", "approved", "paid"] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+            className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
               filter === f
                 ? "bg-blue-500/20 text-blue-400"
                 : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
-            {f === "all" ? "Все" : f === "pending" ? "К выплате" : "Выплачено"}
+            {f === "all" ? "Все" : f === "pending" ? "Ожидает" : f === "approved" ? "Одобрено" : "Выплачено"}
           </button>
         ))}
       </div>
@@ -193,8 +201,10 @@ export function SalaryPage() {
               key={p.id}
               className={`rounded-2xl border p-4 ${
                 p.status === "paid"
-                  ? "border-blue-500/10 bg-blue-500/5"
-                  : "border-zinc-800 bg-zinc-900/30"
+                  ? "border-emerald-500/10 bg-emerald-500/5"
+                  : p.status === "approved"
+                    ? "border-blue-500/10 bg-blue-500/5"
+                    : "border-zinc-800 bg-zinc-900/30"
               }`}
             >
               <div className="flex items-start justify-between">
@@ -209,8 +219,12 @@ export function SalaryPage() {
                   </p>
                 </div>
                 {p.status === "paid" ? (
+                  <span className="rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-bold text-emerald-400">
+                    ВЫПЛАЧЕНО
+                  </span>
+                ) : p.status === "approved" ? (
                   <span className="rounded-lg bg-blue-500/10 px-2.5 py-1 text-xs font-bold text-blue-400">
-                    ОПЛАЧЕНО
+                    ОДОБРЕНО
                   </span>
                 ) : (
                   <span className="rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-bold text-amber-400">
@@ -221,19 +235,19 @@ export function SalaryPage() {
 
               <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                 <div className="rounded-xl bg-zinc-800/30 py-2">
-                  <p className="text-xs text-zinc-500">Часы</p>
+                  <p className="text-[10px] text-zinc-500">Часы</p>
                   <p className="font-mono text-sm font-bold text-white">
                     {Number(p.hours_worked).toFixed(1)}
                   </p>
                 </div>
                 <div className="rounded-xl bg-zinc-800/30 py-2">
-                  <p className="text-xs text-zinc-500">Ставка</p>
+                  <p className="text-[10px] text-zinc-500">Ставка</p>
                   <p className="font-mono text-sm font-bold text-white">
                     {Number(p.hourly_rate)} л/ч
                   </p>
                 </div>
                 <div className="rounded-xl bg-zinc-800/30 py-2">
-                  <p className="text-xs text-zinc-500">Итого</p>
+                  <p className="text-[10px] text-zinc-500">Итого</p>
                   <p className="font-mono text-sm font-bold text-white">
                     {formatMoney(Number(p.total_amount))}
                   </p>
@@ -241,8 +255,8 @@ export function SalaryPage() {
               </div>
 
               {p.paid_at && (
-                <p className="mt-2 text-xs text-blue-400">
-                  Выплачено:{" "}
+                <p className="mt-2 text-xs text-emerald-400">
+                  Получено сотрудником:{" "}
                   {format(new Date(p.paid_at), "d MMM yyyy, HH:mm", {
                     locale: ru,
                   })}
@@ -254,9 +268,9 @@ export function SalaryPage() {
                   variant="blue"
                   className="mt-3 w-full"
                   disabled={isPending}
-                  onClick={() => handleMarkPaid(p.id)}
+                  onClick={() => handleApprove(p.id)}
                 >
-                  {isPending ? "..." : "Отметить как выплаченное"}
+                  {isPending ? "..." : "Одобрить выплату"}
                 </Button>
               )}
             </div>

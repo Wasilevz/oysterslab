@@ -23,13 +23,16 @@ export async function getSalaryStats(): Promise<ActionResult<SalaryStats>> {
     const totalPending = list
       .filter((p) => p.status === "pending")
       .reduce((s, p) => s + Number(p.total_amount), 0);
+    const totalApproved = list
+      .filter((p) => p.status === "approved")
+      .reduce((s, p) => s + Number(p.total_amount), 0);
     const totalPaid = list
       .filter((p) => p.status === "paid")
       .reduce((s, p) => s + Number(p.total_amount), 0);
 
     return {
       success: true,
-      data: { payments: list, totalPending, totalPaid },
+      data: { payments: list, totalPending, totalApproved, totalPaid },
     };
   } catch (err) {
     return {
@@ -39,7 +42,33 @@ export async function getSalaryStats(): Promise<ActionResult<SalaryStats>> {
   }
 }
 
-export async function markSalaryPaid(
+export async function approveSalary(
+  paymentId: string,
+): Promise<ActionResult<SalaryPayment>> {
+  try {
+    const supabase = getSupabaseAdmin();
+
+    const { data, error } = await supabase
+      .from("salary_payments")
+      .update({ status: "approved" })
+      .eq("id", paymentId)
+      .eq("status", "pending")
+      .select("*")
+      .single();
+
+    if (error) return { success: false, error: error.message };
+    if (!data) return { success: false, error: "Запись не найдена или уже одобрена" };
+
+    return { success: true, data: data as SalaryPayment };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Не удалось одобрить выплату",
+    };
+  }
+}
+
+export async function confirmSalaryReceived(
   paymentId: string,
 ): Promise<ActionResult<SalaryPayment>> {
   try {
@@ -49,18 +78,41 @@ export async function markSalaryPaid(
       .from("salary_payments")
       .update({ status: "paid", paid_at: new Date().toISOString() })
       .eq("id", paymentId)
-      .eq("status", "pending")
+      .eq("status", "approved")
       .select("*")
       .single();
 
     if (error) return { success: false, error: error.message };
-    if (!data) return { success: false, error: "Запись не найдена или уже оплачена" };
+    if (!data) return { success: false, error: "Запись не найдена или ещё не одобрена" };
 
     return { success: true, data: data as SalaryPayment };
   } catch (err) {
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Не удалось отметить выплату",
+      error: err instanceof Error ? err.message : "Не удалось подтвердить получение",
+    };
+  }
+}
+
+export async function getEmployeeSalaries(
+  userId: string,
+): Promise<ActionResult<SalaryPayment[]>> {
+  try {
+    const supabase = getSupabaseAdmin();
+
+    const { data, error } = await supabase
+      .from("salary_payments")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) return { success: false, error: error.message };
+
+    return { success: true, data: (data ?? []) as SalaryPayment[] };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Не удалось загрузить зарплаты",
     };
   }
 }

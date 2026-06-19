@@ -4,7 +4,7 @@ export type ShiftStatus = "ACTIVE" | "COMPLETED" | "AUTO_CLOSED" | "REVIEWED";
 
 export type PayrollStatus = "DRAFT" | "APPROVED";
 
-export type SalaryStatus = "pending" | "paid";
+export type SalaryStatus = "pending" | "approved" | "paid";
 
 export interface User {
   id: string;
@@ -90,6 +90,7 @@ export interface DashboardStats {
 export interface SalaryStats {
   payments: SalaryPaymentWithUser[];
   totalPending: number;
+  totalApproved: number;
   totalPaid: number;
 }
 
