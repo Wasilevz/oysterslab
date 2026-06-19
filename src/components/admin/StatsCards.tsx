@@ -10,7 +10,7 @@ interface StatsCardsProps {
 function formatMoney(amount: number): string {
   return new Intl.NumberFormat("ru-RU", {
     style: "currency",
-    currency: "RUB",
+    currency: "MDL",
     maximumFractionDigits: 0,
   }).format(amount);
 }

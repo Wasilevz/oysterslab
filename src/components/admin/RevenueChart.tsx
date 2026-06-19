@@ -18,7 +18,7 @@ interface RevenueChartProps {
 function formatMoney(value: number): string {
   return new Intl.NumberFormat("ru-RU", {
     style: "currency",
-    currency: "RUB",
+    currency: "MDL",
     maximumFractionDigits: 0,
   }).format(value);
 }
