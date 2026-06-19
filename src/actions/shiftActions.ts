@@ -3,15 +3,17 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { ActionResult, Shift } from "@/types/database";
 
-function roundUpTo30(date: Date): Date {
+function roundTo30(date: Date): Date {
   const rounded = new Date(date);
   const m = rounded.getMinutes();
-  if (m > 0 && m <= 30) {
+  if (m >= 0 && m <= 15) {
+    rounded.setMinutes(0, 0, 0);
+  } else if (m >= 16 && m <= 30) {
     rounded.setMinutes(30, 0, 0);
-  } else if (m > 30) {
-    rounded.setHours(rounded.getHours() + 1, 0, 0, 0);
+  } else if (m >= 31 && m <= 45) {
+    rounded.setMinutes(30, 0, 0);
   } else {
-    rounded.setSeconds(0, 0);
+    rounded.setHours(rounded.getHours() + 1, 0, 0, 0);
   }
   return rounded;
 }
@@ -37,7 +39,7 @@ export async function clockIn(
       return { success: false, error: "Смена уже активна" };
     }
 
-    const clockInTime = roundUpTo30(new Date());
+    const clockInTime = roundTo30(new Date());
     const { data: shift, error } = await supabase
       .from("shifts")
       .insert({
@@ -82,7 +84,7 @@ export async function clockOut(
       return { success: false, error: "Нет активной смены" };
     }
 
-    const clockOutTime = roundUpTo30(new Date());
+    const clockOutTime = roundTo30(new Date());
     const clockIn = new Date(activeShift.clock_in);
     const hoursWorked =
       Math.round(((clockOutTime.getTime() - clockIn.getTime()) / 3600000) * 100) /
