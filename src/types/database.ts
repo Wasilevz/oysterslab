@@ -94,6 +94,15 @@ export interface SalaryStats {
   totalPaid: number;
 }
 
+export interface EmployeeStats {
+  hoursThisWeek: number;
+  hoursThisMonth: number;
+  expectedSalary: number;
+  totalShifts: number;
+  hourlyRate: number;
+  weeklyHours: { day: string; hours: number }[];
+}
+
 export interface ActionResult<T = void> {
   success: boolean;
   data?: T;

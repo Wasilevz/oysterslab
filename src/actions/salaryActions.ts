@@ -3,6 +3,7 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type {
   ActionResult,
+  EmployeeStats,
   SalaryPayment,
   SalaryPaymentWithUser,
   SalaryStats,
@@ -204,6 +205,94 @@ export async function deleteSalaryPayment(
     return {
       success: false,
       error: err instanceof Error ? err.message : "Не удалось удалить запись",
+    };
+  }
+}
+
+export async function getEmployeeStats(
+  userId: string,
+): Promise<ActionResult<EmployeeStats>> {
+  try {
+    const supabase = getSupabaseAdmin();
+
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - mondayOffset);
+    weekStart.setHours(0, 0, 0, 0);
+
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const { data: user } = await supabase
+      .from("users")
+      .select("hourly_rate")
+      .eq("id", userId)
+      .single();
+
+    const hourlyRate = user?.hourly_rate ?? 0;
+
+    const { data: monthShifts } = await supabase
+      .from("shifts")
+      .select("clock_in, hours_worked, status")
+      .eq("user_id", userId)
+      .in("status", ["COMPLETED", "REVIEWED", "AUTO_CLOSED"])
+      .gte("clock_in", monthStart.toISOString());
+
+    let hoursThisWeek = 0;
+    let hoursThisMonth = 0;
+    let totalShifts = 0;
+    const dailyHours = new Map<string, number>();
+
+    for (const shift of monthShifts ?? []) {
+      const h = shift.hours_worked ?? 0;
+      hoursThisMonth += h;
+      totalShifts++;
+
+      const shiftDate = new Date(shift.clock_in);
+      if (shiftDate >= weekStart) {
+        hoursThisWeek += h;
+      }
+
+      const dayKey = shiftDate.toLocaleDateString("ru-RU", { weekday: "short" });
+      dailyHours.set(dayKey, (dailyHours.get(dayKey) ?? 0) + h);
+    }
+
+    const activeResult = await supabase
+      .from("shifts")
+      .select("clock_in, hours_worked, status")
+      .eq("user_id", userId)
+      .eq("status", "ACTIVE")
+      .maybeSingle();
+
+    if (activeResult.data) {
+      const now2 = new Date();
+      const elapsed = Math.max(0, (now2.getTime() - new Date(activeResult.data.clock_in).getTime()) / 3600000);
+      hoursThisWeek += elapsed;
+      hoursThisMonth += elapsed;
+    }
+
+    const weekDays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+    const weeklyHours = weekDays.map((day) => ({
+      day,
+      hours: Math.round((dailyHours.get(day) ?? 0) * 10) / 10,
+    }));
+
+    return {
+      success: true,
+      data: {
+        hoursThisWeek: Math.round(hoursThisWeek * 10) / 10,
+        hoursThisMonth: Math.round(hoursThisMonth * 10) / 10,
+        expectedSalary: Math.round(hoursThisMonth * hourlyRate),
+        totalShifts,
+        hourlyRate,
+        weeklyHours,
+      },
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Не удалось загрузить статистику",
     };
   }
 }
