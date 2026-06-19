@@ -3,6 +3,19 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
+function roundUpTo30(date: Date): Date {
+  const rounded = new Date(date);
+  const m = rounded.getMinutes();
+  if (m > 0 && m <= 30) {
+    rounded.setMinutes(30, 0, 0);
+  } else if (m > 30) {
+    rounded.setHours(rounded.getHours() + 1, 0, 0, 0);
+  } else {
+    rounded.setSeconds(0, 0);
+  }
+  return rounded;
+}
+
 async function sendMessage(chatId: number, text: string): Promise<boolean> {
   if (!BOT_TOKEN) return false;
 
@@ -140,13 +153,13 @@ export async function autoCloseOverdueShifts(): Promise<{ closed: number }> {
 
   for (const shift of activeShifts) {
     const clockIn = new Date(shift.clock_in);
-    const now = new Date();
-    const hoursWorked = Math.round(((now.getTime() - clockIn.getTime()) / 3600000) * 100) / 100;
+    const roundedNow = roundUpTo30(new Date());
+    const hoursWorked = Math.round(((roundedNow.getTime() - clockIn.getTime()) / 3600000) * 100) / 100;
 
     await supabase
       .from("shifts")
       .update({
-        clock_out: now.toISOString(),
+        clock_out: roundedNow.toISOString(),
         status: "AUTO_CLOSED",
         hours_worked: hoursWorked,
       })

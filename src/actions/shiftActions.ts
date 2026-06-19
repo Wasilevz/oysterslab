@@ -3,6 +3,19 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { ActionResult, Shift } from "@/types/database";
 
+function roundUpTo30(date: Date): Date {
+  const rounded = new Date(date);
+  const m = rounded.getMinutes();
+  if (m > 0 && m <= 30) {
+    rounded.setMinutes(30, 0, 0);
+  } else if (m > 30) {
+    rounded.setHours(rounded.getHours() + 1, 0, 0, 0);
+  } else {
+    rounded.setSeconds(0, 0);
+  }
+  return rounded;
+}
+
 export async function clockIn(
   userId: string,
 ): Promise<ActionResult<Shift>> {
@@ -24,11 +37,12 @@ export async function clockIn(
       return { success: false, error: "Смена уже активна" };
     }
 
+    const clockInTime = roundUpTo30(new Date());
     const { data: shift, error } = await supabase
       .from("shifts")
       .insert({
         user_id: userId,
-        clock_in: new Date().toISOString(),
+        clock_in: clockInTime.toISOString(),
         status: "ACTIVE",
       })
       .select("*")
@@ -68,16 +82,16 @@ export async function clockOut(
       return { success: false, error: "Нет активной смены" };
     }
 
-    const clockOut = new Date();
+    const clockOutTime = roundUpTo30(new Date());
     const clockIn = new Date(activeShift.clock_in);
     const hoursWorked =
-      Math.round(((clockOut.getTime() - clockIn.getTime()) / 3600000) * 100) /
+      Math.round(((clockOutTime.getTime() - clockIn.getTime()) / 3600000) * 100) /
       100;
 
     const { data: shift, error } = await supabase
       .from("shifts")
       .update({
-        clock_out: clockOut.toISOString(),
+        clock_out: clockOutTime.toISOString(),
         status: "COMPLETED",
         hours_worked: hoursWorked,
       })
