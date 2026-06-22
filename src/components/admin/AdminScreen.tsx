@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { getDashboardStats } from "@/actions/adminActions";
+import { clockIn, clockOut, getActiveShift } from "@/actions/shiftActions";
 import { ForgottenTab } from "@/components/admin/ForgottenTab";
 import { HoursChart } from "@/components/admin/HoursChart";
 import { LiveTab } from "@/components/admin/LiveTab";
@@ -9,10 +10,11 @@ import { RevenueChart } from "@/components/admin/RevenueChart";
 import { SalaryPage } from "@/components/admin/SalaryPage";
 import { SettingsPage } from "@/components/admin/SettingsPage";
 import { StatsCards } from "@/components/admin/StatsCards";
+import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserStore } from "@/store/userStore";
-import type { DashboardStats } from "@/types/database";
+import type { DashboardStats, Shift } from "@/types/database";
 
 const POLL_INTERVAL_MS = 15000;
 
@@ -22,6 +24,8 @@ export function AdminScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCharts, setShowCharts] = useState(false);
+  const [myShift, setMyShift] = useState<Shift | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const loadStats = useCallback(async () => {
     const result = await getDashboardStats();
@@ -37,16 +41,45 @@ export function AdminScreen() {
     setLoading(false);
   }, []);
 
+  const loadMyShift = useCallback(async () => {
+    if (!user) return;
+    const result = await getActiveShift(user.id);
+    if (result.success) {
+      setMyShift(result.data ?? null);
+    }
+  }, [user]);
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadStats();
+    void loadMyShift();
 
     const interval = setInterval(() => {
       void loadStats();
+      void loadMyShift();
     }, POLL_INTERVAL_MS);
 
     return () => clearInterval(interval);
-  }, [loadStats]);
+  }, [loadStats, loadMyShift]);
+
+  const handleToggleShift = () => {
+    if (!user) return;
+    setError(null);
+
+    startTransition(async () => {
+      const result = myShift
+        ? await clockOut(user.id)
+        : await clockIn(user.id);
+
+      if (!result.success) {
+        setError(result.error ?? "Ошибка операции");
+        return;
+      }
+
+      void loadMyShift();
+      void loadStats();
+    });
+  };
 
   if (loading) {
     return (
@@ -64,12 +97,44 @@ export function AdminScreen() {
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <header className="border-b border-zinc-800/60 px-4 py-5">
-        <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
-          Панель управления
-        </p>
-        <h1 className="mt-1 text-2xl font-bold text-white">
-          {user?.full_name}
-        </h1>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
+              Панель управления
+            </p>
+            <h1 className="mt-1 text-2xl font-bold text-white">
+              {user?.full_name}
+            </h1>
+          </div>
+
+          <button
+            onClick={handleToggleShift}
+            disabled={isPending}
+            className={`rounded-2xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
+              myShift
+                ? "bg-rose-500/15 text-rose-400 hover:bg-rose-500/25"
+                : "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+            }`}
+          >
+            {isPending ? "..." : myShift ? "Завершить" : "Начать смену"}
+          </button>
+        </div>
+
+        {myShift && (
+          <div className="mt-3 flex items-center justify-between rounded-2xl border border-blue-500/10 bg-blue-500/5 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
+              </span>
+              <span className="text-xs font-medium text-blue-400">На смене</span>
+            </div>
+            <ShiftTimer
+              clockIn={myShift.clock_in}
+              className="font-mono text-lg font-black tabular-nums text-white"
+            />
+          </div>
+        )}
       </header>
 
       {error && (
