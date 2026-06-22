@@ -1,6 +1,7 @@
 "use server";
 
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { validateQR } from "@/lib/location-auth";
 import type { ActionResult, Shift } from "@/types/database";
 
 function roundTo30(date: Date): Date {
@@ -20,6 +21,7 @@ function roundTo30(date: Date): Date {
 
 export async function clockIn(
   userId: string,
+  qrData?: string,
 ): Promise<ActionResult<Shift>> {
   try {
     const supabase = getSupabaseAdmin();
@@ -37,6 +39,34 @@ export async function clockIn(
 
     if (activeShift) {
       return { success: false, error: "Смена уже активна" };
+    }
+
+    const { data: settings } = await supabase
+      .from("location_settings")
+      .select("allowed_ips, auth_mode")
+      .single();
+
+    const authMode = settings?.auth_mode ?? "qr";
+    const allowedIPs = settings?.allowed_ips ?? [];
+
+    if (authMode === "qr" && !qrData) {
+      return { success: false, error: "Отсканируйте QR-код для начала смены" };
+    }
+
+    if (qrData) {
+      try {
+        const parsed = JSON.parse(qrData) as { ts: number; nonce: string; sig: string };
+        const qrValid = validateQR(parsed.ts, parsed.nonce, parsed.sig);
+        if (!qrValid) {
+          return { success: false, error: "QR-код недействителен или просрочен" };
+        }
+      } catch {
+        return { success: false, error: "QR-код повреждён" };
+      }
+    }
+
+    if (authMode === "ip" && allowedIPs.length > 0) {
+      return { success: false, error: "Подключитесь к WiFi заведения" };
     }
 
     const clockInTime = roundTo30(new Date());
@@ -65,6 +95,7 @@ export async function clockIn(
 
 export async function clockOut(
   userId: string,
+  qrData?: string,
 ): Promise<ActionResult<Shift>> {
   try {
     const supabase = getSupabaseAdmin();
@@ -82,6 +113,34 @@ export async function clockOut(
 
     if (!activeShift) {
       return { success: false, error: "Нет активной смены" };
+    }
+
+    const { data: settings } = await supabase
+      .from("location_settings")
+      .select("allowed_ips, auth_mode")
+      .single();
+
+    const authMode = settings?.auth_mode ?? "qr";
+    const allowedIPs = settings?.allowed_ips ?? [];
+
+    if (authMode === "qr" && !qrData) {
+      return { success: false, error: "Отсканируйте QR-код для завершения смены" };
+    }
+
+    if (qrData) {
+      try {
+        const parsed = JSON.parse(qrData) as { ts: number; nonce: string; sig: string };
+        const qrValid = validateQR(parsed.ts, parsed.nonce, parsed.sig);
+        if (!qrValid) {
+          return { success: false, error: "QR-код недействителен или просрочен" };
+        }
+      } catch {
+        return { success: false, error: "QR-код повреждён" };
+      }
+    }
+
+    if (authMode === "ip" && allowedIPs.length > 0) {
+      return { success: false, error: "Подключитесь к WiFi заведения" };
     }
 
     const clockOutTime = roundTo30(new Date());
