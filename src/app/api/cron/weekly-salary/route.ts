@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { generateSalaryForPeriod } from "@/actions/salaryActions";
+import { getSupabaseAdmin } from "@/lib/supabase";
+import { getEmployees } from "@/actions/salaryActions";
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -10,15 +11,6 @@ export async function GET(request: Request) {
 
   try {
     const now = new Date();
-    const dayOfWeek = now.getDay();
-
-    if (dayOfWeek !== 1) {
-      return NextResponse.json({
-        ok: true,
-        skipped: true,
-        reason: "Not Monday",
-      });
-    }
 
     const mondayOffset = (now.getDay() + 6) % 7;
     const lastWeekStart = new Date(now);
@@ -32,13 +24,67 @@ export async function GET(request: Request) {
     const periodStart = lastWeekStart.toISOString().split("T")[0];
     const periodEnd = lastWeekEnd.toISOString().split("T")[0];
 
-    const result = await generateSalaryForPeriod(periodStart, periodEnd);
+    const supabase = getSupabaseAdmin();
+    const empResult = await getEmployees();
+    if (!empResult.success || !empResult.data) {
+      return NextResponse.json({ ok: false, error: "No employees" });
+    }
+
+    let created = 0;
+    for (const emp of empResult.data) {
+      if (emp.hourly_rate <= 0) continue;
+
+      const { data: existing } = await supabase
+        .from("salary_payments")
+        .select("id")
+        .eq("user_id", emp.id)
+        .eq("period_start", periodStart)
+        .eq("period_end", periodEnd)
+        .maybeSingle();
+
+      if (existing) continue;
+
+      const { data: shifts } = await supabase
+        .from("shifts")
+        .select("hours_worked")
+        .eq("user_id", emp.id)
+        .in("status", ["COMPLETED", "REVIEWED"])
+        .gte("clock_in", periodStart)
+        .lte("clock_in", periodEnd + "T23:59:59Z");
+
+      const totalHours = Math.round(
+        (shifts ?? []).reduce((s, sh) => s + (sh.hours_worked ?? 0), 0) * 100,
+      ) / 100;
+
+      if (totalHours <= 0) continue;
+
+      const { data: finesData } = await supabase
+        .from("fines")
+        .select("amount")
+        .eq("user_id", emp.id)
+        .gte("period_start", periodStart)
+        .lte("period_end", periodEnd);
+
+      const totalFines = (finesData ?? []).reduce((s, f) => s + Number(f.amount), 0);
+      const finalAmount = Math.max(0, Math.round((totalHours * emp.hourly_rate - totalFines) * 100) / 100);
+
+      const { error: insertError } = await supabase.from("salary_payments").insert({
+        user_id: emp.id,
+        hours_worked: totalHours,
+        hourly_rate: emp.hourly_rate,
+        total_amount: finalAmount,
+        status: "pending",
+        period_start: periodStart,
+        period_end: periodEnd,
+      });
+
+      if (!insertError) created++;
+    }
 
     return NextResponse.json({
-      ok: result.success,
+      ok: true,
       period: { start: periodStart, end: periodEnd },
-      created: result.data ?? 0,
-      error: result.error,
+      created,
     });
   } catch (err) {
     return NextResponse.json(

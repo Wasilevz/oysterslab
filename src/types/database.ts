@@ -96,6 +96,15 @@ export interface SalaryStats {
   totalPaid: number;
 }
 
+export interface MonthlyReportEmployee {
+  id: string;
+  full_name: string;
+  position: string | null;
+  totalHours: number;
+  totalAmount: number;
+  totalShifts: number;
+}
+
 export interface EmployeeStats {
   hoursThisWeek: number;
   hoursThisMonth: number;

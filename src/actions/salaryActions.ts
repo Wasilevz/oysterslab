@@ -6,242 +6,272 @@ import type {
   EmployeeStats,
   SalaryPayment,
   SalaryPaymentWithUser,
-  SalaryStats,
+  User,
+  MonthlyReportEmployee,
 } from "@/types/database";
 
-export async function getSalaryStats(): Promise<ActionResult<SalaryStats>> {
+function getWeekBounds(date: Date): { start: string; end: string } {
+  const d = new Date(date);
+  const day = (d.getDay() + 6) % 7;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - day);
+  monday.setHours(0, 0, 0, 0);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+  return {
+    start: monday.toISOString().split("T")[0],
+    end: sunday.toISOString().split("T")[0],
+  };
+}
+
+export async function getEmployees(): Promise<ActionResult<User[]>> {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .order("full_name");
+    if (error) return { success: false, error: "Ошибка сервера" };
+    return { success: true, data: (data ?? []) as User[] };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
+  }
+}
+
+export async function getShiftsForPeriod(
+  userId: string,
+  dateFrom: string,
+  dateTo: string,
+): Promise<ActionResult<{ hours: number; amount: number; rate: number; shiftCount: number }>> {
   try {
     const supabase = getSupabaseAdmin();
 
-    const { data: payments, error } = await supabase
-      .from("salary_payments")
-      .select("*, users!inner(id, full_name, position)")
-      .order("created_at", { ascending: false });
+    const { data: user } = await supabase
+      .from("users")
+      .select("hourly_rate")
+      .eq("id", userId)
+      .single();
 
-    if (error) return { success: false, error: error.message };
+    const rate = user?.hourly_rate ?? 0;
 
-    const list = (payments ?? []) as SalaryPaymentWithUser[];
-    const totalPending = list
-      .filter((p) => p.status === "pending")
-      .reduce((s, p) => s + Number(p.total_amount), 0);
-    const totalApproved = list
-      .filter((p) => p.status === "approved")
-      .reduce((s, p) => s + Number(p.total_amount), 0);
-    const totalPaid = list
-      .filter((p) => p.status === "paid")
-      .reduce((s, p) => s + Number(p.total_amount), 0);
+    const { data: shifts } = await supabase
+      .from("shifts")
+      .select("hours_worked")
+      .eq("user_id", userId)
+      .in("status", ["COMPLETED", "REVIEWED", "AUTO_CLOSED"])
+      .gte("clock_in", dateFrom + "T00:00:00Z")
+      .lte("clock_in", dateTo + "T23:59:59Z");
+
+    const list = shifts ?? [];
+    const totalHours = list.reduce((s, sh) => s + (sh.hours_worked ?? 0), 0);
+    const rounded = Math.round(totalHours * 100) / 100;
+    const amount = Math.round(rounded * rate * 100) / 100;
 
     return {
       success: true,
-      data: { payments: list, totalPending, totalApproved, totalPaid },
+      data: { hours: rounded, amount, rate, shiftCount: list.length },
     };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось загрузить зарплаты",
-    };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
   }
 }
 
-export async function approveSalary(
-  paymentId: string,
-): Promise<ActionResult<SalaryPayment>> {
-  try {
-    const supabase = getSupabaseAdmin();
-
-    const { data, error } = await supabase
-      .from("salary_payments")
-      .update({ status: "approved" })
-      .eq("id", paymentId)
-      .eq("status", "pending")
-      .select("*")
-      .single();
-
-    if (error) return { success: false, error: error.message };
-    if (!data) return { success: false, error: "Запись не найдена или уже одобрена" };
-
-    return { success: true, data: data as SalaryPayment };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось одобрить выплату",
-    };
-  }
-}
-
-export async function confirmSalaryReceived(
-  paymentId: string,
-): Promise<ActionResult<SalaryPayment>> {
-  try {
-    const supabase = getSupabaseAdmin();
-
-    const { data, error } = await supabase
-      .from("salary_payments")
-      .update({ status: "paid", paid_at: new Date().toISOString() })
-      .eq("id", paymentId)
-      .eq("status", "approved")
-      .select("*")
-      .single();
-
-    if (error) return { success: false, error: error.message };
-    if (!data) return { success: false, error: "Запись не найдена или ещё не одобрена" };
-
-    return { success: true, data: data as SalaryPayment };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось подтвердить получение",
-    };
-  }
-}
-
-export async function getEmployeeSalaries(
+export async function createPayment(
   userId: string,
-): Promise<ActionResult<SalaryPayment[]>> {
+  dateFrom: string,
+  dateTo: string,
+): Promise<ActionResult<SalaryPayment>> {
   try {
     const supabase = getSupabaseAdmin();
 
-    const { data, error } = await supabase
+    const { data: existing } = await supabase
       .from("salary_payments")
-      .select("*")
+      .select("id")
       .eq("user_id", userId)
-      .order("created_at", { ascending: false });
+      .eq("period_start", dateFrom)
+      .eq("period_end", dateTo)
+      .maybeSingle();
 
-    if (error) return { success: false, error: error.message };
+    if (existing) {
+      return { success: false, error: "Выплата за этот период уже создана" };
+    }
 
-    return { success: true, data: (data ?? []) as SalaryPayment[] };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось загрузить зарплаты",
-    };
-  }
-}
+    const calc = await getShiftsForPeriod(userId, dateFrom, dateTo);
+    if (!calc.success || !calc.data) {
+      return { success: false, error: calc.error ?? "Ошибка расчёта" };
+    }
 
-export async function checkPeriodCalculated(
-  periodStart: string,
-  periodEnd: string,
-): Promise<ActionResult<boolean>> {
-  try {
-    const supabase = getSupabaseAdmin();
+    if (calc.data.hours <= 0) {
+      return { success: false, error: "Нет отработанных часов за этот период" };
+    }
+
+    const { data: finesData } = await supabase
+      .from("fines")
+      .select("amount")
+      .eq("user_id", userId)
+      .gte("period_start", dateFrom)
+      .lte("period_end", dateTo);
+
+    const totalFines = (finesData ?? []).reduce((s, f) => s + Number(f.amount), 0);
+    const finalAmount = Math.max(0, Math.round((calc.data.amount - totalFines) * 100) / 100);
 
     const { data, error } = await supabase
       .from("salary_payments")
-      .select("id")
-      .eq("period_start", periodStart)
-      .eq("period_end", periodEnd)
-      .limit(1);
-
-    if (error) return { success: false, error: error.message };
-
-    return { success: true, data: (data ?? []).length > 0 };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось проверить период",
-    };
-  }
-}
-
-export async function generateSalaryForPeriod(
-  periodStart: string,
-  periodEnd: string,
-): Promise<ActionResult<number>> {
-  try {
-    const supabase = getSupabaseAdmin();
-
-    const { data: alreadyCalculated } = await supabase
-      .from("salary_payments")
-      .select("id")
-      .eq("period_start", periodStart)
-      .eq("period_end", periodEnd)
-      .limit(1);
-
-    if (alreadyCalculated && alreadyCalculated.length > 0) {
-      return { success: false, error: "Расчёт за этот период уже был произведён" };
-    }
-
-    const { data: employees, error: empError } = await supabase
-      .from("users")
-      .select("id, hourly_rate, full_name")
-      .in("role", ["employee", "admin"]);
-
-    if (empError) return { success: false, error: empError.message };
-    if (!employees || employees.length === 0) return { success: false, error: "Нет сотрудников" };
-
-    let created = 0;
-
-    for (const emp of employees) {
-      if (emp.hourly_rate <= 0) continue;
-
-      const { data: existing } = await supabase
-        .from("salary_payments")
-        .select("id")
-        .eq("user_id", emp.id)
-        .eq("period_start", periodStart)
-        .eq("period_end", periodEnd)
-        .maybeSingle();
-
-      if (existing) continue;
-
-      const { data: shifts } = await supabase
-        .from("shifts")
-        .select("hours_worked")
-        .eq("user_id", emp.id)
-        .in("status", ["COMPLETED", "REVIEWED"])
-        .gte("clock_in", periodStart)
-        .lte("clock_in", periodEnd + "T23:59:59Z");
-
-      const totalHours = (shifts ?? []).reduce(
-        (sum, s) => sum + (s.hours_worked ?? 0), 0,
-      );
-
-      if (totalHours <= 0) continue;
-
-      const totalAmount = Math.round(totalHours * emp.hourly_rate * 100) / 100;
-
-      const { error: insertError } = await supabase.from("salary_payments").insert({
-        user_id: emp.id,
-        hours_worked: Math.round(totalHours * 100) / 100,
-        hourly_rate: emp.hourly_rate,
-        total_amount: totalAmount,
+      .insert({
+        user_id: userId,
+        hours_worked: calc.data.hours,
+        hourly_rate: calc.data.rate,
+        total_amount: finalAmount,
         status: "pending",
-        period_start: periodStart,
-        period_end: periodEnd,
-      });
+        period_start: dateFrom,
+        period_end: dateTo,
+      })
+      .select("*, users!inner(id, full_name, position)")
+      .single();
 
-      if (!insertError) created++;
-    }
+    if (error) return { success: false, error: "Ошибка сервера" };
 
-    return { success: true, data: created };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось рассчитать зарплату",
-    };
+    return { success: true, data: data as SalaryPayment };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
   }
 }
 
-export async function deleteSalaryPayment(
+export async function approvePayment(
   paymentId: string,
 ): Promise<ActionResult<void>> {
   try {
     const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("salary_payments")
+      .update({ status: "approved" })
+      .eq("id", paymentId)
+      .eq("status", "pending");
+    if (error) return { success: false, error: "Ошибка сервера" };
+    return { success: true };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
+  }
+}
 
+export async function confirmPayment(
+  paymentId: string,
+): Promise<ActionResult<void>> {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("salary_payments")
+      .update({ status: "paid", paid_at: new Date().toISOString() })
+      .eq("id", paymentId)
+      .eq("status", "approved");
+    if (error) return { success: false, error: "Ошибка сервера" };
+    return { success: true };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
+  }
+}
+
+export async function deletePayment(
+  paymentId: string,
+): Promise<ActionResult<void>> {
+  try {
+    const supabase = getSupabaseAdmin();
     const { error } = await supabase
       .from("salary_payments")
       .delete()
       .eq("id", paymentId)
       .eq("status", "pending");
-
-    if (error) return { success: false, error: error.message };
-
+    if (error) return { success: false, error: "Ошибка сервера" };
     return { success: true };
-  } catch (err) {
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
+  }
+}
+
+export async function getAllPayments(): Promise<ActionResult<SalaryPaymentWithUser[]>> {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("salary_payments")
+      .select("*, users!inner(id, full_name, position)")
+      .order("created_at", { ascending: false });
+    if (error) return { success: false, error: "Ошибка сервера" };
+    return { success: true, data: (data ?? []) as SalaryPaymentWithUser[] };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
+  }
+}
+
+export async function getMonthlyReport(
+  year: number,
+  month: number,
+): Promise<ActionResult<{
+  employees: {
+    id: string;
+    full_name: string;
+    position: string | null;
+    totalHours: number;
+    totalAmount: number;
+    totalShifts: number;
+  }[];
+  grandTotal: number;
+}>> {
+  try {
+    const supabase = getSupabaseAdmin();
+
+    const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+    const endMonth = month === 12 ? 1 : month + 1;
+    const endYear = month === 12 ? year + 1 : year;
+    const endDate = `${endYear}-${String(endMonth).padStart(2, "0")}-01`;
+
+    const { data: employees } = await supabase
+      .from("users")
+      .select("id, full_name, position, hourly_rate")
+      .in("role", ["employee", "admin"])
+      .order("full_name");
+
+    if (!employees || employees.length === 0) {
+      return { success: true, data: { employees: [], grandTotal: 0 } };
+    }
+
+    const result = [];
+    let grandTotal = 0;
+
+    for (const emp of employees) {
+      const { data: shifts } = await supabase
+        .from("shifts")
+        .select("hours_worked")
+        .eq("user_id", emp.id)
+        .in("status", ["COMPLETED", "REVIEWED", "AUTO_CLOSED"])
+        .gte("clock_in", startDate)
+        .lt("clock_in", endDate);
+
+      const totalHours = Math.round(
+        (shifts ?? []).reduce((s, sh) => s + (sh.hours_worked ?? 0), 0) * 100,
+      ) / 100;
+      const totalAmount = Math.round(totalHours * emp.hourly_rate);
+      const totalShifts = (shifts ?? []).length;
+
+      if (totalHours > 0 || totalShifts > 0) {
+        result.push({
+          id: emp.id,
+          full_name: emp.full_name,
+          position: emp.position,
+          totalHours,
+          totalAmount,
+          totalShifts,
+        });
+        grandTotal += totalAmount;
+      }
+    }
+
     return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось удалить запись",
+      success: true,
+      data: { employees: result, grandTotal: Math.round(grandTotal) },
     };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
   }
 }
 
@@ -251,13 +281,12 @@ export async function getEmployeeStats(
   try {
     const supabase = getSupabaseAdmin();
 
-    const dayOfWeek = new Date().getDay();
-    const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     const now = new Date();
+    const dayOfWeek = now.getDay();
+    const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - mondayOffset);
     weekStart.setHours(0, 0, 0, 0);
-
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const { data: user } = await supabase
@@ -325,10 +354,7 @@ export async function getEmployeeStats(
         weeklyHours,
       },
     };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось загрузить статистику",
-    };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
   }
 }
