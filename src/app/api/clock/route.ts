@@ -17,14 +17,21 @@ function roundTo30(date: Date): Date {
   return rounded;
 }
 
+function normalizeIP(ip: string): string {
+  if (ip.startsWith("::ffff:")) {
+    return ip.slice(7);
+  }
+  return ip;
+}
+
 function getClientIP(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
-    return forwarded.split(",")[0].trim();
+    return normalizeIP(forwarded.split(",")[0].trim());
   }
   const realIP = request.headers.get("x-real-ip");
   if (realIP) {
-    return realIP;
+    return normalizeIP(realIP);
   }
   return "unknown";
 }
@@ -53,10 +60,11 @@ async function verifyLocation(
   }
 
   if (authMode === "ip" && allowedIPs.length > 0) {
+    console.log("[CLOCK] Client IP:", clientIP, "Allowed IPs:", allowedIPs);
     if (isIPAllowed(clientIP, allowedIPs)) {
       return { allowed: true };
     }
-    return { allowed: false, error: "Подключитесь к WiFi заведения" };
+    return { allowed: false, error: `Подключитесь к WiFi заведения (ваш IP: ${clientIP})` };
   }
 
   if (authMode === "qr" && !qrData) {

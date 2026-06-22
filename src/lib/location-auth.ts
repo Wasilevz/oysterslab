@@ -61,11 +61,32 @@ export function getClientIP(request: Request): string {
 
 export function isIPAllowed(clientIP: string, allowedIPs: string[]): boolean {
   if (allowedIPs.length === 0) return false;
+
+  const normalizedClient = clientIP.toLowerCase().trim();
+
   return allowedIPs.some((allowed) => {
-    const trimmed = allowed.trim();
+    const trimmed = allowed.trim().toLowerCase();
+    if (!trimmed) return false;
+
     if (trimmed.includes("/")) {
-      return clientIP.startsWith(trimmed.split("/")[0]);
+      const prefix = trimmed.split("/")[0];
+      return normalizedClient.startsWith(prefix);
     }
-    return clientIP === trimmed;
+
+    if (normalizedClient === trimmed) return true;
+
+    if (normalizedClient.startsWith(trimmed + ".") || trimmed.startsWith(normalizedClient + ".")) {
+      return true;
+    }
+
+    const clientParts = normalizedClient.split(".");
+    const allowedParts = trimmed.split(".");
+    if (clientParts.length === 4 && allowedParts.length === 4) {
+      return clientParts[0] === allowedParts[0] &&
+             clientParts[1] === allowedParts[1] &&
+             clientParts[2] === allowedParts[2];
+    }
+
+    return false;
   });
 }
