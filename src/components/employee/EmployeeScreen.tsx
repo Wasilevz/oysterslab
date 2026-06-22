@@ -17,7 +17,6 @@ import {
 } from "@/actions/shiftActions";
 import { getEmployeeStats } from "@/actions/salaryActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
-import { QRScanner } from "@/components/shared/QRScanner";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatHours, getElapsedSeconds } from "@/lib/utils";
@@ -50,8 +49,6 @@ export function EmployeeScreen() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [showQRScanner, setShowQRScanner] = useState(false);
-  const [pendingAction, setPendingAction] = useState<"clockIn" | "clockOut" | null>(null);
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -90,49 +87,12 @@ export function EmployeeScreen() {
 
         const data = await res.json();
 
-        if (!res.ok && data.error === "Отсканируйте QR-код") {
-          setPendingAction(action);
-          setShowQRScanner(true);
-          return;
-        }
-
         if (!res.ok) {
           setActionError(data.error ?? "Ошибка операции");
           return;
         }
 
         setSuccess(action === "clockOut" ? "Смена завершена" : "Смена начата");
-        void loadData();
-      } catch {
-        setActionError("Ошибка сети");
-      }
-    });
-  };
-
-  const handleQRScan = (qrData: string) => {
-    if (!user || !pendingAction) return;
-
-    setShowQRScanner(false);
-    startTransition(async () => {
-      try {
-        const res = await fetch("/api/clock", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: user.id,
-            action: pendingAction,
-            qrData,
-          }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          setActionError(data.error ?? "Ошибка операции");
-          return;
-        }
-
-        setSuccess(pendingAction === "clockOut" ? "Смена завершена" : "Смена начата");
         void loadData();
       } catch {
         setActionError("Ошибка сети");
@@ -383,13 +343,6 @@ export function EmployeeScreen() {
       </section>
 
       <EmployeeSalary />
-
-      {showQRScanner && (
-        <QRScanner
-          onScan={handleQRScan}
-          onClose={() => setShowQRScanner(false)}
-        />
-      )}
     </div>
   );
 }

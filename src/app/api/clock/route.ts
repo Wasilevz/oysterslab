@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { validateQR, isIPAllowed } from "@/lib/location-auth";
+import { isIPAllowed } from "@/lib/location-auth";
 
 function roundTo30(date: Date): Date {
   const rounded = new Date(date);
@@ -17,73 +17,28 @@ function roundTo30(date: Date): Date {
   return rounded;
 }
 
-function normalizeIP(ip: string): string {
-  if (ip.startsWith("::ffff:")) {
-    return ip.slice(7);
-  }
-  return ip;
-}
-
 function getClientIP(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
-    return normalizeIP(forwarded.split(",")[0].trim());
+    let ip = forwarded.split(",")[0].trim();
+    if (ip.startsWith("::ffff:")) ip = ip.slice(7);
+    return ip;
   }
   const realIP = request.headers.get("x-real-ip");
   if (realIP) {
-    return normalizeIP(realIP);
+    let ip = realIP;
+    if (ip.startsWith("::ffff:")) ip = ip.slice(7);
+    return ip;
   }
   return "unknown";
-}
-
-async function verifyLocation(
-  request: Request,
-  qrData: string | null,
-  supabase: ReturnType<typeof getSupabaseAdmin>,
-): Promise<{ allowed: boolean; error?: string; clientIP?: string }> {
-  const { data: settings } = await supabase
-    .from("location_settings")
-    .select("allowed_ips, auth_mode")
-    .single();
-
-  const authMode = settings?.auth_mode ?? "qr";
-  const allowedIPs = settings?.allowed_ips ?? [];
-  const clientIP = getClientIP(request);
-
-  if (qrData) {
-    try {
-      const parsed = JSON.parse(qrData) as { ts: number; nonce: string; sig: string };
-      if (validateQR(parsed.ts, parsed.nonce, parsed.sig)) {
-        return { allowed: true, clientIP };
-      }
-    } catch { /* invalid QR */ }
-  }
-
-  if (authMode === "ip") {
-    if (allowedIPs.length === 0) {
-      return { allowed: true, clientIP };
-    }
-    console.log("[CLOCK] Client IP:", clientIP, "Allowed:", allowedIPs);
-    if (isIPAllowed(clientIP, allowedIPs)) {
-      return { allowed: true, clientIP };
-    }
-    return { allowed: false, clientIP, error: `Ваш IP: ${clientIP}` };
-  }
-
-  if (authMode === "qr" && !qrData) {
-    return { allowed: false, clientIP, error: "Отсканируйте QR-код" };
-  }
-
-  return { allowed: true, clientIP };
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, action, qrData } = body as {
+    const { userId, action } = body as {
       userId: string;
       action: "clockIn" | "clockOut";
-      qrData?: string;
     };
 
     if (!userId || !action) {
@@ -92,9 +47,22 @@ export async function POST(request: Request) {
 
     const supabase = getSupabaseAdmin();
 
-    const location = await verifyLocation(request, qrData ?? null, supabase);
-    if (!location.allowed) {
-      return NextResponse.json({ error: location.error }, { status: 403 });
+    const { data: settings } = await supabase
+      .from("location_settings")
+      .select("allowed_ips, auth_mode")
+      .single();
+
+    const authMode = settings?.auth_mode ?? "ip";
+    const allowedIPs = settings?.allowed_ips ?? [];
+    const clientIP = getClientIP(request);
+
+    if (authMode === "ip" && allowedIPs.length > 0) {
+      if (!isIPAllowed(clientIP, allowedIPs)) {
+        return NextResponse.json(
+          { error: `Подключитесь к WiFi заведения (ваш IP: ${clientIP})` },
+          { status: 403 },
+        );
+      }
     }
 
     if (action === "clockIn") {
