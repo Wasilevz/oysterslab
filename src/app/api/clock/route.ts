@@ -40,7 +40,7 @@ async function verifyLocation(
   request: Request,
   qrData: string | null,
   supabase: ReturnType<typeof getSupabaseAdmin>,
-): Promise<{ allowed: boolean; error?: string }> {
+): Promise<{ allowed: boolean; error?: string; clientIP?: string }> {
   const { data: settings } = await supabase
     .from("location_settings")
     .select("allowed_ips, auth_mode")
@@ -54,24 +54,27 @@ async function verifyLocation(
     try {
       const parsed = JSON.parse(qrData) as { ts: number; nonce: string; sig: string };
       if (validateQR(parsed.ts, parsed.nonce, parsed.sig)) {
-        return { allowed: true };
+        return { allowed: true, clientIP };
       }
     } catch { /* invalid QR */ }
   }
 
-  if (authMode === "ip" && allowedIPs.length > 0) {
+  if (authMode === "ip") {
+    if (allowedIPs.length === 0) {
+      return { allowed: true, clientIP };
+    }
     console.log("[CLOCK] Client IP:", clientIP, "Allowed:", allowedIPs);
     if (isIPAllowed(clientIP, allowedIPs)) {
-      return { allowed: true };
+      return { allowed: true, clientIP };
     }
-    return { allowed: false, error: `IP не совпадает (${clientIP})` };
+    return { allowed: false, clientIP, error: `Ваш IP: ${clientIP}` };
   }
 
   if (authMode === "qr" && !qrData) {
-    return { allowed: false, error: "Отсканируйте QR-код" };
+    return { allowed: false, clientIP, error: "Отсканируйте QR-код" };
   }
 
-  return { allowed: true };
+  return { allowed: true, clientIP };
 }
 
 export async function POST(request: Request) {

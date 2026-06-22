@@ -106,6 +106,23 @@ export function SettingsPage() {
     setAllowedIPs(allowedIPs.filter((_, i) => i !== index));
   };
 
+  const detectMyIP = async () => {
+    try {
+      const res = await fetch("/api/my-ip");
+      const data = await res.json();
+      if (data.ip && data.ip !== "unknown") {
+        const exists = allowedIPs.some((ip) => ip.trim() === data.ip);
+        if (!exists) {
+          setAllowedIPs([data.ip]);
+        }
+        setSuccess(`IP определён: ${data.ip}`);
+        setTimeout(() => setSuccess(null), 3000);
+      }
+    } catch {
+      setError("Не удалось определить IP");
+    }
+  };
+
   const startEdit = (emp: User) => {
     setEditingId(emp.id);
     setEditPosition(emp.position ?? "");
@@ -290,9 +307,9 @@ export function SettingsPage() {
       {authMode === "ip" && (
         <div className="mt-6 px-4">
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
-            <p className="mb-3 text-sm font-semibold text-white">Разрешённые IP-адреса</p>
+            <p className="mb-1 text-sm font-semibold text-white">IP заведения</p>
             <p className="mb-3 text-[10px] text-zinc-500">
-              Сотрудники смогут начать/завершить смену только с этих IP
+              Сотрудники смогут начать/завершить смену только из заведения
             </p>
 
             <div className="space-y-2">
@@ -300,7 +317,7 @@ export function SettingsPage() {
                 <div key={i} className="flex gap-2">
                   <Input
                     type="text"
-                    placeholder="192.168.1.100"
+                    placeholder="IP не определён"
                     value={ip}
                     onChange={(e) => updateIP(i, e.target.value)}
                   />
@@ -316,12 +333,25 @@ export function SettingsPage() {
               ))}
             </div>
 
-            <button
-              onClick={addIPField}
-              className="mt-3 w-full rounded-xl border border-dashed border-zinc-700 py-2 text-xs text-zinc-500 hover:border-blue-500/30 hover:text-blue-400"
-            >
-              + Добавить IP
-            </button>
+            <div className="mt-3 flex gap-2">
+              <Button
+                variant="blue"
+                className="flex-1"
+                onClick={() => void detectMyIP()}
+              >
+                Определить мой IP
+              </Button>
+              <button
+                onClick={addIPField}
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 text-zinc-500 hover:border-blue-500/30 hover:text-blue-400"
+              >
+                +
+              </button>
+            </div>
+
+            <p className="mt-3 text-[10px] text-zinc-600">
+              Нажмите «Определить мой IP» будучи подключённым к WiFi заведения
+            </p>
           </div>
         </div>
       )}
