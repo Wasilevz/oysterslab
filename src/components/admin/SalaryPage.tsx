@@ -11,6 +11,7 @@ import {
 } from "@/actions/salaryActions";
 import { addFine, deleteFine, getFines } from "@/actions/finesActions";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FineWithUser, SalaryPaymentWithUser } from "@/types/database";
@@ -279,18 +280,20 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
             <div className="mb-3 grid grid-cols-2 gap-2">
               <div>
                 <p className="mb-1 text-xs text-zinc-500">С</p>
-                <Input
-                  type="date"
+                <DatePicker
                   value={periodStart}
-                  onChange={(e) => setPeriodStart(e.target.value)}
+                  onChange={setPeriodStart}
+                  placeholder="Начало"
+                  maxDate={periodEnd || undefined}
                 />
               </div>
               <div>
                 <p className="mb-1 text-xs text-zinc-500">По</p>
-                <Input
-                  type="date"
+                <DatePicker
                   value={periodEnd}
-                  onChange={(e) => setPeriodEnd(e.target.value)}
+                  onChange={setPeriodEnd}
+                  placeholder="Конец"
+                  minDate={periodStart || undefined}
                 />
               </div>
             </div>
