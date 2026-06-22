@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from "@/types/database";
 
-export function SettingsPage() {
+export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const [employees, setEmployees] = useState<User[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPosition, setEditPosition] = useState("");
@@ -175,10 +175,21 @@ export function SettingsPage() {
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <header className="border-b border-zinc-800/60 px-4 py-5">
-        <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
-          Настройки
-        </p>
-        <h1 className="mt-1 text-2xl font-bold text-white">Безопасность</h1>
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button onClick={onBack} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+          )}
+          <div>
+            <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
+              Настройки
+            </p>
+            <h1 className="mt-1 text-2xl font-bold text-white">Безопасность</h1>
+          </div>
+        </div>
       </header>
 
       <div className="mt-6 px-4">

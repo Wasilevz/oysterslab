@@ -17,7 +17,7 @@ const TYPE_COLORS: Record<ScheduleType, { bg: string; text: string; dot: string;
 
 const TYPE_ORDER: ScheduleType[] = ["work", "off", "vacation", "sick"];
 
-export function ScheduleAdmin() {
+export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
   const currentUser = useUserStore((s) => s.user);
   const [employees, setEmployees] = useState<User[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -110,10 +110,21 @@ export function ScheduleAdmin() {
   return (
     <div className="flex min-h-full flex-1 flex-col">
       <header className="border-b border-zinc-800/60 px-4 py-5">
-        <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
-          Расписание
-        </p>
-        <h1 className="mt-1 text-2xl font-bold text-white">График сотрудников</h1>
+        <div className="flex items-center gap-3">
+          {onBack && (
+            <button onClick={onBack} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+          )}
+          <div>
+            <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
+              Расписание
+            </p>
+            <h1 className="mt-1 text-2xl font-bold text-white">График сотрудников</h1>
+          </div>
+        </div>
       </header>
 
       <div className="px-4 pt-4">
@@ -163,7 +174,6 @@ export function ScheduleAdmin() {
       </div>
 
       <div className="mt-4 px-4">
-        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button onClick={prevMonth} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -179,16 +189,6 @@ export function ScheduleAdmin() {
               </svg>
             </button>
           </div>
-          <Button
-            variant="ghost"
-            size="default"
-            disabled={isPending}
-            onClick={handleSetWeekends}
-            className="text-xs"
-          >
-            {isPending ? "..." : "Выходные всем"}
-          </Button>
-        </div>
       </div>
 
       <div className="mt-3 flex-1 overflow-x-auto px-4 pb-24">
