@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { getDashboardStats } from "@/actions/adminActions";
-import { clockIn, clockOut, getActiveShift } from "@/actions/shiftActions";
+import { getActiveShift } from "@/actions/shiftActions";
 import { ForgottenTab } from "@/components/admin/ForgottenTab";
 import { HoursChart } from "@/components/admin/HoursChart";
 import { LiveTab } from "@/components/admin/LiveTab";
@@ -67,17 +67,28 @@ export function AdminScreen() {
     setError(null);
 
     startTransition(async () => {
-      const result = myShift
-        ? await clockOut(user.id)
-        : await clockIn(user.id);
+      try {
+        const res = await fetch("/api/clock", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: user.id,
+            action: myShift ? "clockOut" : "clockIn",
+          }),
+        });
 
-      if (!result.success) {
-        setError(result.error ?? "Ошибка операции");
-        return;
+        const data = await res.json();
+
+        if (!res.ok) {
+          setError(data.error ?? "Ошибка операции");
+          return;
+        }
+
+        void loadMyShift();
+        void loadStats();
+      } catch {
+        setError("Ошибка сети");
       }
-
-      void loadMyShift();
-      void loadStats();
     });
   };
 

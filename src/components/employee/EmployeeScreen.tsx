@@ -12,8 +12,6 @@ import {
   Cell,
 } from "recharts";
 import {
-  clockIn,
-  clockOut,
   getActiveShift,
   getMyShifts,
 } from "@/actions/shiftActions";
@@ -79,17 +77,28 @@ export function EmployeeScreen() {
     setActionError(null);
     setSuccess(null);
     startTransition(async () => {
-      const result = activeShift
-        ? await clockOut(user.id)
-        : await clockIn(user.id);
+      try {
+        const res = await fetch("/api/clock", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: user.id,
+            action: activeShift ? "clockOut" : "clockIn",
+          }),
+        });
 
-      if (!result.success) {
-        setActionError(result.error ?? "Ошибка операции");
-        return;
+        const data = await res.json();
+
+        if (!res.ok) {
+          setActionError(data.error ?? "Ошибка операции");
+          return;
+        }
+
+        setSuccess(activeShift ? "Смена завершена" : "Смена начата");
+        void loadData();
+      } catch {
+        setActionError("Ошибка сети");
       }
-
-      setSuccess(activeShift ? "Смена завершена" : "Смена начата");
-      void loadData();
     });
   };
 
