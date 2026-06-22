@@ -11,6 +11,7 @@ export interface User {
   telegram_id: number;
   full_name: string;
   role: UserRole;
+  position: string | null;
   hourly_rate: number;
   created_at: string;
 }
@@ -50,20 +51,20 @@ export interface SalaryPayment {
 }
 
 export interface ShiftWithUser extends Shift {
-  users: Pick<User, "id" | "full_name" | "telegram_id">;
+  users: Pick<User, "id" | "full_name" | "telegram_id" | "position">;
 }
 
 export interface PayrollWithUser extends Payroll {
-  users: Pick<User, "id" | "full_name">;
+  users: Pick<User, "id" | "full_name" | "position">;
 }
 
 export interface SalaryPaymentWithUser extends SalaryPayment {
-  users: Pick<User, "id" | "full_name">;
+  users: Pick<User, "id" | "full_name" | "position">;
 }
 
 export interface ActiveShiftCard {
   shift: Shift;
-  user: Pick<User, "id" | "full_name">;
+  user: Pick<User, "id" | "full_name" | "position">;
 }
 
 export interface EmployeeHours {
@@ -106,4 +107,18 @@ export interface ActionResult<T = void> {
   success: boolean;
   data?: T;
   error?: string;
+}
+
+export interface Fine {
+  id: string;
+  user_id: string;
+  amount: number;
+  reason: string;
+  period_start: string;
+  period_end: string;
+  created_at: string;
+}
+
+export interface FineWithUser extends Fine {
+  users: Pick<User, "id" | "full_name" | "position">;
 }

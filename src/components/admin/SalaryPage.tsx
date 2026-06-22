@@ -5,13 +5,15 @@ import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import {
   approveSalary,
+  checkPeriodCalculated,
   generateSalaryForPeriod,
   getSalaryStats,
 } from "@/actions/salaryActions";
+import { addFine, deleteFine, getFines } from "@/actions/finesActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { SalaryPaymentWithUser } from "@/types/database";
+import type { FineWithUser, SalaryPaymentWithUser } from "@/types/database";
 
 function formatMoney(amount: number): string {
   return new Intl.NumberFormat("ru-RU", {
@@ -27,6 +29,7 @@ interface SalaryPageProps {
 
 export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
   const [payments, setPayments] = useState<SalaryPaymentWithUser[]>([]);
+  const [fines, setFines] = useState<FineWithUser[]>([]);
   const [totalPending, setTotalPending] = useState(0);
   const [totalApproved, setTotalApproved] = useState(0);
   const [totalPaid, setTotalPaid] = useState(0);
@@ -37,16 +40,26 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
   const [periodEnd, setPeriodEnd] = useState("");
   const [genResult, setGenResult] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "approved" | "paid">("all");
+  const [fineUserId, setFineUserId] = useState("");
+  const [fineAmount, setFineAmount] = useState("");
+  const [fineReason, setFineReason] = useState("");
+  const [showFineForm, setShowFineForm] = useState(false);
 
   const loadData = useCallback(async () => {
-    const result = await getSalaryStats();
-    if (result.success && result.data) {
-      setPayments(result.data.payments);
-      setTotalPending(result.data.totalPending);
-      setTotalApproved(result.data.totalApproved);
-      setTotalPaid(result.data.totalPaid);
+    const [salaryResult, finesResult] = await Promise.all([
+      getSalaryStats(),
+      getFines(),
+    ]);
+    if (salaryResult.success && salaryResult.data) {
+      setPayments(salaryResult.data.payments);
+      setTotalPending(salaryResult.data.totalPending);
+      setTotalApproved(salaryResult.data.totalApproved);
+      setTotalPaid(salaryResult.data.totalPaid);
     } else {
-      setError(result.error ?? "Ошибка загрузки");
+      setError(salaryResult.error ?? "Ошибка загрузки");
+    }
+    if (finesResult.success && finesResult.data) {
+      setFines(finesResult.data);
     }
     setLoading(false);
   }, []);
@@ -56,7 +69,7 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
     void loadData();
   }, [loadData]);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!periodStart || !periodEnd) {
       setError("Укажите период");
       return;
@@ -67,6 +80,12 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
     }
     setError(null);
     setGenResult(null);
+
+    const check = await checkPeriodCalculated(periodStart, periodEnd);
+    if (check.success && check.data) {
+      setError("Расчёт за этот период уже был произведён");
+      return;
+    }
 
     startTransition(async () => {
       const result = await generateSalaryForPeriod(periodStart, periodEnd);
@@ -91,6 +110,57 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
       void loadData();
     });
   };
+
+  const handleAddFine = () => {
+    if (!fineUserId || !fineAmount || !fineReason) {
+      setError("Заполните все поля штрафа");
+      return;
+    }
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    weekStart.setHours(0, 0, 0, 0);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    startTransition(async () => {
+      const result = await addFine(
+        fineUserId,
+        Number(fineAmount),
+        fineReason,
+        weekStart.toISOString().split("T")[0],
+        weekEnd.toISOString().split("T")[0],
+      );
+      if (!result.success) {
+        setError(result.error ?? "Ошибка добавления штрафа");
+        return;
+      }
+      setFineUserId("");
+      setFineAmount("");
+      setFineReason("");
+      setShowFineForm(false);
+      void loadData();
+    });
+  };
+
+  const handleDeleteFine = (id: string) => {
+    startTransition(async () => {
+      const result = await deleteFine(id);
+      if (!result.success) {
+        setError(result.error ?? "Ошибка удаления штрафа");
+        return;
+      }
+      void loadData();
+    });
+  };
+
+  const uniqueEmployees = payments.reduce<{ id: string; name: string }[]>((acc, p) => {
+    if (!acc.find((e) => e.id === p.user_id)) {
+      acc.push({ id: p.user_id, name: p.users.full_name });
+    }
+    return acc;
+  }, []);
 
   const filtered = payments.filter((p) =>
     filter === "all" ? true : p.status === filter,
@@ -178,6 +248,84 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
         )}
       </div>
 
+      <div className="mx-4 mt-4 rounded-2xl border border-rose-500/10 bg-rose-500/5 p-4">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold text-rose-400">Штрафы</p>
+          <Button
+            variant="ghost"
+            size="default"
+            onClick={() => setShowFineForm(!showFineForm)}
+          >
+            {showFineForm ? "Скрыть" : "+ Добавить"}
+          </Button>
+        </div>
+
+        {showFineForm && (
+          <div className="mt-3 space-y-2">
+            <select
+              value={fineUserId}
+              onChange={(e) => setFineUserId(e.target.value)}
+              className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+            >
+              <option value="">Сотрудник</option>
+              {uniqueEmployees.map((emp) => (
+                <option key={emp.id} value={emp.id}>{emp.name}</option>
+              ))}
+            </select>
+            <Input
+              type="number"
+              inputMode="decimal"
+              step="0.5"
+              min="0"
+              placeholder="Сумма (MDL)"
+              value={fineAmount}
+              onChange={(e) => setFineAmount(e.target.value)}
+            />
+            <Input
+              type="text"
+              placeholder="Причина"
+              value={fineReason}
+              onChange={(e) => setFineReason(e.target.value)}
+            />
+            <Button
+              variant="blue"
+              className="w-full"
+              disabled={isPending || !fineUserId || !fineAmount || !fineReason}
+              onClick={handleAddFine}
+            >
+              {isPending ? "..." : "Добавить штраф"}
+            </Button>
+          </div>
+        )}
+
+        {fines.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {fines.map((fine) => (
+              <div
+                key={fine.id}
+                className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/30 px-3 py-2"
+              >
+                <div>
+                  <p className="text-sm font-medium text-white">{fine.users.full_name}</p>
+                  <p className="text-[10px] text-zinc-500">{fine.reason}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm font-bold text-rose-400">
+                    -{Number(fine.amount)} л
+                  </span>
+                  <button
+                    onClick={() => handleDeleteFine(fine.id)}
+                    className="text-xs text-zinc-600 hover:text-rose-400"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {error && (
         <div className="mx-4 mt-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
           <p className="text-sm text-red-400">{error}</p>
@@ -222,6 +370,9 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
                   <p className="text-lg font-bold text-white">
                     {p.users.full_name}
                   </p>
+                  {p.users.position && (
+                    <p className="text-xs text-zinc-500">{p.users.position}</p>
+                  )}
                   <p className="text-xs text-zinc-500">
                     {format(new Date(p.period_start), "d MMM", { locale: ru })}
                     {" — "}

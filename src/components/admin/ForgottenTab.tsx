@@ -85,6 +85,9 @@ export function ForgottenTab({ shifts, onReviewed }: ForgottenTabProps) {
                 <p className="text-lg font-bold text-white">
                   {shift.users.full_name}
                 </p>
+                {shift.users.position && (
+                  <p className="text-xs text-zinc-500">{shift.users.position}</p>
+                )}
                 <p className="text-sm text-zinc-400">
                   {format(new Date(shift.clock_in), "d MMMM yyyy, HH:mm", {
                     locale: ru,

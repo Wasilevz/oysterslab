@@ -15,7 +15,7 @@ export async function getSalaryStats(): Promise<ActionResult<SalaryStats>> {
 
     const { data: payments, error } = await supabase
       .from("salary_payments")
-      .select("*, users!inner(id, full_name)")
+      .select("*, users!inner(id, full_name, position)")
       .order("created_at", { ascending: false });
 
     if (error) return { success: false, error: error.message };
@@ -118,12 +118,48 @@ export async function getEmployeeSalaries(
   }
 }
 
+export async function checkPeriodCalculated(
+  periodStart: string,
+  periodEnd: string,
+): Promise<ActionResult<boolean>> {
+  try {
+    const supabase = getSupabaseAdmin();
+
+    const { data, error } = await supabase
+      .from("salary_payments")
+      .select("id")
+      .eq("period_start", periodStart)
+      .eq("period_end", periodEnd)
+      .limit(1);
+
+    if (error) return { success: false, error: error.message };
+
+    return { success: true, data: (data ?? []).length > 0 };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Не удалось проверить период",
+    };
+  }
+}
+
 export async function generateSalaryForPeriod(
   periodStart: string,
   periodEnd: string,
 ): Promise<ActionResult<number>> {
   try {
     const supabase = getSupabaseAdmin();
+
+    const { data: alreadyCalculated } = await supabase
+      .from("salary_payments")
+      .select("id")
+      .eq("period_start", periodStart)
+      .eq("period_end", periodEnd)
+      .limit(1);
+
+    if (alreadyCalculated && alreadyCalculated.length > 0) {
+      return { success: false, error: "Расчёт за этот период уже был произведён" };
+    }
 
     const { data: employees, error: empError } = await supabase
       .from("users")

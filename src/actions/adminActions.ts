@@ -25,17 +25,17 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
       await Promise.all([
         supabase
           .from("shifts")
-          .select("*, users!inner(id, full_name, telegram_id)")
+          .select("*, users!inner(id, full_name, telegram_id, position)")
           .eq("status", "ACTIVE")
           .order("clock_in", { ascending: true }),
         supabase
           .from("shifts")
-          .select("*, users!inner(id, full_name, telegram_id)")
+          .select("*, users!inner(id, full_name, telegram_id, position)")
           .eq("status", "AUTO_CLOSED")
           .order("clock_in", { ascending: false }),
         supabase
           .from("payrolls")
-          .select("*, users!inner(id, full_name)")
+          .select("*, users!inner(id, full_name, position)")
           .eq("status", "DRAFT")
           .order("period_end", { ascending: false }),
         supabase
@@ -61,7 +61,7 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
 
     const activeShifts = (activeResult.data ?? []).map((row) => {
       const { users, ...shift } = row;
-      return { shift, user: users as { id: string; full_name: string } };
+      return { shift, user: users as { id: string; full_name: string; position: string | null } };
     });
 
     const hoursMap = new Map<string, { name: string; hours: number }>();

@@ -33,6 +33,9 @@ export function LiveTab({ activeShifts }: LiveTabProps) {
             </span>
             <div>
               <p className="text-lg font-bold text-white">{user.full_name}</p>
+              {user.position && (
+                <p className="text-xs text-zinc-500">{user.position}</p>
+              )}
               <p className="text-xs text-zinc-500">На смене</p>
             </div>
           </div>
