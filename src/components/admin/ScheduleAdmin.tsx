@@ -1,24 +1,27 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { getSchedule, setScheduleDay, setBulkWeekends } from "@/actions/scheduleActions";
+import { getSchedule, setScheduleDay, setBulkWeekends, getWorkingToday } from "@/actions/scheduleActions";
 import { getEmployees } from "@/actions/employeeActions";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useUserStore } from "@/store/userStore";
 import type { Schedule, ScheduleType, User } from "@/types/database";
 
-const TYPE_COLORS: Record<ScheduleType, { bg: string; text: string; label: string }> = {
-  work: { bg: "bg-blue-500/20", text: "text-blue-400", label: "Рабочий" },
-  off: { bg: "bg-zinc-700/30", text: "text-zinc-500", label: "Выходной" },
-  vacation: { bg: "bg-amber-500/20", text: "text-amber-400", label: "Отпуск" },
-  sick: { bg: "bg-rose-500/20", text: "text-rose-400", label: "Больничный" },
+const TYPE_COLORS: Record<ScheduleType, { bg: string; text: string; dot: string; label: string }> = {
+  work: { bg: "bg-blue-500/20", text: "text-blue-400", dot: "bg-blue-500", label: "Рабочий" },
+  off: { bg: "bg-zinc-700/30", text: "text-zinc-500", dot: "bg-zinc-600", label: "Выходной" },
+  vacation: { bg: "bg-amber-500/20", text: "text-amber-400", dot: "bg-amber-500", label: "Отпуск" },
+  sick: { bg: "bg-rose-500/20", text: "text-rose-400", dot: "bg-rose-500", label: "Больничный" },
 };
 
 const TYPE_ORDER: ScheduleType[] = ["work", "off", "vacation", "sick"];
 
 export function ScheduleAdmin() {
+  const currentUser = useUserStore((s) => s.user);
   const [employees, setEmployees] = useState<User[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [workingToday, setWorkingToday] = useState<{ id: string; full_name: string; position: string | null; clock_in: string | null }[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
@@ -26,15 +29,16 @@ export function ScheduleAdmin() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
   const daysInMonth = new Date(year, month, 0).getDate();
-  const firstDayOfWeek = (new Date(year, month - 1, 1).getDay() + 6) % 7;
 
   const loadData = useCallback(async () => {
-    const [schedResult, empResult] = await Promise.all([
+    const [schedResult, empResult, todayResult] = await Promise.all([
       getSchedule(year, month),
       getEmployees(),
+      getWorkingToday(),
     ]);
     if (schedResult.success && schedResult.data) setSchedules(schedResult.data);
     if (empResult.success && empResult.data) setEmployees(empResult.data);
+    if (todayResult.success && todayResult.data) setWorkingToday(todayResult.data);
     setLoading(false);
   }, [year, month]);
 
@@ -91,6 +95,8 @@ export function ScheduleAdmin() {
   ];
 
   const dayLabels = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   if (loading) {
     return (
@@ -110,46 +116,86 @@ export function ScheduleAdmin() {
         <h1 className="mt-1 text-2xl font-bold text-white">График сотрудников</h1>
       </header>
 
-      <div className="mt-4 px-4">
-        <div className="flex items-center justify-between">
-          <button onClick={prevMonth} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
-          </button>
-          <p className="text-lg font-bold text-white">
-            {monthNames[month - 1]} {year}
-          </p>
-          <button onClick={nextMonth} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-          </button>
-        </div>
+      <div className="px-4 pt-4">
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold text-white">Мой месяц</p>
+            <div className="flex items-center gap-2">
+              {(["work", "off", "vacation", "sick"] as const).map((t) => (
+                <span key={t} className="flex items-center gap-1 text-[10px]">
+                  <span className={`h-1.5 w-1.5 rounded-full ${TYPE_COLORS[t].dot}`} />
+                  <span className={TYPE_COLORS[t].text}>{TYPE_COLORS[t].label}</span>
+                </span>
+              ))}
+            </div>
+          </div>
 
-        <div className="mt-4 flex gap-1.5">
-          {TYPE_ORDER.map((t) => (
-            <span key={t} className={`rounded-lg px-2 py-1 text-[10px] font-semibold ${TYPE_COLORS[t].bg} ${TYPE_COLORS[t].text}`}>
-              {TYPE_COLORS[t].label}
-            </span>
-          ))}
-        </div>
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {dayLabels.map((d) => (
+              <div key={d} className="py-1 text-center text-[10px] font-medium text-zinc-500">{d}</div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {Array.from({ length: (new Date(year, month - 1, 1).getDay() + 6) % 7 }).map((_, i) => (
+              <div key={`empty-${i}`} />
+            ))}
+            {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
+              const type = currentUser ? getScheduleType(currentUser.id, day) : "work";
+              const colors = TYPE_COLORS[type];
+              const isToday = todayStr === `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 
-        <Button
-          variant="ghost"
-          className="mt-3 w-full"
-          disabled={isPending}
-          onClick={handleSetWeekends}
-        >
-          {isPending ? "..." : "Установить выходные (сб/вс) всем"}
-        </Button>
+              return (
+                <div
+                  key={day}
+                  className={`flex flex-col items-center rounded-lg py-1.5 ${
+                    isToday ? "ring-1 ring-blue-500/50" : ""
+                  }`}
+                >
+                  <span className={`text-xs font-medium ${isToday ? "text-white" : "text-zinc-400"}`}>
+                    {day}
+                  </span>
+                  <span className={`mt-0.5 h-1.5 w-1.5 rounded-full ${colors.dot}`} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
-      <div className="mt-4 flex-1 overflow-x-auto px-4 pb-24">
+      <div className="mt-4 px-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button onClick={prevMonth} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+              </svg>
+            </button>
+            <p className="text-lg font-bold text-white">
+              {monthNames[month - 1]} {year}
+            </p>
+            <button onClick={nextMonth} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+          </div>
+          <Button
+            variant="ghost"
+            size="default"
+            disabled={isPending}
+            onClick={handleSetWeekends}
+            className="text-xs"
+          >
+            {isPending ? "..." : "Выходные всем"}
+          </Button>
+        </div>
+      </div>
+
+      <div className="mt-3 flex-1 overflow-x-auto px-4 pb-24">
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="sticky left-0 z-10 bg-zinc-950 p-1 text-left text-[10px] font-medium text-zinc-500">
+              <th className="sticky left-0 z-10 bg-zinc-950 p-1.5 text-left text-[11px] font-medium text-zinc-500">
                 Сотрудник
               </th>
               {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
@@ -159,10 +205,10 @@ export function ScheduleAdmin() {
                 return (
                   <th
                     key={day}
-                    className={`p-1 text-center text-[10px] font-medium ${isWeekend ? "text-zinc-600" : "text-zinc-500"}`}
+                    className={`p-1 text-center text-[11px] font-medium ${isWeekend ? "text-zinc-600" : "text-zinc-500"}`}
                   >
                     <div>{day}</div>
-                    <div className="text-[8px]">{dayLabels[dow]}</div>
+                    <div className="text-[9px]">{dayLabels[dow]}</div>
                   </th>
                 );
               })}
@@ -171,10 +217,10 @@ export function ScheduleAdmin() {
           <tbody>
             {employees.map((emp) => (
               <tr key={emp.id}>
-                <td className="sticky left-0 z-10 bg-zinc-950 py-1 pr-2">
-                  <p className="truncate text-xs font-medium text-white">{emp.full_name}</p>
+                <td className="sticky left-0 z-10 bg-zinc-950 py-1.5 pr-3">
+                  <p className="truncate text-xs font-semibold text-white">{emp.full_name}</p>
                   {emp.position && (
-                    <p className="truncate text-[8px] text-zinc-500">{emp.position}</p>
+                    <p className="truncate text-[9px] text-zinc-500">{emp.position}</p>
                   )}
                 </td>
                 {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
@@ -184,7 +230,7 @@ export function ScheduleAdmin() {
                     <td key={day} className="p-0.5">
                       <button
                         onClick={() => cycleType(emp.id, day)}
-                        className={`h-7 w-7 rounded-lg text-[10px] font-bold transition-colors ${colors.bg} ${colors.text}`}
+                        className={`h-9 w-9 rounded-xl text-[11px] font-bold transition-all active:scale-95 ${colors.bg} ${colors.text}`}
                       >
                         {type === "work" ? "Р" : type === "off" ? "—" : type === "vacation" ? "О" : "Б"}
                       </button>
@@ -196,6 +242,40 @@ export function ScheduleAdmin() {
           </tbody>
         </table>
       </div>
+
+      {workingToday.length > 0 && (
+        <div className="border-t border-zinc-800/60 px-4 pt-4 pb-24">
+          <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
+            Сегодня на смене
+          </h2>
+          <div className="space-y-2">
+            {workingToday.map((w) => (
+              <div
+                key={w.id}
+                className="flex items-center justify-between rounded-2xl border border-zinc-800/30 bg-zinc-900/20 px-4 py-3"
+              >
+                <div>
+                  <p className="text-sm font-medium text-white">{w.full_name}</p>
+                  {w.position && (
+                    <p className="text-[10px] text-zinc-500">{w.position}</p>
+                  )}
+                </div>
+                {w.clock_in ? (
+                  <span className="flex items-center gap-1.5">
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
+                    </span>
+                    <span className="text-[10px] text-blue-400">На смене</span>
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-zinc-600">Ещё не пришёл</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
