@@ -11,6 +11,7 @@ import { SalaryPage } from "@/components/admin/SalaryPage";
 import { SettingsPage } from "@/components/admin/SettingsPage";
 import { StatsCards } from "@/components/admin/StatsCards";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
+import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserStore } from "@/store/userStore";
@@ -200,6 +201,10 @@ export function AdminScreen() {
             </TabsContent>
           </div>
         </Tabs>
+      </div>
+
+      <div className="px-4">
+        <EmployeeSalary />
       </div>
 
       {(stats?.employeeHours.length ?? 0) > 0 || (stats?.monthRevenue.length ?? 0) > 0 ? (
