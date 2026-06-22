@@ -191,11 +191,11 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
           </div>
       </div>
 
-      <div className="mt-3 flex-1 overflow-x-auto px-4 pb-24">
+      <div className="mt-3 flex-1 overflow-x-auto px-4 pb-24 relative">
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="sticky left-0 z-10 bg-zinc-950 p-1.5 text-left text-[11px] font-medium text-zinc-500">
+              <th className="sticky left-0 z-20 bg-zinc-950 p-1.5 text-left text-[11px] font-medium text-zinc-500 min-w-[100px]">
                 Сотрудник
               </th>
               {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
@@ -217,7 +217,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
           <tbody>
             {employees.map((emp) => (
               <tr key={emp.id}>
-                <td className="sticky left-0 z-10 bg-zinc-950 py-1.5 pr-3">
+                <td className="sticky left-0 z-20 bg-zinc-950 py-1.5 pr-3 min-w-[100px]">
                   <p className="truncate text-xs font-semibold text-white">{emp.full_name}</p>
                   {emp.position && (
                     <p className="truncate text-[9px] text-zinc-500">{emp.position}</p>
