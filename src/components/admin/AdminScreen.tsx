@@ -20,6 +20,7 @@ export function AdminScreen() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showCharts, setShowCharts] = useState(false);
 
   const loadStats = useCallback(async () => {
     const result = await getDashboardStats();
@@ -53,11 +54,8 @@ export function AdminScreen() {
         <div className="grid grid-cols-2 gap-3">
           <Skeleton className="h-24 rounded-2xl" />
           <Skeleton className="h-24 rounded-2xl" />
-          <Skeleton className="h-24 rounded-2xl" />
-          <Skeleton className="h-24 rounded-2xl" />
         </div>
-        <Skeleton className="h-[250px] rounded-2xl" />
-        <Skeleton className="h-[250px] rounded-2xl" />
+        <Skeleton className="h-[200px] rounded-2xl" />
       </div>
     );
   }
@@ -81,23 +79,12 @@ export function AdminScreen() {
 
       {stats && <StatsCards stats={stats} />}
 
-      {stats && (stats.employeeHours.length > 0 || stats.monthRevenue.length > 0) && (
-        <div className="mt-6 space-y-4 px-4">
-          {stats.employeeHours.length > 0 && (
-            <HoursChart data={stats.employeeHours} />
-          )}
-          {stats.monthRevenue.length > 0 && (
-            <RevenueChart data={stats.monthRevenue} />
-          )}
-        </div>
-      )}
-
-      <div className="mt-6 flex-1">
+      <div className="mt-4 flex-1">
         <Tabs defaultValue="live" className="flex flex-1 flex-col">
           <div className="px-4">
             <TabsList>
               <TabsTrigger value="live">
-                Лайв
+                Смены
                 {(stats?.activeShifts.length ?? 0) > 0 && (
                   <span className="ml-1.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-blue-500/20 px-1 text-[10px] font-bold text-blue-400">
                     {stats?.activeShifts.length}
@@ -134,6 +121,36 @@ export function AdminScreen() {
           </div>
         </Tabs>
       </div>
+
+      {(stats?.employeeHours.length ?? 0) > 0 || (stats?.monthRevenue.length ?? 0) > 0 ? (
+        <div className="border-t border-zinc-800/60 px-4 pt-4 pb-8">
+          <button
+            onClick={() => setShowCharts(!showCharts)}
+            className="flex w-full items-center justify-between py-2 text-xs font-medium uppercase tracking-wider text-zinc-500 hover:text-zinc-300"
+          >
+            <span>Аналитика</span>
+            <svg
+              className={`h-4 w-4 transition-transform ${showCharts ? "rotate-180" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {showCharts && (
+            <div className="mt-3 space-y-4">
+              {stats && stats.employeeHours.length > 0 && (
+                <HoursChart data={stats.employeeHours} />
+              )}
+              {stats && stats.monthRevenue.length > 0 && (
+                <RevenueChart data={stats.monthRevenue} />
+              )}
+            </div>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }

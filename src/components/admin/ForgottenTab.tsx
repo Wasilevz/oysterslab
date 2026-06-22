@@ -29,7 +29,7 @@ export function ForgottenTab({ shifts, onReviewed }: ForgottenTabProps) {
 
   const openDialog = (shift: ShiftWithUser) => {
     setSelected(shift);
-    setHours("");
+    setHours(shift.hours_worked?.toFixed(1) ?? "");
     setError(null);
   };
 
@@ -65,8 +65,13 @@ export function ForgottenTab({ shifts, onReviewed }: ForgottenTabProps) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center px-4">
         <div className="text-center">
-          <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-zinc-800/50" />
-          <p className="text-zinc-500">Забытых смен нет</p>
+          <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-zinc-800/50 flex items-center justify-center">
+            <svg className="h-6 w-6 text-zinc-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <p className="text-sm font-medium text-zinc-400">Забытых смен нет</p>
+          <p className="mt-1 text-xs text-zinc-600">Все сотрудники закрыли смены</p>
         </div>
       </div>
     );
@@ -74,6 +79,12 @@ export function ForgottenTab({ shifts, onReviewed }: ForgottenTabProps) {
 
   return (
     <>
+      <div className="px-4 mb-3">
+        <p className="text-xs text-zinc-500">
+          Система автоматически закрыла смены после 1:30. Проверьте часы и подтвердите.
+        </p>
+      </div>
+
       <div className="grid gap-3 px-4">
         {shifts.map((shift) => (
           <article
@@ -89,21 +100,28 @@ export function ForgottenTab({ shifts, onReviewed }: ForgottenTabProps) {
                   <p className="text-xs text-zinc-500">{shift.users.position}</p>
                 )}
                 <p className="text-sm text-zinc-400">
-                  {format(new Date(shift.clock_in), "d MMMM yyyy, HH:mm", {
+                  {format(new Date(shift.clock_in), "d MMMM, HH:mm", {
                     locale: ru,
                   })}
                 </p>
               </div>
-              <span className="rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-400">
-                AUTO
-              </span>
+              <div className="text-right">
+                <span className="rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-400">
+                  AUTO
+                </span>
+                {shift.hours_worked != null && (
+                  <p className="mt-1 font-mono text-xs font-bold text-amber-400">
+                    ≈ {shift.hours_worked.toFixed(1)} ч
+                  </p>
+                )}
+              </div>
             </div>
             <Button
               variant="outline"
               className="w-full"
               onClick={() => openDialog(shift)}
             >
-              Указать часы
+              Проверить и подтвердить
             </Button>
           </article>
         ))}
@@ -122,17 +140,24 @@ export function ForgottenTab({ shifts, onReviewed }: ForgottenTabProps) {
             </DialogDescription>
           </DialogHeader>
 
-          <Input
-            type="number"
-            inputMode="decimal"
-            step="0.5"
-            min="0.5"
-            max="24"
-            placeholder="8"
-            value={hours}
-            onChange={(e) => setHours(e.target.value)}
-            autoFocus
-          />
+          <div className="space-y-2">
+            <Input
+              type="number"
+              inputMode="decimal"
+              step="0.5"
+              min="0.5"
+              max="24"
+              placeholder="8"
+              value={hours}
+              onChange={(e) => setHours(e.target.value)}
+              autoFocus
+            />
+            {selected?.hours_worked != null && (
+              <p className="text-xs text-zinc-500">
+                Система рассчитала: {selected.hours_worked.toFixed(1)} ч
+              </p>
+            )}
+          </div>
 
           {error && <p className="text-sm text-red-400">{error}</p>}
 
@@ -145,7 +170,7 @@ export function ForgottenTab({ shifts, onReviewed }: ForgottenTabProps) {
               onClick={handleSubmit}
               disabled={isPending || !hours}
             >
-              {isPending ? "Сохранение..." : "Сохранить"}
+              {isPending ? "Сохранение..." : "Подтвердить"}
             </Button>
           </DialogFooter>
         </DialogContent>

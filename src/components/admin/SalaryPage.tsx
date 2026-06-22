@@ -44,6 +44,7 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
   const [fineAmount, setFineAmount] = useState("");
   const [fineReason, setFineReason] = useState("");
   const [showFineForm, setShowFineForm] = useState(false);
+  const [showGenerateForm, setShowGenerateForm] = useState(false);
 
   const loadData = useCallback(async () => {
     const [salaryResult, finesResult] = await Promise.all([
@@ -96,6 +97,7 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
       setGenResult(`Создано записей: ${result.data}`);
       setPeriodStart("");
       setPeriodEnd("");
+      setShowGenerateForm(false);
       void loadData();
     });
   };
@@ -106,6 +108,18 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
       if (!result.success) {
         setError(result.error ?? "Ошибка");
         return;
+      }
+      void loadData();
+    });
+  };
+
+  const handleApproveAll = () => {
+    const pendingPayments = payments.filter((p) => p.status === "pending");
+    if (pendingPayments.length === 0) return;
+
+    startTransition(async () => {
+      for (const p of pendingPayments) {
+        await approveSalary(p.id);
       }
       void loadData();
     });
@@ -162,6 +176,7 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
     return acc;
   }, []);
 
+  const pendingPayments = payments.filter((p) => p.status === "pending");
   const filtered = payments.filter((p) =>
     filter === "all" ? true : p.status === filter,
   );
@@ -171,7 +186,6 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
       <div className="flex flex-1 flex-col gap-4 p-4 pb-24">
         <Skeleton className="h-8 w-32" />
         <Skeleton className="h-24 w-full rounded-2xl" />
-        <Skeleton className="h-32 w-full rounded-2xl" />
         <Skeleton className="h-32 w-full rounded-2xl" />
       </div>
     );
@@ -213,124 +227,171 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
         </div>
       </div>
 
-      <div className="mt-4 rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4 mx-4">
-        <p className="mb-3 text-sm font-semibold text-blue-400">
-          Рассчитать за период
-        </p>
-        <div className="mb-3 grid grid-cols-2 gap-2">
-          <div>
-            <p className="mb-1 text-xs text-zinc-500">С</p>
-            <Input
-              type="date"
-              value={periodStart}
-              onChange={(e) => setPeriodStart(e.target.value)}
-            />
-          </div>
-          <div>
-            <p className="mb-1 text-xs text-zinc-500">По</p>
-            <Input
-              type="date"
-              value={periodEnd}
-              onChange={(e) => setPeriodEnd(e.target.value)}
-            />
-          </div>
-        </div>
-        <Button
-          variant="blue"
-          className="w-full"
-          disabled={isPending || !periodStart || !periodEnd}
-          onClick={handleGenerate}
-        >
-          {isPending ? "Расчёт..." : "Рассчитать зарплату"}
-        </Button>
-        {genResult && (
-          <p className="mt-2 text-sm text-blue-400">{genResult}</p>
-        )}
-      </div>
-
-      <div className="mx-4 mt-4 rounded-2xl border border-rose-500/10 bg-rose-500/5 p-4">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-rose-400">Штрафы</p>
-          <Button
-            variant="ghost"
-            size="default"
-            onClick={() => setShowFineForm(!showFineForm)}
-          >
-            {showFineForm ? "Скрыть" : "+ Добавить"}
-          </Button>
-        </div>
-
-        {showFineForm && (
-          <div className="mt-3 space-y-2">
-            <select
-              value={fineUserId}
-              onChange={(e) => setFineUserId(e.target.value)}
-              className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
-            >
-              <option value="">Сотрудник</option>
-              {uniqueEmployees.map((emp) => (
-                <option key={emp.id} value={emp.id}>{emp.name}</option>
-              ))}
-            </select>
-            <Input
-              type="number"
-              inputMode="decimal"
-              step="0.5"
-              min="0"
-              placeholder="Сумма (MDL)"
-              value={fineAmount}
-              onChange={(e) => setFineAmount(e.target.value)}
-            />
-            <Input
-              type="text"
-              placeholder="Причина"
-              value={fineReason}
-              onChange={(e) => setFineReason(e.target.value)}
-            />
+      {pendingPayments.length > 0 && (
+        <div className="mx-4 mt-4 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-amber-400">
+                Ожидают одобрения
+              </p>
+              <p className="mt-0.5 text-xs text-zinc-500">
+                {pendingPayments.length} {pendingPayments.length === 1 ? "запись" : "записей"}
+              </p>
+            </div>
             <Button
               variant="blue"
-              className="w-full"
-              disabled={isPending || !fineUserId || !fineAmount || !fineReason}
-              onClick={handleAddFine}
+              size="default"
+              disabled={isPending}
+              onClick={handleApproveAll}
             >
-              {isPending ? "..." : "Добавить штраф"}
+              {isPending ? "..." : "Одобрить все"}
             </Button>
           </div>
-        )}
-
-        {fines.length > 0 && (
-          <div className="mt-3 space-y-2">
-            {fines.map((fine) => (
-              <div
-                key={fine.id}
-                className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/30 px-3 py-2"
-              >
-                <div>
-                  <p className="text-sm font-medium text-white">{fine.users.full_name}</p>
-                  <p className="text-[10px] text-zinc-500">{fine.reason}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm font-bold text-rose-400">
-                    -{Number(fine.amount)} л
-                  </span>
-                  <button
-                    onClick={() => handleDeleteFine(fine.id)}
-                    className="text-xs text-zinc-600 hover:text-rose-400"
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {error && (
         <div className="mx-4 mt-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
           <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
+
+      <div className="mx-4 mt-4">
+        <button
+          onClick={() => setShowGenerateForm(!showGenerateForm)}
+          className="flex w-full items-center justify-between rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4 text-left"
+        >
+          <span className="text-sm font-semibold text-blue-400">
+            Рассчитать за период
+          </span>
+          <svg
+            className={`h-4 w-4 text-blue-400 transition-transform ${showGenerateForm ? "rotate-180" : ""}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {showGenerateForm && (
+          <div className="mt-2 rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
+            <div className="mb-3 grid grid-cols-2 gap-2">
+              <div>
+                <p className="mb-1 text-xs text-zinc-500">С</p>
+                <Input
+                  type="date"
+                  value={periodStart}
+                  onChange={(e) => setPeriodStart(e.target.value)}
+                />
+              </div>
+              <div>
+                <p className="mb-1 text-xs text-zinc-500">По</p>
+                <Input
+                  type="date"
+                  value={periodEnd}
+                  onChange={(e) => setPeriodEnd(e.target.value)}
+                />
+              </div>
+            </div>
+            <Button
+              variant="blue"
+              className="w-full"
+              disabled={isPending || !periodStart || !periodEnd}
+              onClick={handleGenerate}
+            >
+              {isPending ? "Расчёт..." : "Рассчитать зарплату"}
+            </Button>
+            {genResult && (
+              <p className="mt-2 text-sm text-blue-400">{genResult}</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="mx-4 mt-4">
+        <button
+          onClick={() => setShowFineForm(!showFineForm)}
+          className="flex w-full items-center justify-between rounded-2xl border border-rose-500/10 bg-rose-500/5 p-4 text-left"
+        >
+          <span className="text-sm font-semibold text-rose-400">Штрафы</span>
+          <svg
+            className={`h-4 w-4 text-rose-400 transition-transform ${showFineForm ? "rotate-180" : ""}`}
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {showFineForm && (
+          <div className="mt-2 rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
+            <div className="space-y-2">
+              <select
+                value={fineUserId}
+                onChange={(e) => setFineUserId(e.target.value)}
+                className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+              >
+                <option value="">Сотрудник</option>
+                {uniqueEmployees.map((emp) => (
+                  <option key={emp.id} value={emp.id}>{emp.name}</option>
+                ))}
+              </select>
+              <Input
+                type="number"
+                inputMode="decimal"
+                step="0.5"
+                min="0"
+                placeholder="Сумма (MDL)"
+                value={fineAmount}
+                onChange={(e) => setFineAmount(e.target.value)}
+              />
+              <Input
+                type="text"
+                placeholder="Причина"
+                value={fineReason}
+                onChange={(e) => setFineReason(e.target.value)}
+              />
+              <Button
+                variant="blue"
+                className="w-full"
+                disabled={isPending || !fineUserId || !fineAmount || !fineReason}
+                onClick={handleAddFine}
+              >
+                {isPending ? "..." : "Добавить штраф"}
+              </Button>
+            </div>
+
+            {fines.length > 0 && (
+              <div className="mt-3 space-y-2">
+                {fines.map((fine) => (
+                  <div
+                    key={fine.id}
+                    className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/30 px-3 py-2"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-white">{fine.users.full_name}</p>
+                      <p className="text-[10px] text-zinc-500">{fine.reason}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-sm font-bold text-rose-400">
+                        -{Number(fine.amount)} л
+                      </span>
+                      <button
+                        onClick={() => handleDeleteFine(fine.id)}
+                        className="text-xs text-zinc-600 hover:text-rose-400"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="mt-4 flex gap-1.5 px-4 overflow-x-auto">
         {(["all", "pending", "approved", "paid"] as const).map((f) => (
@@ -350,8 +411,16 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
 
       <div className="mt-3 flex-1 space-y-2 px-4 pb-8">
         {filtered.length === 0 ? (
-          <div className="flex min-h-[30vh] items-center justify-center">
-            <p className="text-zinc-500">Нет записей</p>
+          <div className="flex min-h-[20vh] items-center justify-center">
+            <div className="text-center">
+              <div className="mx-auto mb-3 h-12 w-12 rounded-full bg-zinc-800/50 flex items-center justify-center">
+                <svg className="h-6 w-6 text-zinc-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-zinc-400">Нет записей</p>
+              <p className="mt-1 text-xs text-zinc-600">Рассчитайте зарплату за период</p>
+            </div>
           </div>
         ) : (
           filtered.map((p) => (
@@ -371,9 +440,9 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
                     {p.users.full_name}
                   </p>
                   {p.users.position && (
-                    <p className="text-xs text-zinc-500">{p.users.position}</p>
+                    <p className="text-xs text-zinc-400">{p.users.position}</p>
                   )}
-                  <p className="text-xs text-zinc-500">
+                  <p className="mt-1 text-xs text-zinc-500">
                     {format(new Date(p.period_start), "d MMM", { locale: ru })}
                     {" — "}
                     {format(new Date(p.period_end), "d MMM", { locale: ru })}
@@ -394,31 +463,21 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
                 )}
               </div>
 
-              <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                <div className="rounded-xl bg-zinc-800/30 py-2">
-                  <p className="text-[10px] text-zinc-500">Часы</p>
-                  <p className="font-mono text-sm font-bold text-white">
-                    {Number(p.hours_worked).toFixed(1)}
-                  </p>
+              <div className="mt-3 flex items-center justify-between">
+                <div className="flex gap-4 text-sm">
+                  <span className="text-zinc-400">
+                    {Number(p.hours_worked).toFixed(1)} ч × {Number(p.hourly_rate)} л/ч
+                  </span>
                 </div>
-                <div className="rounded-xl bg-zinc-800/30 py-2">
-                  <p className="text-[10px] text-zinc-500">Ставка</p>
-                  <p className="font-mono text-sm font-bold text-white">
-                    {Number(p.hourly_rate)} л/ч
-                  </p>
-                </div>
-                <div className="rounded-xl bg-zinc-800/30 py-2">
-                  <p className="text-[10px] text-zinc-500">Итого</p>
-                  <p className="font-mono text-sm font-bold text-white">
-                    {formatMoney(Number(p.total_amount))}
-                  </p>
-                </div>
+                <p className="font-mono text-lg font-bold text-white">
+                  {formatMoney(Number(p.total_amount))}
+                </p>
               </div>
 
               {p.paid_at && (
                 <p className="mt-2 text-xs text-emerald-400">
-                  Получено сотрудником:{" "}
-                  {format(new Date(p.paid_at), "d MMM yyyy, HH:mm", {
+                  Получено:{" "}
+                  {format(new Date(p.paid_at), "d MMM, HH:mm", {
                     locale: ru,
                   })}
                 </p>
@@ -431,7 +490,7 @@ export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
                   disabled={isPending}
                   onClick={() => handleApprove(p.id)}
                 >
-                  {isPending ? "..." : "Одобрить выплату"}
+                  {isPending ? "..." : "Одобрить"}
                 </Button>
               )}
             </div>

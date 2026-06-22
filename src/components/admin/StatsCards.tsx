@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Clock } from "lucide-react";
+import { AlertCircle, Clock, Users } from "lucide-react";
 import type { DashboardStats } from "@/types/database";
 
 interface StatsCardsProps {
@@ -8,6 +8,8 @@ interface StatsCardsProps {
 }
 
 export function StatsCards({ stats }: StatsCardsProps) {
+  const pendingCount = stats.autoClosedShifts.length;
+
   const cards = [
     {
       label: "На смене",
@@ -27,10 +29,23 @@ export function StatsCards({ stats }: StatsCardsProps) {
       border: "border-blue-400/20",
       glow: "shadow-blue-400/5",
     },
+    ...(pendingCount > 0
+      ? [
+          {
+            label: "Требует внимания",
+            value: pendingCount,
+            icon: AlertCircle,
+            color: "text-amber-400",
+            bg: "from-amber-500/10 to-amber-600/5",
+            border: "border-amber-500/20",
+            glow: "shadow-amber-500/5",
+          },
+        ]
+      : []),
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 px-4">
+    <div className={`grid ${cards.length === 3 ? "grid-cols-3" : "grid-cols-2"} gap-3 px-4`}>
       {cards.map((card) => (
         <div
           key={card.label}
