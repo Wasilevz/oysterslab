@@ -47,7 +47,7 @@ async function getActiveEmployeeIds(supabase: ReturnType<typeof getSupabaseAdmin
   const { data: employees } = await supabase
     .from("users")
     .select("id, telegram_id, full_name")
-    .eq("role", "employee");
+    .in("role", ["employee", "admin"]);
 
   if (!employees || employees.length === 0) return { employees: [], activeIds: new Set<string>() };
 

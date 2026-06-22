@@ -41,7 +41,7 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
         supabase
           .from("users")
           .select("id, hourly_rate")
-          .eq("role", "employee"),
+          .in("role", ["employee", "admin"]),
         supabase
           .from("shifts")
           .select("user_id, hours_worked, users!inner(full_name)")

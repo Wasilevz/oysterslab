@@ -164,7 +164,7 @@ export async function generateSalaryForPeriod(
     const { data: employees, error: empError } = await supabase
       .from("users")
       .select("id, hourly_rate, full_name")
-      .eq("role", "employee");
+      .in("role", ["employee", "admin"]);
 
     if (empError) return { success: false, error: empError.message };
     if (!employees || employees.length === 0) return { success: false, error: "Нет сотрудников" };
