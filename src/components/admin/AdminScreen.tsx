@@ -120,7 +120,7 @@ export function AdminScreen() {
           <button
             onClick={handleToggleShift}
             disabled={isPending}
-            className={`rounded-2xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
+            className={`rounded-2xl px-6 py-3.5 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
               myShift
                 ? "bg-rose-500/15 text-rose-400 hover:bg-rose-500/25"
                 : "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
