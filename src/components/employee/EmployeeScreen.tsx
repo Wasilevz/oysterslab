@@ -18,6 +18,7 @@ import {
 import { getEmployeeStats } from "@/actions/salaryActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
+import { ScheduleEmployee } from "@/components/employee/ScheduleEmployee";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatHours, getElapsedSeconds } from "@/lib/utils";
 import { useUserStore } from "@/store/userStore";
@@ -343,6 +344,8 @@ export function EmployeeScreen() {
       </section>
 
       <EmployeeSalary />
+
+      <ScheduleEmployee />
     </div>
   );
 }

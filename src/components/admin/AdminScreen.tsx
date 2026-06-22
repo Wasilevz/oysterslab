@@ -9,6 +9,7 @@ import { LiveTab } from "@/components/admin/LiveTab";
 import { RevenueChart } from "@/components/admin/RevenueChart";
 import { SalaryPage } from "@/components/admin/SalaryPage";
 import { SettingsPage } from "@/components/admin/SettingsPage";
+import { ScheduleAdmin } from "@/components/admin/ScheduleAdmin";
 import { StatsCards } from "@/components/admin/StatsCards";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
@@ -176,6 +177,7 @@ export function AdminScreen() {
                 )}
               </TabsTrigger>
               <TabsTrigger value="salary">Выплаты</TabsTrigger>
+              <TabsTrigger value="schedule">График</TabsTrigger>
               <TabsTrigger value="settings">Настройки</TabsTrigger>
             </TabsList>
           </div>
@@ -194,6 +196,10 @@ export function AdminScreen() {
 
             <TabsContent value="salary" className="flex-1">
               <SalaryPage thisMonthPayroll={stats?.thisMonthPayroll ?? 0} />
+            </TabsContent>
+
+            <TabsContent value="schedule" className="flex-1">
+              <ScheduleAdmin />
             </TabsContent>
 
             <TabsContent value="settings" className="flex-1">

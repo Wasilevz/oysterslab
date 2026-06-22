@@ -105,6 +105,20 @@ export interface EmployeeStats {
   weeklyHours: { day: string; hours: number }[];
 }
 
+export type ScheduleType = "work" | "off" | "vacation" | "sick";
+
+export interface Schedule {
+  id: string;
+  user_id: string;
+  date: string;
+  type: ScheduleType;
+  created_at: string;
+}
+
+export interface ScheduleWithUser extends Schedule {
+  users: Pick<User, "id" | "full_name" | "position">;
+}
+
 export interface ActionResult<T = void> {
   success: boolean;
   data?: T;
