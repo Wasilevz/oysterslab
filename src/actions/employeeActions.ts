@@ -12,14 +12,11 @@ export async function getEmployees(): Promise<ActionResult<User[]>> {
       .select("*")
       .order("full_name");
 
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true, data: (data ?? []) as User[] };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось загрузить сотрудников",
-    };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
   }
 }
 
@@ -65,14 +62,11 @@ export async function addEmployee(
       .select("*")
       .single();
 
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true, data: data as User };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось добавить сотрудника",
-    };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
   }
 }
 
@@ -96,14 +90,11 @@ export async function updateEmployee(
       })
       .eq("id", userId);
 
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось обновить сотрудника",
-    };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
   }
 }
 
@@ -113,13 +104,10 @@ export async function deleteEmployee(userId: string): Promise<ActionResult<void>
 
     const { error } = await supabase.from("users").delete().eq("id", userId);
 
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось удалить сотрудника",
-    };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
   }
 }

@@ -43,6 +43,7 @@ export default function Home() {
   const { user, status, telegramId, error, setLoading, setUser, setDenied, setError } =
     useUserStore();
   const initialized = useRef(false);
+  const initDataRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (initialized.current) return;
@@ -60,6 +61,7 @@ export default function Home() {
         WebApp.setBackgroundColor("#09090b");
 
         const initData = WebApp.initData;
+        initDataRef.current = initData || null;
 
         if (!initData) {
           setDenied(
@@ -79,7 +81,7 @@ export default function Home() {
           return;
         }
 
-        setUser(result.data);
+        setUser(result.data, initData);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Ошибка инициализации приложения",

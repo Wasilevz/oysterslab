@@ -72,7 +72,7 @@ export function AdminScreen() {
         const res = await fetch("/api/clock", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: user.id, action }),
+          body: JSON.stringify({ userId: user.id, action, initData: useUserStore.getState().initData }),
         });
 
         const data = await res.json();

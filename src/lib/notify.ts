@@ -3,6 +3,13 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 function roundTo30(date: Date): Date {
   const rounded = new Date(date);
   const m = rounded.getMinutes();
@@ -79,42 +86,53 @@ export async function sendShiftReminders(): Promise<{ sent: number; errors: numb
 
     const isOnShift = activeIds.has(emp.id);
     let message: string | null = null;
+    const name = escapeHtml(emp.full_name);
 
     // === УТРЕННИЕ НАПОМИНАНИЯ (смена начинается в 12:00) ===
 
     if (hour === 11 && minute === 45 && !isOnShift) {
-      message = `⏰ ${emp.full_name}, смена через 15 минут.\nОткрой приложение и нажми «Начать смену».`;
+      message = `⏰ ${name}, смена через 15 минут.\nОткрой приложение и нажми «Начать смену».`;
     }
 
     if (hour === 12 && minute === 0 && !isOnShift) {
-      message = `🔔 ${emp.full_name}, пора на смену!\nНе забудь нажать «Начать смену».`;
+      message = `🔔 ${name}, пора на смену!\nНе забудь нажать «Начать смену».`;
     }
 
     // === ВЕЧЕРНИЕ НАПОМИНАНИЯ (с учётом задержек) ===
 
     // 22:15 — мягкое напоминание за 15 мин до официального окончания
     if (hour === 22 && minute === 15 && isOnShift) {
-      message = `📋 ${emp.full_name}, через 15 минут официальное окончание смены.\nЕсли задерживаешься — ничего страшного, просто закрой смену когда уйдёшь.`;
+      message = `📋 ${name}, через 15 минут официальное окончание смены.\nЕсли задерживаешься — ничего страшного, просто закрой смену когда уйдёшь.`;
     }
 
     // 22:30 — официальное окончание, без давления
     if (hour === 22 && minute === 30 && isOnShift) {
-      message = `📋 ${emp.full_name}, 22:30 — официальное окончание смены.\nЗакрой смену в приложении, когда будешь уходить.`;
+      message = `📋 ${name}, 22:30 — официальное окончание смены.\nЗакрой смену в приложении, когда будешь уходить.`;
     }
 
     // 23:00 — дружеское напоминание
     if (hour === 23 && minute === 0 && isOnShift) {
-      message = `👋 ${emp.full_name}, уже полночь.\nНе забудь закрыть смену, когда уйдёшь.`;
+      message = `👋 ${name}, уже полночь.\nНе забудь закрыть смену, когда уйдёшь.`;
     }
 
     // 23:30 — ещё одно напоминание
     if (hour === 23 && minute === 30 && isOnShift) {
-      message = `📝 ${emp.full_name}, напоминание: смена всё ещё открыта.\nЗакрой когда уйдёшь.`;
+      message = `📝 ${name}, напоминание: смена всё ещё открыта.\nЗакрой когда уйдёшь.`;
     }
 
     // 00:00 — после полуночи
     if (hour === 0 && minute === 0 && isOnShift) {
-      message = `🌙 ${emp.full_name}, уже بعد полуночи.\nЗакрой смену, чтобы часы сохранились.`;
+      message = `\u{1F319} ${name}, уже после полуночи.\nЗакрой смену, чтобы часы сохранились.`;
+    }
+
+    // 00:30 — мягкий таймаут
+    if (hour === 0 && minute === 30 && isOnShift) {
+      message = `\u26A0\uFE0F ${name}, смена открыта больше 12 часов.\nПожалуйста, закрой её как можно скорее.`;
+    }
+
+    // 01:00 — предупреждение об автозакрытии
+    if (hour === 1 && minute === 0 && isOnShift) {
+      message = `\u{1F6A8} ${name}, смена будет автоматически закрыта через 30 минут.\nЗакрой её сейчас, чтобы не потерять часы.`;
     }
 
     // 00:30 — мягкий таймаут
@@ -169,9 +187,10 @@ export async function autoCloseOverdueShifts(): Promise<{ closed: number }> {
 
     const user = (Array.isArray(shift.users) ? shift.users[0] : shift.users) as { full_name: string; telegram_id: number } | undefined;
     if (user?.telegram_id) {
+      const safeName = escapeHtml(user.full_name);
       await sendMessage(
         user.telegram_id,
-        `🔒 ${user.full_name}, смена автоматически закрыта.\nОтработано: ${hoursWorked.toFixed(1)} ч.\nЕсли часы неточные — обратись к администратору.`,
+        `\u{1F512} ${safeName}, смена автоматически закрыта.\nОтработано: ${hoursWorked.toFixed(1)} \u0447.\nЕсли часы неточные — обратись к администратору.`,
       );
     }
 

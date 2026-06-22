@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { isIPAllowed } from "@/lib/location-auth";
+import { verifyRequestAuth } from "@/lib/auth";
 
 function roundTo30(date: Date): Date {
   const rounded = new Date(date);
@@ -36,13 +37,27 @@ function getClientIP(request: Request): string {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, action } = body as {
+    const { userId, action, initData } = body as {
       userId: string;
       action: "clockIn" | "clockOut";
+      initData?: string;
     };
 
     if (!userId || !action) {
       return NextResponse.json({ error: "Missing userId or action" }, { status: 400 });
+    }
+
+    if (!initData) {
+      return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+    }
+
+    const authUser = await verifyRequestAuth(initData);
+    if (!authUser) {
+      return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+    }
+
+    if (authUser.id !== userId && authUser.role !== "admin") {
+      return NextResponse.json({ error: "Нет доступа" }, { status: 403 });
     }
 
     const supabase = getSupabaseAdmin();
@@ -59,7 +74,7 @@ export async function POST(request: Request) {
     if (authMode === "ip" && allowedIPs.length > 0) {
       if (!isIPAllowed(clientIP, allowedIPs)) {
         return NextResponse.json(
-          { error: `Подключитесь к WiFi заведения (ваш IP: ${clientIP})` },
+          { error: "Подключитесь к WiFi заведения" },
           { status: 403 },
         );
       }
@@ -89,7 +104,7 @@ export async function POST(request: Request) {
         .single();
 
       if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
       }
 
       return NextResponse.json({ success: true, shift });
@@ -104,7 +119,7 @@ export async function POST(request: Request) {
         .maybeSingle();
 
       if (findError) {
-        return NextResponse.json({ error: findError.message }, { status: 500 });
+        return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
       }
 
       if (!active) {
@@ -128,17 +143,14 @@ export async function POST(request: Request) {
         .single();
 
       if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
       }
 
       return NextResponse.json({ success: true, shift });
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
-  } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unknown error" },
-      { status: 500 },
-    );
+  } catch {
+    return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
   }
 }
