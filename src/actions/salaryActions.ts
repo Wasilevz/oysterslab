@@ -215,9 +215,9 @@ export async function getEmployeeStats(
   try {
     const supabase = getSupabaseAdmin();
 
-    const now = new Date();
-    const dayOfWeek = now.getDay();
+    const dayOfWeek = new Date().getDay();
     const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const now = new Date();
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - mondayOffset);
     weekStart.setHours(0, 0, 0, 0);
@@ -254,7 +254,8 @@ export async function getEmployeeStats(
         hoursThisWeek += h;
       }
 
-      const dayKey = shiftDate.toLocaleDateString("ru-RU", { weekday: "short" });
+      const dayNames = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+      const dayKey = dayNames[shiftDate.getDay()];
       dailyHours.set(dayKey, (dailyHours.get(dayKey) ?? 0) + h);
     }
 
@@ -266,8 +267,7 @@ export async function getEmployeeStats(
       .maybeSingle();
 
     if (activeResult.data) {
-      const now2 = new Date();
-      const elapsed = Math.max(0, (now2.getTime() - new Date(activeResult.data.clock_in).getTime()) / 3600000);
+      const elapsed = Math.max(0, (Date.now() - new Date(activeResult.data.clock_in).getTime()) / 3600000);
       hoursThisWeek += elapsed;
       hoursThisMonth += elapsed;
     }

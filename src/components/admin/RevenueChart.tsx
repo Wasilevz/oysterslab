@@ -69,10 +69,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
               fontSize: 13,
             }}
             labelStyle={{ color: "#a1a1aa" }}
-            formatter={(value, name) => {
-              if (name === "amount") return [formatMoney(Number(value)), "Сумма"];
-              return [`${value} ч`, "Часы"];
-            }}
+            formatter={(value) => [formatMoney(Number(value)), "Сумма"]}
           />
           <Area
             type="monotone"

@@ -74,7 +74,6 @@ export interface EmployeeHours {
 export interface MonthRevenue {
   month: string;
   amount: number;
-  hours: number;
 }
 
 export interface DashboardStats {

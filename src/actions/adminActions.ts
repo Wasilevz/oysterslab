@@ -87,22 +87,15 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
     }
     thisMonthPayroll = Math.round(thisMonthPayroll);
 
-    const revenueMap = new Map<string, { amount: number; hours: number }>();
+    const revenueMap = new Map<string, number>();
     for (const row of payrollsAllResult.data ?? []) {
       const key = row.period_start;
-      const existing = revenueMap.get(key);
-      if (existing) {
-        existing.amount += row.total_amount;
-        existing.hours += row.total_hours;
-      } else {
-        revenueMap.set(key, { amount: row.total_amount, hours: row.total_hours });
-      }
+      revenueMap.set(key, (revenueMap.get(key) ?? 0) + row.total_amount);
     }
     const monthRevenue: MonthRevenue[] = Array.from(revenueMap.entries())
-      .map(([key, v]) => ({
+      .map(([key, amount]) => ({
         month: getMonthLabel(new Date(key)),
-        amount: Math.round(v.amount),
-        hours: Math.round(v.hours * 10) / 10,
+        amount: Math.round(amount),
       }))
       .reverse();
 
