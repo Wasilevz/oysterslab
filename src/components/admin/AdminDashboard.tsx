@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useUserStore } from "@/store/userStore";
 import type { DashboardStats, Shift } from "@/types/database";
 
-type AdminView = "live" | "forgotten" | "salary" | "schedule" | "settings";
+type AdminView = "live" | "forgotten" | "salary" | "schedule" | "settings" | "shifts";
 
 interface AdminDashboardProps {
   onNavigate: (view: AdminView) => void;
@@ -148,6 +148,19 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       color: "text-violet-400",
       bg: "from-violet-500/10 to-violet-600/5",
       border: "border-violet-500/20",
+    },
+    {
+      key: "shifts" as const,
+      title: "Смены (ред.)",
+      desc: "Редактирование времени",
+      icon: (
+        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+        </svg>
+      ),
+      color: "text-orange-400",
+      bg: "from-orange-500/10 to-orange-600/5",
+      border: "border-orange-500/20",
     },
     {
       key: "settings" as const,

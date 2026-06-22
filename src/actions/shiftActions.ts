@@ -245,3 +245,78 @@ export async function reviewAutoClosedShift(
     };
   }
 }
+
+export async function editShift(
+  shiftId: string,
+  clockIn: string,
+  clockOut: string | null,
+): Promise<ActionResult<Shift>> {
+  try {
+    const supabase = getSupabaseAdmin();
+
+    const { data: shift, error: findError } = await supabase
+      .from("shifts")
+      .select("*")
+      .eq("id", shiftId)
+      .maybeSingle();
+
+    if (findError) return { success: false, error: "Ошибка сервера" };
+    if (!shift) return { success: false, error: "Смена не найдена" };
+
+    const clockInDate = new Date(clockIn);
+    const clockOutDate = clockOut ? new Date(clockOut) : null;
+    const hoursWorked = clockOutDate
+      ? Math.round(((clockOutDate.getTime() - clockInDate.getTime()) / 3600000) * 100) / 100
+      : null;
+
+    const updateData: Record<string, unknown> = {
+      clock_in: clockInDate.toISOString(),
+    };
+
+    if (clockOutDate) {
+      updateData.clock_out = clockOutDate.toISOString();
+      updateData.hours_worked = hoursWorked;
+      if (shift.status === "ACTIVE") {
+        updateData.status = "COMPLETED";
+      }
+    }
+
+    const { data: updated, error } = await supabase
+      .from("shifts")
+      .update(updateData)
+      .eq("id", shiftId)
+      .select("*, users!inner(id, full_name, position)")
+      .single();
+
+    if (error) return { success: false, error: "Ошибка сервера" };
+
+    return { success: true, data: updated as Shift };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
+  }
+}
+
+export async function getAllShifts(
+  dateFrom?: string,
+  dateTo?: string,
+): Promise<ActionResult<(Shift & { users: { full_name: string; position: string | null } })[]>> {
+  try {
+    const supabase = getSupabaseAdmin();
+
+    let query = supabase
+      .from("shifts")
+      .select("*, users!inner(full_name, position)")
+      .order("clock_in", { ascending: false });
+
+    if (dateFrom) query = query.gte("clock_in", dateFrom + "T00:00:00Z");
+    if (dateTo) query = query.lte("clock_in", dateTo + "T23:59:59Z");
+
+    const { data, error } = await query.limit(100);
+
+    if (error) return { success: false, error: "Ошибка сервера" };
+
+    return { success: true, data: (data ?? []) as (Shift & { users: { full_name: string; position: string | null } })[] };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
+  }
+}

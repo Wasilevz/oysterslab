@@ -6,10 +6,11 @@ import { LiveTab } from "@/components/admin/LiveTab";
 import { ForgottenTab } from "@/components/admin/ForgottenTab";
 import { SalaryPage } from "@/components/admin/SalaryPage";
 import { ScheduleAdmin } from "@/components/admin/ScheduleAdmin";
+import { ShiftEditor } from "@/components/admin/ShiftEditor";
 import { SettingsPage } from "@/components/admin/SettingsPage";
 import { useUserStore } from "@/store/userStore";
 
-type AdminView = "dashboard" | "live" | "forgotten" | "salary" | "schedule" | "settings";
+type AdminView = "dashboard" | "live" | "forgotten" | "salary" | "schedule" | "settings" | "shifts";
 
 export function AdminScreen() {
   const user = useUserStore((s) => s.user);
@@ -30,6 +31,8 @@ export function AdminScreen() {
         return <ScheduleAdmin onBack={() => setView("dashboard")} />;
       case "settings":
         return <SettingsPage onBack={() => setView("dashboard")} />;
+      case "shifts":
+        return <ShiftEditor onBack={() => setView("dashboard")} />;
       default:
         return <AdminDashboard onNavigate={setView} />;
     }
