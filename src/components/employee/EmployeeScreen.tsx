@@ -78,8 +78,35 @@ export function EmployeeScreen() {
     if (!user) return;
     setActionError(null);
     setSuccess(null);
-    setPendingAction(activeShift ? "clockOut" : "clockIn");
-    setShowQRScanner(true);
+    const action = activeShift ? "clockOut" : "clockIn";
+
+    startTransition(async () => {
+      try {
+        const res = await fetch("/api/clock", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id, action }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok && data.error === "Отсканируйте QR-код") {
+          setPendingAction(action);
+          setShowQRScanner(true);
+          return;
+        }
+
+        if (!res.ok) {
+          setActionError(data.error ?? "Ошибка операции");
+          return;
+        }
+
+        setSuccess(action === "clockOut" ? "Смена завершена" : "Смена начата");
+        void loadData();
+      } catch {
+        setActionError("Ошибка сети");
+      }
+    });
   };
 
   const handleQRScan = (qrData: string) => {

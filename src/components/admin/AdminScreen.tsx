@@ -68,8 +68,35 @@ export function AdminScreen() {
   const handleToggleShift = () => {
     if (!user) return;
     setError(null);
-    setPendingAction(myShift ? "clockOut" : "clockIn");
-    setShowQRScanner(true);
+    const action = myShift ? "clockOut" : "clockIn";
+
+    startTransition(async () => {
+      try {
+        const res = await fetch("/api/clock", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id, action }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok && data.error === "Отсканируйте QR-код") {
+          setPendingAction(action);
+          setShowQRScanner(true);
+          return;
+        }
+
+        if (!res.ok) {
+          setError(data.error ?? "Ошибка операции");
+          return;
+        }
+
+        void loadMyShift();
+        void loadStats();
+      } catch {
+        setError("Ошибка сети");
+      }
+    });
   };
 
   const handleQRScan = (qrData: string) => {
