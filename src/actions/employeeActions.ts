@@ -72,11 +72,15 @@ export async function addEmployee(
 
 export async function updateEmployee(
   userId: string,
+  fullName: string,
   position: string,
   hourlyRate: number,
 ): Promise<ActionResult<void>> {
   if (!Number.isFinite(hourlyRate) || hourlyRate < 0) {
     return { success: false, error: "Укажите корректную ставку" };
+  }
+  if (!fullName.trim()) {
+    return { success: false, error: "Введите имя сотрудника" };
   }
 
   try {
@@ -85,6 +89,7 @@ export async function updateEmployee(
     const { error } = await supabase
       .from("users")
       .update({
+        full_name: fullName.trim(),
         position: position.trim() || null,
         hourly_rate: hourlyRate,
       })

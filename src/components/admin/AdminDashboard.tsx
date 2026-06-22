@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { getDashboardStats } from "@/actions/adminActions";
 import { getActiveShift } from "@/actions/shiftActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
+import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUserStore } from "@/store/userStore";
 import type { DashboardStats, Shift } from "@/types/database";
@@ -224,6 +225,10 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             )}
           </button>
         ))}
+      </div>
+
+      <div className="px-4 mt-4">
+        <EmployeeSalary />
       </div>
     </div>
   );

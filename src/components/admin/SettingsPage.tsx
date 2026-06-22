@@ -14,6 +14,7 @@ import type { User } from "@/types/database";
 export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const [employees, setEmployees] = useState<User[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
   const [editPosition, setEditPosition] = useState("");
   const [editRate, setEditRate] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -93,12 +94,14 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
 
   const startEdit = (emp: User) => {
     setEditingId(emp.id);
+    setEditName(emp.full_name);
     setEditPosition(emp.position ?? "");
     setEditRate(String(emp.hourly_rate));
   };
 
   const cancelEdit = () => {
     setEditingId(null);
+    setEditName("");
     setEditPosition("");
     setEditRate("");
   };
@@ -111,12 +114,13 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
       return;
     }
 
-    const result = await updateEmployee(editingId, editPosition, rate);
+    const result = await updateEmployee(editingId, editName, editPosition, rate);
     if (!result.success) {
       setError(result.error ?? "Ошибка сохранения");
       return;
     }
     setEditingId(null);
+    setEditName("");
     setEditPosition("");
     setEditRate("");
     void loadSettings();
@@ -348,10 +352,15 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
             >
               {editingId === emp.id ? (
                 <div className="space-y-2">
-                  <p className="text-sm font-bold text-white">{emp.full_name}</p>
                   <Input
                     type="text"
-                    placeholder="Должность (например: Официант)"
+                    placeholder="Имя и фамилия"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                  />
+                  <Input
+                    type="text"
+                    placeholder="Должность"
                     value={editPosition}
                     onChange={(e) => setEditPosition(e.target.value)}
                   />
