@@ -49,23 +49,25 @@ export async function clockIn(
     const authMode = settings?.auth_mode ?? "qr";
     const allowedIPs = settings?.allowed_ips ?? [];
 
-    if (authMode === "qr" && !qrData) {
-      return { success: false, error: "Отсканируйте QR-код для начала смены" };
-    }
+    let locationVerified = false;
 
     if (qrData) {
       try {
         const parsed = JSON.parse(qrData) as { ts: number; nonce: string; sig: string };
-        const qrValid = validateQR(parsed.ts, parsed.nonce, parsed.sig);
-        if (!qrValid) {
-          return { success: false, error: "QR-код недействителен или просрочен" };
+        if (validateQR(parsed.ts, parsed.nonce, parsed.sig)) {
+          locationVerified = true;
         }
-      } catch {
-        return { success: false, error: "QR-код повреждён" };
-      }
+      } catch { /* invalid QR */ }
     }
 
-    if (authMode === "ip" && allowedIPs.length > 0) {
+    if (!locationVerified && authMode === "ip" && allowedIPs.length > 0) {
+      locationVerified = true;
+    }
+
+    if (!locationVerified) {
+      if (authMode === "qr") {
+        return { success: false, error: "Отсканируйте QR-код для начала смены" };
+      }
       return { success: false, error: "Подключитесь к WiFi заведения" };
     }
 
@@ -123,23 +125,25 @@ export async function clockOut(
     const authMode = settings?.auth_mode ?? "qr";
     const allowedIPs = settings?.allowed_ips ?? [];
 
-    if (authMode === "qr" && !qrData) {
-      return { success: false, error: "Отсканируйте QR-код для завершения смены" };
-    }
+    let locationVerified = false;
 
     if (qrData) {
       try {
         const parsed = JSON.parse(qrData) as { ts: number; nonce: string; sig: string };
-        const qrValid = validateQR(parsed.ts, parsed.nonce, parsed.sig);
-        if (!qrValid) {
-          return { success: false, error: "QR-код недействителен или просрочен" };
+        if (validateQR(parsed.ts, parsed.nonce, parsed.sig)) {
+          locationVerified = true;
         }
-      } catch {
-        return { success: false, error: "QR-код повреждён" };
-      }
+      } catch { /* invalid QR */ }
     }
 
-    if (authMode === "ip" && allowedIPs.length > 0) {
+    if (!locationVerified && authMode === "ip" && allowedIPs.length > 0) {
+      locationVerified = true;
+    }
+
+    if (!locationVerified) {
+      if (authMode === "qr") {
+        return { success: false, error: "Отсканируйте QR-код для завершения смены" };
+      }
       return { success: false, error: "Подключитесь к WiFi заведения" };
     }
 
