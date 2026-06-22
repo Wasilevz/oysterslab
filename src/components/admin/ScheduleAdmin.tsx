@@ -205,10 +205,10 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
                 return (
                   <th
                     key={day}
-                    className={`p-1 text-center text-[11px] font-medium ${isWeekend ? "text-zinc-600" : "text-zinc-500"}`}
+                    className={`p-1 text-center text-[11px] font-medium ${isWeekend ? "text-rose-400" : "text-zinc-500"}`}
                   >
-                    <div>{day}</div>
-                    <div className="text-[9px]">{dayLabels[dow]}</div>
+                    <div className={isWeekend ? "font-bold" : ""}>{day}</div>
+                    <div className={`text-[9px] ${isWeekend ? "text-rose-500/60" : ""}`}>{dayLabels[dow]}</div>
                   </th>
                 );
               })}
