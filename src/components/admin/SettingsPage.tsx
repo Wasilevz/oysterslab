@@ -6,7 +6,7 @@ import {
   getLocationSettings,
   saveLocationSettings,
 } from "@/actions/locationActions";
-import { getEmployees, updateEmployee } from "@/actions/employeeActions";
+import { getEmployees, addEmployee, updateEmployee, deleteEmployee } from "@/actions/employeeActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +17,12 @@ export function SettingsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPosition, setEditPosition] = useState("");
   const [editRate, setEditRate] = useState("");
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newTelegramId, setNewTelegramId] = useState("");
+  const [newPosition, setNewPosition] = useState("");
+  const [newRate, setNewRate] = useState("");
+  const [newRole, setNewRole] = useState<"employee" | "admin">("employee");
   const [qrData, setQrData] = useState<string | null>(null);
   const [qrExpiresAt, setQrExpiresAt] = useState(0);
   const [qrCountdown, setQrCountdown] = useState(0);
@@ -128,6 +134,46 @@ export function SettingsPage() {
     setEditingId(null);
     setEditPosition("");
     setEditRate("");
+    void loadSettings();
+  };
+
+  const handleAddEmployee = async () => {
+    const tgId = Number(newTelegramId);
+    const rate = Number(newRate);
+
+    if (!newName.trim()) {
+      setError("Введите имя");
+      return;
+    }
+    if (!Number.isFinite(tgId) || tgId <= 0) {
+      setError("Введите корректный Telegram ID");
+      return;
+    }
+    if (!Number.isFinite(rate) || rate < 0) {
+      setError("Укажите корректную ставку");
+      return;
+    }
+
+    const result = await addEmployee(tgId, newName, newRole, newPosition, rate);
+    if (!result.success) {
+      setError(result.error ?? "Ошибка добавления");
+      return;
+    }
+    setNewName("");
+    setNewTelegramId("");
+    setNewPosition("");
+    setNewRate("");
+    setNewRole("employee");
+    setShowAddForm(false);
+    void loadSettings();
+  };
+
+  const handleDeleteEmployee = async (userId: string) => {
+    const result = await deleteEmployee(userId);
+    if (!result.success) {
+      setError(result.error ?? "Ошибка удаления");
+      return;
+    }
     void loadSettings();
   };
 
@@ -302,9 +348,81 @@ export function SettingsPage() {
       </div>
 
       <div className="px-4 mt-6 pb-24">
-        <p className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
-          Сотрудники
-        </p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+            Сотрудники
+          </p>
+          <button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="rounded-xl border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 hover:border-blue-500/30 hover:text-blue-400"
+          >
+            {showAddForm ? "Скрыть" : "+ Добавить"}
+          </button>
+        </div>
+
+        {showAddForm && (
+          <div className="mb-4 rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4">
+            <p className="mb-3 text-sm font-semibold text-blue-400">Новый сотрудник</p>
+            <div className="space-y-2">
+              <Input
+                type="text"
+                placeholder="Имя и фамилия"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+              />
+              <Input
+                type="number"
+                placeholder="Telegram ID"
+                value={newTelegramId}
+                onChange={(e) => setNewTelegramId(e.target.value)}
+              />
+              <Input
+                type="text"
+                placeholder="Должность (например: Официант)"
+                value={newPosition}
+                onChange={(e) => setNewPosition(e.target.value)}
+              />
+              <Input
+                type="number"
+                inputMode="decimal"
+                step="0.5"
+                min="0"
+                placeholder="Ставка (л/ч)"
+                value={newRate}
+                onChange={(e) => setNewRate(e.target.value)}
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setNewRole("employee")}
+                  className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${
+                    newRole === "employee"
+                      ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                      : "border-zinc-700 text-zinc-500"
+                  }`}
+                >
+                  Сотрудник
+                </button>
+                <button
+                  onClick={() => setNewRole("admin")}
+                  className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${
+                    newRole === "admin"
+                      ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                      : "border-zinc-700 text-zinc-500"
+                  }`}
+                >
+                  Админ
+                </button>
+              </div>
+              <Button
+                variant="blue"
+                className="w-full"
+                onClick={() => void handleAddEmployee()}
+              >
+                Добавить сотрудника
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-2">
           {employees.map((emp) => (
@@ -355,15 +473,23 @@ export function SettingsPage() {
                       <p className="text-xs text-zinc-400">{emp.position}</p>
                     )}
                     <p className="text-[10px] text-zinc-500">
-                      {emp.hourly_rate} л/ч
+                      {emp.role === "admin" ? "Админ" : "Сотрудник"} · {emp.hourly_rate} л/ч · TG: {emp.telegram_id}
                     </p>
                   </div>
-                  <button
-                    onClick={() => startEdit(emp)}
-                    className="rounded-xl border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 hover:border-blue-500/30 hover:text-blue-400"
-                  >
-                    Изменить
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => startEdit(emp)}
+                      className="rounded-xl border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 hover:border-blue-500/30 hover:text-blue-400"
+                    >
+                      Изменить
+                    </button>
+                    <button
+                      onClick={() => void handleDeleteEmployee(emp.id)}
+                      className="rounded-xl border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 hover:border-rose-500/30 hover:text-rose-400"
+                    >
+                      Удалить
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
