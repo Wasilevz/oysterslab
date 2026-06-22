@@ -11,6 +11,7 @@ import { SalaryPage } from "@/components/admin/SalaryPage";
 import { SettingsPage } from "@/components/admin/SettingsPage";
 import { StatsCards } from "@/components/admin/StatsCards";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
+import { QRScanner } from "@/components/shared/QRScanner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserStore } from "@/store/userStore";
@@ -26,6 +27,8 @@ export function AdminScreen() {
   const [showCharts, setShowCharts] = useState(false);
   const [myShift, setMyShift] = useState<Shift | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"clockIn" | "clockOut" | null>(null);
 
   const loadStats = useCallback(async () => {
     const result = await getDashboardStats();
@@ -65,7 +68,14 @@ export function AdminScreen() {
   const handleToggleShift = () => {
     if (!user) return;
     setError(null);
+    setPendingAction(myShift ? "clockOut" : "clockIn");
+    setShowQRScanner(true);
+  };
 
+  const handleQRScan = (qrData: string) => {
+    if (!user || !pendingAction) return;
+
+    setShowQRScanner(false);
     startTransition(async () => {
       try {
         const res = await fetch("/api/clock", {
@@ -73,7 +83,8 @@ export function AdminScreen() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             userId: user.id,
-            action: myShift ? "clockOut" : "clockIn",
+            action: pendingAction,
+            qrData,
           }),
         });
 
@@ -233,6 +244,13 @@ export function AdminScreen() {
           )}
         </div>
       ) : null}
+
+      {showQRScanner && (
+        <QRScanner
+          onScan={handleQRScan}
+          onClose={() => setShowQRScanner(false)}
+        />
+      )}
     </div>
   );
 }

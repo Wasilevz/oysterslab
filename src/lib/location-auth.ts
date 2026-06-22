@@ -73,20 +73,6 @@ export function isIPAllowed(clientIP: string, allowedIPs: string[]): boolean {
       return normalizedClient.startsWith(prefix);
     }
 
-    if (normalizedClient === trimmed) return true;
-
-    if (normalizedClient.startsWith(trimmed + ".") || trimmed.startsWith(normalizedClient + ".")) {
-      return true;
-    }
-
-    const clientParts = normalizedClient.split(".");
-    const allowedParts = trimmed.split(".");
-    if (clientParts.length === 4 && allowedParts.length === 4) {
-      return clientParts[0] === allowedParts[0] &&
-             clientParts[1] === allowedParts[1] &&
-             clientParts[2] === allowedParts[2];
-    }
-
-    return false;
+    return normalizedClient === trimmed;
   });
 }

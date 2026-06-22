@@ -60,11 +60,11 @@ async function verifyLocation(
   }
 
   if (authMode === "ip" && allowedIPs.length > 0) {
-    console.log("[CLOCK] Client IP:", clientIP, "Allowed IPs:", allowedIPs);
+    console.log("[CLOCK] Client IP:", clientIP, "Allowed:", allowedIPs);
     if (isIPAllowed(clientIP, allowedIPs)) {
       return { allowed: true };
     }
-    return { allowed: false, error: `Подключитесь к WiFi заведения (ваш IP: ${clientIP})` };
+    return { allowed: false, error: `IP не совпадает (${clientIP})` };
   }
 
   if (authMode === "qr" && !qrData) {
