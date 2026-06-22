@@ -6,11 +6,17 @@ import {
   getLocationSettings,
   saveLocationSettings,
 } from "@/actions/locationActions";
+import { getEmployees, updateEmployee } from "@/actions/employeeActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { User } from "@/types/database";
 
 export function SettingsPage() {
+  const [employees, setEmployees] = useState<User[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editPosition, setEditPosition] = useState("");
+  const [editRate, setEditRate] = useState("");
   const [qrData, setQrData] = useState<string | null>(null);
   const [qrExpiresAt, setQrExpiresAt] = useState(0);
   const [qrCountdown, setQrCountdown] = useState(0);
@@ -22,10 +28,16 @@ export function SettingsPage() {
   const [isPending, startTransition] = useTransition();
 
   const loadSettings = useCallback(async () => {
-    const result = await getLocationSettings();
-    if (result.success && result.data) {
-      setAllowedIPs(result.data.allowedIPs.length > 0 ? result.data.allowedIPs : [""]);
-      setAuthMode(result.data.authMode as "qr" | "ip");
+    const [settingsResult, employeesResult] = await Promise.all([
+      getLocationSettings(),
+      getEmployees(),
+    ]);
+    if (settingsResult.success && settingsResult.data) {
+      setAllowedIPs(settingsResult.data.allowedIPs.length > 0 ? settingsResult.data.allowedIPs : [""]);
+      setAuthMode(settingsResult.data.authMode as "qr" | "ip");
+    }
+    if (employeesResult.success && employeesResult.data) {
+      setEmployees(employeesResult.data);
     }
     setLoading(false);
   }, []);
@@ -86,6 +98,37 @@ export function SettingsPage() {
 
   const removeIP = (index: number) => {
     setAllowedIPs(allowedIPs.filter((_, i) => i !== index));
+  };
+
+  const startEdit = (emp: User) => {
+    setEditingId(emp.id);
+    setEditPosition(emp.position ?? "");
+    setEditRate(String(emp.hourly_rate));
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditPosition("");
+    setEditRate("");
+  };
+
+  const handleSaveEmployee = async () => {
+    if (!editingId) return;
+    const rate = Number(editRate);
+    if (!Number.isFinite(rate) || rate < 0) {
+      setError("Укажите корректную ставку");
+      return;
+    }
+
+    const result = await updateEmployee(editingId, editPosition, rate);
+    if (!result.success) {
+      setError(result.error ?? "Ошибка сохранения");
+      return;
+    }
+    setEditingId(null);
+    setEditPosition("");
+    setEditRate("");
+    void loadSettings();
   };
 
   if (loading) {
@@ -256,6 +299,76 @@ export function SettingsPage() {
         >
           {isPending ? "Сохранение..." : "Сохранить настройки"}
         </Button>
+      </div>
+
+      <div className="px-4 mt-6 pb-24">
+        <p className="mb-3 text-xs font-medium uppercase tracking-wider text-zinc-500">
+          Сотрудники
+        </p>
+
+        <div className="space-y-2">
+          {employees.map((emp) => (
+            <div
+              key={emp.id}
+              className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4"
+            >
+              {editingId === emp.id ? (
+                <div className="space-y-2">
+                  <p className="text-sm font-bold text-white">{emp.full_name}</p>
+                  <Input
+                    type="text"
+                    placeholder="Должность (например: Официант)"
+                    value={editPosition}
+                    onChange={(e) => setEditPosition(e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    inputMode="decimal"
+                    step="0.5"
+                    min="0"
+                    placeholder="Ставка (л/ч)"
+                    value={editRate}
+                    onChange={(e) => setEditRate(e.target.value)}
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      className="flex-1"
+                      onClick={cancelEdit}
+                    >
+                      Отмена
+                    </Button>
+                    <Button
+                      variant="blue"
+                      className="flex-1"
+                      onClick={() => void handleSaveEmployee()}
+                    >
+                      Сохранить
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-white">{emp.full_name}</p>
+                    {emp.position && (
+                      <p className="text-xs text-zinc-400">{emp.position}</p>
+                    )}
+                    <p className="text-[10px] text-zinc-500">
+                      {emp.hourly_rate} л/ч
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => startEdit(emp)}
+                    className="rounded-xl border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 hover:border-blue-500/30 hover:text-blue-400"
+                  >
+                    Изменить
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
