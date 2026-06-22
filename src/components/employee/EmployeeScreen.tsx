@@ -43,6 +43,7 @@ function getInitials(name: string): string {
 
 export function EmployeeScreen() {
   const user = useUserStore((s) => s.user);
+  const toggleViewAs = useUserStore((s) => s.toggleViewAs);
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
   const [recentShifts, setRecentShifts] = useState<Shift[]>([]);
   const [stats, setStats] = useState<EmployeeStats | null>(null);
@@ -120,16 +121,19 @@ export function EmployeeScreen() {
   return (
     <div className="flex min-h-full flex-1 flex-col p-4 pb-8">
       {/* Header */}
-      <header className="mb-5 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-bold text-white shadow-lg shadow-blue-500/20">
-          {user?.full_name ? getInitials(user.full_name) : "—"}
-        </div>
+      <header className="mb-5 flex items-center justify-between">
         <div>
           <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-600">
             Привет
           </p>
           <h1 className="text-lg font-bold text-white">{user?.full_name}</h1>
         </div>
+        <button
+          onClick={toggleViewAs}
+          className="rounded-xl border border-zinc-700 px-3 py-1.5 text-[10px] font-semibold text-zinc-400 hover:border-blue-500/30 hover:text-blue-400"
+        >
+          Как админ
+        </button>
       </header>
 
       {/* Карточка смены — главный элемент */}

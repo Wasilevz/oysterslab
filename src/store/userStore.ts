@@ -9,10 +9,12 @@ interface UserState {
   status: AuthStatus;
   error: string | null;
   initData: string | null;
+  viewAs: "admin" | "employee" | null;
   setLoading: () => void;
   setUser: (user: User, initData?: string) => void;
   setDenied: (telegramId: number | null, message?: string) => void;
   setError: (message: string) => void;
+  toggleViewAs: () => void;
   reset: () => void;
 }
 
@@ -22,6 +24,7 @@ export const useUserStore = create<UserState>((set) => ({
   status: "idle",
   error: null,
   initData: null,
+  viewAs: null,
   setLoading: () =>
     set({ status: "loading", error: null }),
   setUser: (user, initData) =>
@@ -31,6 +34,7 @@ export const useUserStore = create<UserState>((set) => ({
       status: "authenticated",
       error: null,
       initData: initData ?? null,
+      viewAs: null,
     }),
   setDenied: (telegramId, message) =>
     set({
@@ -45,6 +49,12 @@ export const useUserStore = create<UserState>((set) => ({
       status: "error",
       error: message,
     }),
+  toggleViewAs: () =>
+    set((state) => ({
+      viewAs: state.viewAs === null
+        ? state.user?.role === "admin" ? "employee" : "admin"
+        : null,
+    })),
   reset: () =>
     set({
       user: null,
@@ -52,5 +62,6 @@ export const useUserStore = create<UserState>((set) => ({
       status: "idle",
       error: null,
       initData: null,
+      viewAs: null,
     }),
 }));

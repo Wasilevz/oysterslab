@@ -40,7 +40,7 @@ function AccessDenied({
 }
 
 export default function Home() {
-  const { user, status, telegramId, error, setLoading, setUser, setDenied, setError } =
+  const { user, status, telegramId, error, viewAs, setLoading, setUser, setDenied, setError } =
     useUserStore();
   const initialized = useRef(false);
   const initDataRef = useRef<string | null>(null);
@@ -115,9 +115,11 @@ export default function Home() {
     return <AccessDenied telegramId={telegramId} message="Пользователь не найден" />;
   }
 
+  const effectiveRole = viewAs ?? user?.role;
+
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100">
-      {user.role === "admin" ? <AdminScreen /> : <EmployeeScreen />}
+      {effectiveRole === "admin" ? <AdminScreen /> : <EmployeeScreen />}
     </main>
   );
 }
