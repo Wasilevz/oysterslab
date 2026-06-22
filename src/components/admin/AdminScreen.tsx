@@ -129,7 +129,7 @@ export function AdminScreen() {
             </TabsContent>
 
             <TabsContent value="salary" className="flex-1">
-              <SalaryPage />
+              <SalaryPage thisMonthPayroll={stats?.thisMonthPayroll ?? 0} />
             </TabsContent>
           </div>
         </Tabs>

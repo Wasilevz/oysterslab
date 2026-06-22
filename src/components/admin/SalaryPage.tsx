@@ -21,7 +21,11 @@ function formatMoney(amount: number): string {
   }).format(amount);
 }
 
-export function SalaryPage() {
+interface SalaryPageProps {
+  thisMonthPayroll?: number;
+}
+
+export function SalaryPage({ thisMonthPayroll = 0 }: SalaryPageProps) {
   const [payments, setPayments] = useState<SalaryPaymentWithUser[]>([]);
   const [totalPending, setTotalPending] = useState(0);
   const [totalApproved, setTotalApproved] = useState(0);
@@ -112,7 +116,13 @@ export function SalaryPage() {
         <h1 className="mt-1 text-2xl font-bold text-white">Выплаты</h1>
       </header>
 
-      <div className="mt-4 grid grid-cols-3 gap-2 px-4">
+      <div className="mt-4 grid grid-cols-2 gap-2 px-4">
+        <div className="rounded-2xl border border-indigo-500/10 bg-indigo-500/5 p-3">
+          <p className="text-[10px] font-medium text-zinc-500">Зарплата (мес)</p>
+          <p className="mt-0.5 text-lg font-bold text-indigo-400">
+            {formatMoney(thisMonthPayroll)}
+          </p>
+        </div>
         <div className="rounded-2xl border border-amber-500/10 bg-amber-500/5 p-3">
           <p className="text-[10px] font-medium text-zinc-500">Ожидает</p>
           <p className="mt-0.5 text-lg font-bold text-amber-400">

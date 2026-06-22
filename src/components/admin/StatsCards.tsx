@@ -1,24 +1,13 @@
 "use client";
 
-import { Users, Clock, Banknote } from "lucide-react";
+import { Users, Clock } from "lucide-react";
 import type { DashboardStats } from "@/types/database";
 
 interface StatsCardsProps {
   stats: DashboardStats;
 }
 
-function formatMoney(amount: number): string {
-  return new Intl.NumberFormat("ru-RU", {
-    style: "currency",
-    currency: "MDL",
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
 export function StatsCards({ stats }: StatsCardsProps) {
-  const thisMonthHours =
-    stats.employeeHours.reduce((s, e) => s + e.hours, 0);
-
   const cards = [
     {
       label: "На смене",
@@ -37,24 +26,6 @@ export function StatsCards({ stats }: StatsCardsProps) {
       bg: "from-blue-400/10 to-blue-500/5",
       border: "border-blue-400/20",
       glow: "shadow-blue-400/5",
-    },
-    {
-      label: "Часов (мес)",
-      value: thisMonthHours.toFixed(1),
-      icon: Clock,
-      color: "text-sky-400",
-      bg: "from-sky-500/10 to-sky-600/5",
-      border: "border-sky-500/20",
-      glow: "shadow-sky-500/5",
-    },
-    {
-      label: "Зарплата (мес)",
-      value: formatMoney(stats.thisMonthPayroll),
-      icon: Banknote,
-      color: "text-blue-400",
-      bg: "from-indigo-500/10 to-blue-600/5",
-      border: "border-indigo-500/20",
-      glow: "shadow-indigo-500/5",
     },
   ];
 
