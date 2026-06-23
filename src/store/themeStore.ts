@@ -8,38 +8,23 @@ interface ThemeState {
   toggleTheme: () => void;
 }
 
-function applyTheme(theme: Theme) {
-  if (typeof document === "undefined") return;
-  const root = document.documentElement;
-  if (theme === "dark") {
-    root.classList.add("dark");
-    root.classList.remove("light");
-  } else {
-    root.classList.add("light");
-    root.classList.remove("dark");
-  }
-  localStorage.setItem("theme", theme);
-}
-
-function getInitialTheme(): Theme {
+function getStoredTheme(): Theme {
   if (typeof window === "undefined") return "dark";
-  const stored = localStorage.getItem("theme") as Theme | null;
-  return stored ?? "dark";
+  return (localStorage.getItem("theme") as Theme) || "dark";
 }
 
-export const useThemeStore = create<ThemeState>((set) => ({
-  theme: getInitialTheme(),
+export const useThemeStore = create<ThemeState>((set, get) => ({
+  theme: getStoredTheme(),
 
   setTheme: (theme: Theme) => {
-    applyTheme(theme);
+    localStorage.setItem("theme", theme);
     set({ theme });
   },
 
   toggleTheme: () => {
-    set((state) => {
-      const next = state.theme === "dark" ? "light" : "dark";
-      applyTheme(next);
-      return { theme: next };
-    });
+    const current = get().theme;
+    const next = current === "dark" ? "light" : "dark";
+    localStorage.setItem("theme", next);
+    set({ theme: next });
   },
 }));

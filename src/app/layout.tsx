@@ -25,6 +25,13 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+const themeScript = `
+(function() {
+  var t = localStorage.getItem('theme') || 'dark';
+  document.documentElement.classList.add(t);
+})()
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,6 +43,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider>{children}</ThemeProvider>
       </body>

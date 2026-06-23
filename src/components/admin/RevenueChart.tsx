@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useThemeStore } from "@/store/themeStore";
 import type { MonthRevenue } from "@/types/database";
 
 interface RevenueChartProps {
@@ -24,61 +25,47 @@ function formatMoney(value: number): string {
 }
 
 export function RevenueChart({ data }: RevenueChartProps) {
+  const theme = useThemeStore((s) => s.theme);
+
   if (data.length === 0) {
     return (
-      <div className="flex h-[250px] items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900/30 px-4">
-        <p className="text-sm text-zinc-600">Пока нет данных</p>
+      <div className="flex h-[250px] items-center justify-center rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-white px-4">
+        <p className="text-sm dark:text-[#64748B] text-[#718096]">Пока нет данных</p>
       </div>
     );
   }
 
+  const gridColor = theme === "dark" ? "#334155" : "#E2E8F0";
+  const tickColor = theme === "dark" ? "#94A3B8" : "#718096";
+  const tooltipBg = theme === "dark" ? "#1E293B" : "#FFFFFF";
+  const tooltipBorder = theme === "dark" ? "#334155" : "#E2E8F0";
+  const tooltipText = theme === "dark" ? "#F8FAFC" : "#2D3748";
+  const tooltipLabel = theme === "dark" ? "#94A3B8" : "#718096";
+  const strokeColor = theme === "dark" ? "#D6BC97" : "#008080";
+  const gradientId = "colorAmount";
+
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
-      <p className="mb-4 text-sm font-semibold text-zinc-400">
+    <div className="rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-white p-4">
+      <p className="mb-4 text-sm font-semibold dark:text-[#94A3B8] text-[#718096]">
         Зарплаты по месяцам
       </p>
       <ResponsiveContainer width="100%" height={250}>
-        <AreaChart
-          data={data}
-          margin={{ top: 5, right: 10, left: -15, bottom: 5 }}
-        >
+        <AreaChart data={data} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
           <defs>
-            <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={strokeColor} stopOpacity={0.3} />
+              <stop offset="95%" stopColor={strokeColor} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-          <XAxis
-            dataKey="month"
-            tick={{ fill: "#71717a", fontSize: 11 }}
-            axisLine={{ stroke: "#27272a" }}
-            tickLine={false}
-          />
-          <YAxis
-            tick={{ fill: "#71717a", fontSize: 11 }}
-            axisLine={{ stroke: "#27272a" }}
-            tickLine={false}
-          />
+          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+          <XAxis dataKey="month" tick={{ fill: tickColor, fontSize: 11 }} axisLine={{ stroke: gridColor }} tickLine={false} />
+          <YAxis tick={{ fill: tickColor, fontSize: 11 }} axisLine={{ stroke: gridColor }} tickLine={false} />
           <Tooltip
-            contentStyle={{
-              backgroundColor: "#18181b",
-              border: "1px solid #27272a",
-              borderRadius: "12px",
-              color: "#fafafa",
-              fontSize: 13,
-            }}
-            labelStyle={{ color: "#a1a1aa" }}
+            contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: "12px", color: tooltipText, fontSize: 13 }}
+            labelStyle={{ color: tooltipLabel }}
             formatter={(value) => [formatMoney(Number(value)), "Сумма"]}
           />
-          <Area
-            type="monotone"
-            dataKey="amount"
-            stroke="#3b82f6"
-            strokeWidth={2}
-            fillOpacity={1}
-            fill="url(#colorAmount)"
-          />
+          <Area type="monotone" dataKey="amount" stroke={strokeColor} strokeWidth={2} fillOpacity={1} fill={`url(#${gradientId})`} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
