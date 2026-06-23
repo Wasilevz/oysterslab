@@ -3,6 +3,17 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { ActionResult, User } from "@/types/database";
 
+async function verifyAdmin(callerId: string): Promise<string | null> {
+  const supabase = getSupabaseAdmin();
+  const { data: caller } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", callerId)
+    .single();
+  if (!caller || caller.role !== "admin") return "Нет доступа";
+  return null;
+}
+
 export async function getEmployees(): Promise<ActionResult<User[]>> {
   try {
     const supabase = getSupabaseAdmin();
@@ -26,7 +37,11 @@ export async function addEmployee(
   role: "employee" | "admin",
   position: string,
   hourlyRate: number,
+  callerId: string,
 ): Promise<ActionResult<User>> {
+  const adminError = await verifyAdmin(callerId);
+  if (adminError) return { success: false, error: adminError };
+
   if (!fullName.trim()) {
     return { success: false, error: "Введите имя сотрудника" };
   }
@@ -77,7 +92,13 @@ export async function updateEmployee(
   hourlyRate: number,
   role?: "employee" | "admin",
   shiftStartTime?: string,
+  callerId?: string,
 ): Promise<ActionResult<void>> {
+  if (callerId) {
+    const adminError = await verifyAdmin(callerId);
+    if (adminError) return { success: false, error: adminError };
+  }
+
   if (!Number.isFinite(hourlyRate) || hourlyRate < 0) {
     return { success: false, error: "Укажите корректную ставку" };
   }
@@ -110,7 +131,10 @@ export async function updateEmployee(
   }
 }
 
-export async function deleteEmployee(userId: string): Promise<ActionResult<void>> {
+export async function deleteEmployee(userId: string, callerId: string): Promise<ActionResult<void>> {
+  const adminError = await verifyAdmin(callerId);
+  if (adminError) return { success: false, error: adminError };
+
   try {
     const supabase = getSupabaseAdmin();
 

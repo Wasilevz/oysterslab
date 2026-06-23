@@ -124,8 +124,14 @@ export async function createPayment(
 
 export async function approvePayment(
   paymentId: string,
+  callerId?: string,
 ): Promise<ActionResult<void>> {
   try {
+    if (callerId) {
+      const supabase = getSupabaseAdmin();
+      const { data: caller } = await supabase.from("users").select("role").eq("id", callerId).single();
+      if (!caller || caller.role !== "admin") return { success: false, error: "Нет доступа" };
+    }
     const supabase = getSupabaseAdmin();
     const { error } = await supabase
       .from("salary_payments")
@@ -166,8 +172,14 @@ export async function confirmPayment(
 
 export async function deletePayment(
   paymentId: string,
+  callerId?: string,
 ): Promise<ActionResult<void>> {
   try {
+    if (callerId) {
+      const supabase = getSupabaseAdmin();
+      const { data: caller } = await supabase.from("users").select("role").eq("id", callerId).single();
+      if (!caller || caller.role !== "admin") return { success: false, error: "Нет доступа" };
+    }
     const supabase = getSupabaseAdmin();
     const { error } = await supabase
       .from("salary_payments")

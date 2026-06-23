@@ -250,8 +250,15 @@ export async function editShift(
   shiftId: string,
   clockIn: string,
   clockOut: string | null,
+  callerId?: string,
 ): Promise<ActionResult<Shift>> {
   try {
+    if (callerId) {
+      const supabase = getSupabaseAdmin();
+      const { data: caller } = await supabase.from("users").select("role").eq("id", callerId).single();
+      if (!caller || caller.role !== "admin") return { success: false, error: "Нет доступа" };
+    }
+
     const supabase = getSupabaseAdmin();
 
     const { data: shift, error: findError } = await supabase

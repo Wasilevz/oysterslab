@@ -7,6 +7,7 @@ import {
 } from "@/actions/locationActions";
 import { getEmployees, addEmployee, updateEmployee, deleteEmployee } from "@/actions/employeeActions";
 import { useI18n } from "@/lib/i18n";
+import { useUserStore } from "@/store/userStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -123,7 +124,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     if (!newName.trim()) { setError("Введите имя"); return; }
     if (!Number.isFinite(tgId) || tgId <= 0) { setError("Введите Telegram ID"); return; }
     if (!Number.isFinite(rate) || rate < 0) { setError("Укажите ставку"); return; }
-    const result = await addEmployee(tgId, newName, newRole, newPosition, rate);
+    const result = await addEmployee(tgId, newName, newRole, newPosition, rate, useUserStore.getState().user?.id ?? "");
     if (!result.success) { setError(result.error ?? "Ошибка"); return; }
     setNewName(""); setNewTelegramId(""); setNewPosition(""); setNewRate(""); setNewRole("employee");
     setShowAddForm(false);
@@ -131,7 +132,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   };
 
   const handleDeleteEmployee = async (userId: string) => {
-    const result = await deleteEmployee(userId);
+    const result = await deleteEmployee(userId, useUserStore.getState().user?.id ?? "");
     if (!result.success) { setError(result.error ?? "Ошибка"); return; }
     void loadSettings();
   };
