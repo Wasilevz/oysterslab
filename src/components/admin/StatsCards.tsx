@@ -17,19 +17,19 @@ export function StatsCards({ stats }: StatsCardsProps) {
       label: t("stats.onShift"),
       value: stats.activeShifts.length,
       icon: Clock,
-      color: "text-[#008080]",
-      bg: "dark:from-[#D6BC97]/10 dark:to-[#D6BC97]/5 from-[#E6F7F7] to-[#B2DFDB]/50",
-      border: "border-[#008080]/20",
-      glow: "dark:shadow-[#D6BC97]/5 shadow-[#B2DFDB]/50",
+      color: "text-[var(--accent)]",
+      bg: "from-[var(--accent)] to-[var(--accent)]/50",
+      border: "border-[var(--accent)]/20",
+      glow: "shadow-[var(--accent)]/5",
     },
     {
       label: t("stats.employees"),
       value: stats.totalEmployees,
       icon: Users,
-      color: "text-[#008080]",
-      bg: "dark:from-[#D6BC97]/10 dark:to-[#D6BC97]/5 from-[#E6F7F7] to-[#B2DFDB]/50",
-      border: "border-[#008080]/20",
-      glow: "dark:shadow-[#D6BC97]/5 shadow-[#B2DFDB]/50",
+      color: "text-[var(--accent)]",
+      bg: "from-[var(--accent)] to-[var(--accent)]/50",
+      border: "border-[var(--accent)]/20",
+      glow: "shadow-[var(--accent)]/5",
     },
     ...(pendingCount > 0
       ? [
@@ -38,9 +38,9 @@ export function StatsCards({ stats }: StatsCardsProps) {
             value: pendingCount,
             icon: AlertCircle,
             color: "text-amber-400",
-            bg: "dark:from-amber-500/10 dark:to-amber-600/5 from-amber-50 to-amber-100/50",
+            bg: "from-amber-50 to-amber-100/50",
             border: "border-amber-500/20",
-            glow: "dark:shadow-amber-500/5 shadow-amber-200/50",
+            glow: "shadow-amber-200/50",
           },
         ]
       : []),
@@ -54,8 +54,8 @@ export function StatsCards({ stats }: StatsCardsProps) {
           className={`relative overflow-hidden rounded-2xl border ${card.border} bg-gradient-to-br ${card.bg} p-4 shadow-lg ${card.glow}`}
         >
           <card.icon className={`mb-2 h-5 w-5 ${card.color}`} />
-          <p className="text-2xl font-bold dark:text-[#F8FAFC] text-[#2D3748]">{card.value}</p>
-          <p className="mt-0.5 text-xs font-medium dark:text-[#64748B] text-[#718096]">
+          <p className="text-2xl font-bold text-[var(--fg)]">{card.value}</p>
+          <p className="mt-0.5 text-xs font-medium text-[var(--muted)]">
             {card.label}
           </p>
         </div>

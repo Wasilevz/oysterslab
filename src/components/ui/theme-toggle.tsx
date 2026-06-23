@@ -8,10 +8,10 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   return (
     <button
       onClick={toggleTheme}
-      className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-all ${
+      className={`flex items-center gap-2 rounded-xl border border-[var(--card-border)] px-3 py-2 text-xs font-semibold transition-all bg-[var(--card)] hover:bg-[var(--card-border)] ${
         theme === "dark"
-          ? "border-[#334155] bg-[#1E293B] text-[#D6BC97] hover:bg-[#334155]"
-          : "border-[#E2E8F0] bg-white text-[#2D3748] hover:bg-[#F7FAFC]"
+          ? "text-[var(--accent)]"
+          : "text-[var(--fg)]"
       } ${className}`}
     >
       <span className="text-base">{theme === "dark" ? "🌙" : "☀️"}</span>

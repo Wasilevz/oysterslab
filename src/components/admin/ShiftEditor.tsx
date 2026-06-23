@@ -19,7 +19,7 @@ const STATUS_KEYS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  ACTIVE: "text-[#008080]",
+  ACTIVE: "text-[var(--accent)]",
   COMPLETED: "text-emerald-400",
   AUTO_CLOSED: "text-amber-400",
   REVIEWED: "text-violet-400",
@@ -94,32 +94,32 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
     <div className="px-4 pt-4 pb-24">
       <div className="mb-4 flex items-center gap-3">
         {onBack && (
-          <button onClick={onBack} className="rounded-xl p-2 dark:text-[#94A3B8] text-[#718096] dark:hover:bg-[#334155] hover:bg-[#F1F5F9] dark:hover:text-[#F8FAFC] hover:text-[#2D3748]">
+          <button onClick={onBack} className="rounded-xl p-2 text-[var(--muted)] hover:bg-[var(--card-border)] hover:text-[var(--fg)]">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
           </button>
         )}
-        <h2 className="text-lg font-bold dark:text-[#F8FAFC] text-[#2D3748]">{t("shiftEditor.title")}</h2>
+        <h2 className="text-lg font-bold text-[var(--fg)]">{t("shiftEditor.title")}</h2>
       </div>
 
       <div className="mb-4 grid grid-cols-2 gap-2">
         <div>
-          <p className="mb-1 text-xs dark:text-[#64748B] text-[#718096]">{t("salary.from")}</p>
+          <p className="mb-1 text-xs text-[var(--muted)]">{t("salary.from")}</p>
           <input
             type="date"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
-            className="w-full rounded-xl border dark:border-[#475569] border-[#E2E8F0] dark:bg-[#334155] bg-[#F1F5F9] px-3 py-2 text-sm dark:text-[#F8FAFC] text-[#2D3748]"
+            className="w-full rounded-xl border border-[var(--card-border)] bg-[var(--card)] px-3 py-2 text-sm text-[var(--fg)]"
           />
         </div>
         <div>
-          <p className="mb-1 text-xs dark:text-[#64748B] text-[#718096]">{t("salary.to")}</p>
+          <p className="mb-1 text-xs text-[var(--muted)]">{t("salary.to")}</p>
           <input
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
-            className="w-full rounded-xl border dark:border-[#475569] border-[#E2E8F0] dark:bg-[#334155] bg-[#F1F5F9] px-3 py-2 text-sm dark:text-[#F8FAFC] text-[#2D3748]"
+            className="w-full rounded-xl border border-[var(--card-border)] bg-[var(--card)] px-3 py-2 text-sm text-[var(--fg)]"
           />
         </div>
       </div>
@@ -134,34 +134,34 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
         <Skeleton className="h-48 w-full rounded-2xl" />
       ) : shifts.length === 0 ? (
         <div className="flex min-h-[30vh] items-center justify-center">
-          <p className="dark:text-[#64748B] text-[#718096]">{t("shiftEditor.noShifts")}</p>
+          <p className="text-[var(--muted)]">{t("shiftEditor.noShifts")}</p>
         </div>
       ) : (
         <div className="space-y-2">
           {shifts.map((shift) => {
             const statusKey = STATUS_KEYS[shift.status] ?? null;
-            const statusColor = STATUS_COLORS[shift.status] ?? "text-[#A0AEC0]";
+            const statusColor = STATUS_COLORS[shift.status] ?? "text-[var(--muted-light)]";
             const isEditing = editingId === shift.id;
 
             return (
               <div
                 key={shift.id}
-                className="rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 p-4"
+                className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-4"
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-bold dark:text-[#F8FAFC] text-[#2D3748]">{shift.users.full_name}</p>
+                    <p className="font-bold text-[var(--fg)]">{shift.users.full_name}</p>
                     {shift.users.position && (
-                      <p className="text-[10px] dark:text-[#64748B] text-[#718096]">{shift.users.position}</p>
+                      <p className="text-[10px] text-[var(--muted)]">{shift.users.position}</p>
                     )}
-                    <p className="mt-1 text-xs dark:text-[#94A3B8] text-[#718096]">
+                    <p className="mt-1 text-xs text-[var(--muted)]">
                       {format(new Date(shift.clock_in), "d MMM, HH:mm", { locale: ru })}
                       {shift.clock_out && (
                         <> → {format(new Date(shift.clock_out), "HH:mm", { locale: ru })}</>
                       )}
                     </p>
                     {shift.hours_worked != null && (
-                      <p className="text-[10px] dark:text-[#64748B] text-[#718096]">
+                      <p className="text-[10px] text-[var(--muted)]">
                         {shift.hours_worked.toFixed(1)} ч
                       </p>
                     )}
@@ -173,7 +173,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                     {!isEditing && (
                       <button
                         onClick={() => startEdit(shift)}
-                        className="rounded-lg border dark:border-[#475569] border-[#E2E8F0] px-2 py-1 text-[10px] dark:text-[#94A3B8] text-[#718096] hover:border-[#008080]/30 hover:text-[#008080]"
+                        className="rounded-lg border border-[var(--card-border)] px-2 py-1 text-[10px] text-[var(--muted)] hover:border-[var(--accent)]/30 hover:text-[var(--accent)]"
                       >
                         ✎
                       </button>
@@ -182,25 +182,25 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                 </div>
 
                 {isEditing && (
-                  <div className="mt-3 space-y-2 border-t dark:border-[#334155] border-[#E2E8F0] pt-3">
+                  <div className="mt-3 space-y-2 border-t border-[var(--card-border)] pt-3">
                     <div>
-                      <p className="mb-1 text-[10px] dark:text-[#64748B] text-[#718096]">{t("shiftEditor.clockIn")}</p>
+                      <p className="mb-1 text-[10px] text-[var(--muted)]">{t("shiftEditor.clockIn")}</p>
                       <input
                         type="datetime-local"
                         value={editClockIn}
                         onChange={(e) => setEditClockIn(e.target.value)}
-                        className="w-full rounded-xl border dark:border-[#475569] border-[#E2E8F0] dark:bg-[#334155] bg-[#F1F5F9] px-3 py-2 text-sm dark:text-[#F8FAFC] text-[#2D3748]"
+                        className="w-full rounded-xl border border-[var(--card-border)] bg-[var(--card)] px-3 py-2 text-sm text-[var(--fg)]"
                       />
                     </div>
                     <div>
-                      <p className="mb-1 text-[10px] dark:text-[#64748B] text-[#718096]">{t("shiftEditor.clockOut")}</p>
+                      <p className="mb-1 text-[10px] text-[var(--muted)]">{t("shiftEditor.clockOut")}</p>
                       <input
                         type="datetime-local"
                         value={editClockOut}
                         onChange={(e) => setEditClockOut(e.target.value)}
-                        className="w-full rounded-xl border dark:border-[#475569] border-[#E2E8F0] dark:bg-[#334155] bg-[#F1F5F9] px-3 py-2 text-sm dark:text-[#F8FAFC] text-[#2D3748]"
+                        className="w-full rounded-xl border border-[var(--card-border)] bg-[var(--card)] px-3 py-2 text-sm text-[var(--fg)]"
                       />
-                      <p className="mt-0.5 text-[10px] dark:text-[#475569] text-[#718096]">
+                      <p className="mt-0.5 text-[10px] text-[var(--muted)]">
                         {t("shiftEditor.clockOutHint")}
                       </p>
                     </div>

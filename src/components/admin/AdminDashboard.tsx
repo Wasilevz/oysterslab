@@ -105,11 +105,11 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      color: "text-[#008080]",
-      bg: "dark:from-[#D6BC97]/10 dark:to-[#D6BC97]/5 from-[#E6F7F7] to-[#B2DFDB]/50",
-      border: "border-[#008080]/20",
+      color: "text-[var(--accent)]",
+      bg: "from-[var(--accent)] to-[var(--accent)]/50",
+      border: "border-[var(--accent)]/20",
       badge: stats?.activeShifts.length,
-      badgeColor: "dark:bg-[#D6BC97]/20 bg-[#B2DFDB] text-[#008080]",
+      badgeColor: "bg-[var(--accent)] text-[var(--accent)]",
     },
     {
       key: "forgotten" as const,
@@ -121,10 +121,10 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </svg>
       ),
       color: "text-amber-400",
-      bg: "dark:from-amber-500/10 dark:to-amber-600/5 from-amber-50 to-amber-100/50",
+      bg: "from-amber-50 to-amber-100/50",
       border: "border-amber-500/20",
       badge: stats?.autoClosedShifts.length,
-      badgeColor: "dark:bg-amber-500/20 bg-amber-100 text-amber-400",
+      badgeColor: "bg-amber-100 text-amber-400",
     },
     {
       key: "salary" as const,
@@ -136,7 +136,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </svg>
       ),
       color: "text-emerald-400",
-      bg: "dark:from-emerald-500/10 dark:to-emerald-600/5 from-emerald-50 to-emerald-100/50",
+      bg: "from-emerald-50 to-emerald-100/50",
       border: "border-emerald-500/20",
     },
     {
@@ -149,7 +149,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </svg>
       ),
       color: "text-violet-400",
-      bg: "dark:from-violet-500/10 dark:to-violet-600/5 from-violet-50 to-violet-100/50",
+      bg: "from-violet-50 to-violet-100/50",
       border: "border-violet-500/20",
     },
     {
@@ -162,7 +162,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </svg>
       ),
       color: "text-orange-400",
-      bg: "dark:from-orange-500/10 dark:to-orange-600/5 from-orange-50 to-orange-100/50",
+      bg: "from-orange-50 to-orange-100/50",
       border: "border-orange-500/20",
     },
     {
@@ -175,9 +175,9 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       ),
-      color: "text-[#718096]",
-      bg: "dark:from-[#64748B]/10 dark:to-[#475569]/5 from-[#F1F5F9] to-[#F1F5F9]/50",
-      border: "border-[#A0AEC0]/20",
+      color: "text-[var(--muted)]",
+      bg: "from-[var(--card)] to-[var(--card)]/50",
+      border: "border-[var(--muted-light)]/20",
     },
   ];
 
@@ -185,21 +185,21 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
       <header className="mb-5">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-widest dark:text-[#475569] text-[#718096]">
+          <p className="text-xs font-medium uppercase tracking-widest text-[var(--muted)]">
             {t("nav.dashboard")}
           </p>
           <ThemeToggle />
         </div>
         <div className="mt-1 flex items-center justify-between">
-          <h1 className="text-2xl font-bold dark:text-[#F8FAFC] text-[#2D3748]">{user?.full_name}</h1>
+          <h1 className="text-2xl font-bold text-[var(--fg)]">{user?.full_name}</h1>
 
           <button
             onClick={handleToggleShift}
             disabled={isPending}
             className={`rounded-2xl px-6 py-3.5 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
               myShift
-                ? "dark:bg-rose-500/15 bg-rose-100 text-rose-400 hover:bg-rose-500/25"
-                : "dark:bg-[#D6BC97]/20 bg-[#B2DFDB] text-[#008080] hover:bg-[#008080]/30"
+                ? "bg-rose-100 text-rose-400 hover:bg-rose-500/25"
+                : "bg-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)]/30"
             }`}
           >
             {isPending ? "..." : myShift ? t("shift.end") : t("shift.start")}
@@ -207,17 +207,17 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </div>
 
         {myShift && (
-          <div className="mt-3 flex items-center justify-between rounded-2xl border border-[#008080]/10 dark:bg-[#D6BC97]/5 bg-[#E6F7F7] px-4 py-3">
+          <div className="mt-3 flex items-center justify-between rounded-2xl border border-[var(--accent)]/10 bg-[var(--accent)] px-4 py-3">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#008080] opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#008080]" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
               </span>
-              <span className="text-xs font-medium text-[#008080]">{t("shift.active")}</span>
+              <span className="text-xs font-medium text-[var(--accent)]">{t("shift.active")}</span>
             </div>
             <ShiftTimer
               clockIn={myShift.clock_in}
-              className="font-mono text-lg font-black tabular-nums dark:text-[#F8FAFC] text-[#2D3748]"
+              className="font-mono text-lg font-black tabular-nums text-[var(--fg)]"
             />
           </div>
         )}
@@ -235,8 +235,8 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             className={`relative overflow-hidden rounded-2xl border ${item.border} bg-gradient-to-br ${item.bg} p-4 text-left transition-all active:scale-[0.98]`}
           >
             <div className={`mb-3 ${item.color}`}>{item.icon}</div>
-            <p className="text-sm font-bold dark:text-[#F8FAFC] text-[#2D3748]">{item.title}</p>
-            <p className="mt-0.5 text-[10px] dark:text-[#64748B] text-[#718096]">{item.desc}</p>
+            <p className="text-sm font-bold text-[var(--fg)]">{item.title}</p>
+            <p className="mt-0.5 text-[10px] text-[var(--muted)]">{item.desc}</p>
             {item.badge != null && item.badge > 0 && (
               <span className={`absolute right-3 top-3 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${item.badgeColor}`}>
                 {item.badge}

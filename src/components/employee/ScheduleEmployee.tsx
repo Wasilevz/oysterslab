@@ -8,8 +8,8 @@ import { useUserStore } from "@/store/userStore";
 import type { Schedule, ScheduleType } from "@/types/database";
 
 const TYPE_COLORS: Record<ScheduleType, { dot: string; text: string }> = {
-  work: { dot: "bg-[#008080]", text: "text-[#008080]" },
-  off: { dot: "dark:bg-[#475569] bg-[#718096]", text: "dark:text-[#64748B] text-[#718096]" },
+  work: { dot: "bg-[var(--accent)]", text: "text-[var(--accent)]" },
+  off: { dot: "bg-[var(--muted)]", text: "text-[var(--muted)]" },
   vacation: { dot: "bg-amber-500", text: "text-amber-400" },
   sick: { dot: "bg-rose-500", text: "text-rose-400" },
 };
@@ -90,16 +90,16 @@ export function ScheduleEmployee() {
   return (
     <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
       <header className="mb-5">
-        <p className="text-xs font-medium uppercase tracking-widest dark:text-[#475569] text-[#718096]">
+        <p className="text-xs font-medium uppercase tracking-widest text-[var(--muted)]">
           {t("schedule.mySchedule")}
         </p>
-        <h1 className="mt-1 text-2xl font-bold dark:text-[#F8FAFC] text-[#2D3748]">
+        <h1 className="mt-1 text-2xl font-bold text-[var(--fg)]">
           {monthNames[month - 1]} {year}
         </h1>
       </header>
 
       <div className="flex items-center justify-between mb-4">
-        <button onClick={prevMonth} className="rounded-xl p-2 dark:text-[#94A3B8] text-[#718096] dark:hover:bg-[#334155] hover:bg-[#F1F5F9] dark:hover:text-[#F8FAFC] hover:text-[#2D3748]">
+        <button onClick={prevMonth} className="rounded-xl p-2 text-[var(--muted)] hover:bg-[var(--card-border)] hover:text-[var(--fg)]">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
@@ -112,17 +112,17 @@ export function ScheduleEmployee() {
             </span>
           ))}
         </div>
-        <button onClick={nextMonth} className="rounded-xl p-2 dark:text-[#94A3B8] text-[#718096] dark:hover:bg-[#334155] hover:bg-[#F1F5F9] dark:hover:text-[#F8FAFC] hover:text-[#2D3748]">
+        <button onClick={nextMonth} className="rounded-xl p-2 text-[var(--muted)] hover:bg-[var(--card-border)] hover:text-[var(--fg)]">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </button>
       </div>
 
-      <div className="rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 p-3">
+      <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-3">
         <div className="grid grid-cols-7 gap-1 mb-2">
           {dayNames.map((d) => (
-            <div key={d} className="py-1 text-center text-[10px] font-medium dark:text-[#64748B] text-[#718096]">{d}</div>
+            <div key={d} className="py-1 text-center text-[10px] font-medium text-[var(--muted)]">{d}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1">
@@ -138,10 +138,10 @@ export function ScheduleEmployee() {
               <div
                 key={day}
                 className={`flex flex-col items-center rounded-lg py-1.5 ${
-                  isToday ? "ring-1 ring-[#008080]/50" : ""
+                  isToday ? "ring-1 ring-[var(--accent)]/50" : ""
                 }`}
               >
-                <span className={`text-xs font-medium ${isToday ? "dark:text-[#F8FAFC] text-[#2D3748]" : "dark:text-[#94A3B8] text-[#718096]"}`}>
+                <span className={`text-xs font-medium ${isToday ? "text-[var(--fg)]" : "text-[var(--muted)]"}`}>
                   {day}
                 </span>
                 <span className={`mt-0.5 h-1.5 w-1.5 rounded-full ${colors.dot}`} />
@@ -153,31 +153,31 @@ export function ScheduleEmployee() {
 
       {workingToday.length > 0 && (
         <div className="mt-5">
-          <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest dark:text-[#475569] text-[#718096]">
+          <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">
             {t("schedule.todayOnShift")}
           </h2>
           <div className="space-y-2">
             {workingToday.map((w) => (
               <div
                 key={w.id}
-                className="flex items-center justify-between rounded-2xl border dark:border-[#334155]/30 border-[#E2E8F0]/30 dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 px-4 py-3"
+                className="flex items-center justify-between rounded-2xl border border-[var(--card-border)]/30 bg-[var(--card)] px-4 py-3"
               >
                 <div>
-                  <p className="text-sm font-medium dark:text-[#F8FAFC] text-[#2D3748]">{w.full_name}</p>
+                  <p className="text-sm font-medium text-[var(--fg)]">{w.full_name}</p>
                   {w.position && (
-                    <p className="text-[10px] dark:text-[#64748B] text-[#718096]">{w.position}</p>
+                    <p className="text-[10px] text-[var(--muted)]">{w.position}</p>
                   )}
                 </div>
                 {w.clock_in ? (
                   <span className="flex items-center gap-1.5">
                     <span className="relative flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#008080] opacity-75" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-[#008080]" />
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
                     </span>
-                    <span className="text-[10px] text-[#008080]">{t("shift.onShift")}</span>
+                    <span className="text-[10px] text-[var(--accent)]">{t("shift.onShift")}</span>
                   </span>
                 ) : (
-                  <span className="text-[10px] dark:text-[#475569] text-[#718096]">{t("schedule.notArrived")}</span>
+                  <span className="text-[10px] text-[var(--muted)]">{t("schedule.notArrived")}</span>
                 )}
               </div>
             ))}
