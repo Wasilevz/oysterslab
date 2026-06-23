@@ -198,10 +198,10 @@ export function EmployeeScreen() {
         <button
           onClick={handleToggleShift}
           disabled={isPending}
-          className={`w-full py-4 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
+          className={`w-full rounded-2xl py-4 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
             isOnShift
-              ? "bg-rose-100 text-rose-400 hover:bg-rose-500/25"
-              : "bg-[var(--brand-primary)]/20 text-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
+              ? "bg-[var(--color-error)]/15 text-[var(--color-error)] hover:bg-[var(--color-error)]/25"
+              : "bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/25"
           }`}
         >
           {isPending ? "..." : isOnShift ? t("shift.end") : t("shift.start")}
