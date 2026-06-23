@@ -6,12 +6,14 @@ import {
   saveLocationSettings,
 } from "@/actions/locationActions";
 import { getEmployees, addEmployee, updateEmployee, deleteEmployee } from "@/actions/employeeActions";
+import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { User } from "@/types/database";
 
 export function SettingsPage({ onBack }: { onBack?: () => void }) {
+  const { t, locale, setLocale } = useI18n();
   const [employees, setEmployees] = useState<User[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -202,9 +204,37 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
 
       <div className="mt-6 px-4">
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
-          <p className="mb-1 text-sm font-semibold text-white">IP заведения</p>
+          <p className="mb-3 text-sm font-semibold text-white">Язык / Limbă</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setLocale("ru")}
+              className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${
+                locale === "ru"
+                  ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                  : "border-zinc-700 text-zinc-500"
+              }`}
+            >
+              🇷🇺 Русский
+            </button>
+            <button
+              onClick={() => setLocale("ro")}
+              className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${
+                locale === "ro"
+                  ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                  : "border-zinc-700 text-zinc-500"
+              }`}
+            >
+              🇲🇩 Română
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 px-4">
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
+          <p className="mb-1 text-sm font-semibold text-white">{t("settings.location")}</p>
           <p className="mb-3 text-[10px] text-zinc-500">
-            Сотрудники смогут начать/завершить смену только из заведения
+            {t("settings.locationDesc")}
           </p>
 
           <div className="space-y-2">
