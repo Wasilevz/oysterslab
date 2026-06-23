@@ -10,8 +10,8 @@ import { useUserStore } from "@/store/userStore";
 import type { Schedule, ScheduleType, User } from "@/types/database";
 
 const TYPE_COLORS: Record<ScheduleType, { bg: string; text: string; dot: string }> = {
-  work: { bg: "dark:bg-blue-500/20 bg-blue-100", text: "text-blue-400", dot: "bg-blue-500" },
-  off: { bg: "dark:bg-zinc-700/30 bg-zinc-200", text: "dark:text-zinc-500 text-zinc-400", dot: "dark:bg-zinc-600 bg-zinc-400" },
+  work: { bg: "dark:bg-[#D6BC97]/20 bg-[#B2DFDB]", text: "text-[#008080]", dot: "bg-[#008080]" },
+  off: { bg: "dark:bg-[#475569]/30 bg-[#F1F5F9]", text: "dark:text-[#64748B] text-[#718096]", dot: "dark:bg-[#475569] bg-[#718096]" },
   vacation: { bg: "dark:bg-amber-500/20 bg-amber-100", text: "text-amber-400", dot: "bg-amber-500" },
   sick: { bg: "dark:bg-rose-500/20 bg-rose-100", text: "text-rose-400", dot: "bg-rose-500" },
 };
@@ -118,28 +118,28 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <header className="border-b dark:border-zinc-800/60 border-zinc-200/60 px-4 py-5">
+      <header className="border-b dark:border-[#334155]/60 border-[#E2E8F0]/60 px-4 py-5">
         <div className="flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-600 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
+            <button onClick={onBack} className="rounded-xl p-2 dark:text-[#94A3B8] text-[#718096] dark:hover:bg-[#334155] hover:bg-[#F1F5F9] dark:hover:text-[#F8FAFC] hover:text-[#2D3748]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
             </button>
           )}
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
+            <p className="text-xs font-medium uppercase tracking-widest dark:text-[#475569] text-[#718096]">
               {t("schedule.subtitle")}
             </p>
-            <h1 className="mt-1 text-2xl font-bold dark:text-white text-zinc-900">{t("schedule.title")}</h1>
+            <h1 className="mt-1 text-2xl font-bold dark:text-[#F8FAFC] text-[#2D3748]">{t("schedule.title")}</h1>
           </div>
         </div>
       </header>
 
       <div className="px-4 pt-4">
-        <div className="rounded-2xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80 p-4">
+        <div className="rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold dark:text-white text-zinc-900">{t("schedule.myMonth")}</p>
+            <p className="text-sm font-semibold dark:text-[#F8FAFC] text-[#2D3748]">{t("schedule.myMonth")}</p>
             <div className="flex items-center gap-2">
               {(["work", "off", "vacation", "sick"] as const).map((type) => (
                 <span key={type} className="flex items-center gap-1 text-[10px]">
@@ -152,7 +152,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
 
           <div className="grid grid-cols-7 gap-1 mb-2">
             {dayLabels.map((d) => (
-              <div key={d} className="py-1 text-center text-[10px] font-medium dark:text-zinc-500 text-zinc-400">{d}</div>
+              <div key={d} className="py-1 text-center text-[10px] font-medium dark:text-[#64748B] text-[#718096]">{d}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -168,10 +168,10 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
                 <div
                   key={day}
                   className={`flex flex-col items-center rounded-lg py-1.5 ${
-                    isToday ? "ring-1 ring-blue-500/50" : ""
+                    isToday ? "ring-1 ring-[#008080]/50" : ""
                   }`}
                 >
-                  <span className={`text-xs font-medium ${isToday ? "dark:text-white text-zinc-900" : "dark:text-zinc-400 text-zinc-600"}`}>
+                  <span className={`text-xs font-medium ${isToday ? "dark:text-[#F8FAFC] text-[#2D3748]" : "dark:text-[#94A3B8] text-[#718096]"}`}>
                     {day}
                   </span>
                   <span className={`mt-0.5 h-1.5 w-1.5 rounded-full ${colors.dot}`} />
@@ -184,15 +184,15 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
 
       <div className="mt-4 px-4">
           <div className="flex items-center gap-2">
-            <button onClick={prevMonth} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-600 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
+            <button onClick={prevMonth} className="rounded-xl p-2 dark:text-[#94A3B8] text-[#718096] dark:hover:bg-[#334155] hover:bg-[#F1F5F9] dark:hover:text-[#F8FAFC] hover:text-[#2D3748]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
             </button>
-            <p className="text-lg font-bold dark:text-white text-zinc-900">
+            <p className="text-lg font-bold dark:text-[#F8FAFC] text-[#2D3748]">
               {monthNames[month - 1]} {year}
             </p>
-            <button onClick={nextMonth} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-600 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
+            <button onClick={nextMonth} className="rounded-xl p-2 dark:text-[#94A3B8] text-[#718096] dark:hover:bg-[#334155] hover:bg-[#F1F5F9] dark:hover:text-[#F8FAFC] hover:text-[#2D3748]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
               </svg>
@@ -204,7 +204,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
         <table className="w-full border-collapse">
           <thead>
             <tr>
-              <th className="sticky left-0 z-20 dark:bg-zinc-950 bg-white p-1.5 text-left text-[11px] font-medium dark:text-zinc-500 text-zinc-400 min-w-[100px] dark:shadow-[8px_0_12px_-4px_#09090b] shadow-[8px_0_12px_-4px_rgba(0,0,0,0.05)]">
+              <th className="sticky left-0 z-20 dark:bg-[#0F172A] bg-white p-1.5 text-left text-[11px] font-medium dark:text-[#64748B] text-[#718096] min-w-[100px] dark:shadow-[8px_0_12px_-4px_#09090b] shadow-[8px_0_12px_-4px_rgba(0,0,0,0.05)]">
                 {t("salary.employee")}
               </th>
               {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
@@ -214,7 +214,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
                 return (
                   <th
                     key={day}
-                    className={`p-1 text-center text-[11px] font-medium ${isWeekend ? "text-rose-400" : "text-zinc-500"}`}
+                    className={`p-1 text-center text-[11px] font-medium ${isWeekend ? "text-rose-400" : "text-[#A0AEC0]"}`}
                   >
                     <div className={isWeekend ? "font-bold" : ""}>{day}</div>
                     <div className={`text-[9px] ${isWeekend ? "text-rose-500/60" : ""}`}>{dayLabels[dow]}</div>
@@ -226,10 +226,10 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
           <tbody>
             {employees.map((emp) => (
               <tr key={emp.id}>
-                <td className="sticky left-0 z-20 dark:bg-zinc-950 bg-white py-1.5 pr-3 min-w-[100px] dark:shadow-[8px_0_12px_-4px_#09090b] shadow-[8px_0_12px_-4px_rgba(0,0,0,0.05)]">
-                  <p className="truncate text-xs font-semibold dark:text-white text-zinc-900">{emp.full_name}</p>
+                <td className="sticky left-0 z-20 dark:bg-[#0F172A] bg-white py-1.5 pr-3 min-w-[100px] dark:shadow-[8px_0_12px_-4px_#09090b] shadow-[8px_0_12px_-4px_rgba(0,0,0,0.05)]">
+                  <p className="truncate text-xs font-semibold dark:text-[#F8FAFC] text-[#2D3748]">{emp.full_name}</p>
                   {emp.position && (
-                    <p className="truncate text-[9px] dark:text-zinc-500 text-zinc-400">{emp.position}</p>
+                    <p className="truncate text-[9px] dark:text-[#64748B] text-[#718096]">{emp.position}</p>
                   )}
                 </td>
                 {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
@@ -253,32 +253,32 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
       </div>
 
       {workingToday.length > 0 && (
-        <div className="border-t dark:border-zinc-800/60 border-zinc-200/60 px-4 pt-4 pb-24">
-          <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
+        <div className="border-t dark:border-[#334155]/60 border-[#E2E8F0]/60 px-4 pt-4 pb-24">
+          <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest dark:text-[#475569] text-[#718096]">
             {t("schedule.todayOnShift")}
           </h2>
           <div className="space-y-2">
             {workingToday.map((w) => (
               <div
                 key={w.id}
-                className="flex items-center justify-between rounded-2xl border dark:border-zinc-800/30 border-zinc-200/30 dark:bg-zinc-900/20 bg-zinc-100/80 px-4 py-3"
+                className="flex items-center justify-between rounded-2xl border dark:border-[#334155]/30 border-[#E2E8F0]/30 dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 px-4 py-3"
               >
                 <div>
-                  <p className="text-sm font-medium dark:text-white text-zinc-900">{w.full_name}</p>
+                  <p className="text-sm font-medium dark:text-[#F8FAFC] text-[#2D3748]">{w.full_name}</p>
                   {w.position && (
-                    <p className="text-[10px] dark:text-zinc-500 text-zinc-400">{w.position}</p>
+                    <p className="text-[10px] dark:text-[#64748B] text-[#718096]">{w.position}</p>
                   )}
                 </div>
                 {w.clock_in ? (
                   <span className="flex items-center gap-1.5">
                     <span className="relative flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#008080] opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-[#008080]" />
                     </span>
-                    <span className="text-[10px] text-blue-400">{t("shift.onShift")}</span>
+                    <span className="text-[10px] text-[#008080]">{t("shift.onShift")}</span>
                   </span>
                 ) : (
-                  <span className="text-[10px] dark:text-zinc-600 text-zinc-400">{t("schedule.notArrived")}</span>
+                  <span className="text-[10px] dark:text-[#475569] text-[#718096]">{t("schedule.notArrived")}</span>
                 )}
               </div>
             ))}

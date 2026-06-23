@@ -144,33 +144,33 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <header className="border-b dark:border-zinc-800/60 border-zinc-200/60 px-4 py-5">
+      <header className="border-b dark:border-[#334155]/60 border-[#E2E8F0]/60 px-4 py-5">
         <div className="flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-500 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
+            <button onClick={onBack} className="rounded-xl p-2 dark:text-[#94A3B8] text-[#A0AEC0] dark:hover:bg-[#334155] hover:bg-[#F1F5F9] dark:hover:text-[#F8FAFC] hover:text-[#2D3748]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
             </button>
           )}
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
+            <p className="text-xs font-medium uppercase tracking-widest dark:text-[#475569] text-[#718096]">
               {t("settings.title")}
             </p>
-            <h1 className="mt-1 text-2xl font-bold dark:text-white text-zinc-900">{t("settings.security")}</h1>
+            <h1 className="mt-1 text-2xl font-bold dark:text-[#F8FAFC] text-[#2D3748]">{t("settings.security")}</h1>
           </div>
         </div>
       </header>
 
       {/* Language */}
       <div className="mt-4 px-4">
-        <div className="rounded-2xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80 p-4">
-          <p className="mb-3 text-sm font-semibold dark:text-white text-zinc-900">{t("settings.language")}</p>
+        <div className="rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 p-4">
+          <p className="mb-3 text-sm font-semibold dark:text-[#F8FAFC] text-[#2D3748]">{t("settings.language")}</p>
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => setLocale("ru")} className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-50 text-blue-600 dark:text-blue-400" : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"}`}>
+            <button onClick={() => setLocale("ru")} className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-[#008080]/30 dark:bg-[#D6BC97]/10 bg-[#E6F7F7] text-[#008080] dark:text-[#D6BC97]" : "dark:border-[#475569] border-[#E2E8F0] dark:text-[#64748B] text-[#718096]"}`}>
               🇷🇺 Русский
             </button>
-            <button onClick={() => setLocale("ro")} className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${locale === "ro" ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-50 text-blue-600 dark:text-blue-400" : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"}`}>
+            <button onClick={() => setLocale("ro")} className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${locale === "ro" ? "border-[#008080]/30 dark:bg-[#D6BC97]/10 bg-[#E6F7F7] text-[#008080] dark:text-[#D6BC97]" : "dark:border-[#475569] border-[#E2E8F0] dark:text-[#64748B] text-[#718096]"}`}>
               🇲🇩 Română
             </button>
           </div>
@@ -179,24 +179,24 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
 
       {/* IP Location */}
       <div className="mt-3 px-4">
-        <div className="rounded-2xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80 p-4">
-          <p className="mb-1 text-sm font-semibold dark:text-white text-zinc-900">{t("settings.location")}</p>
-          <p className="mb-3 text-[10px] dark:text-zinc-500 text-zinc-400">{t("settings.locationDesc")}</p>
+        <div className="rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 p-4">
+          <p className="mb-1 text-sm font-semibold dark:text-[#F8FAFC] text-[#2D3748]">{t("settings.location")}</p>
+          <p className="mb-3 text-[10px] dark:text-[#64748B] text-[#718096]">{t("settings.locationDesc")}</p>
           <div className="space-y-2">
             {allowedIPs.map((ip, i) => (
               <div key={i} className="flex gap-2">
                 <Input type="text" placeholder={t("settings.ipPlaceholder")} value={ip} onChange={(e) => updateIP(i, e.target.value)} />
                 {allowedIPs.length > 1 && (
-                  <button onClick={() => removeIP(i)} className="flex h-10 w-10 items-center justify-center rounded-xl border dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400 hover:border-rose-500/50 hover:text-rose-400">×</button>
+                  <button onClick={() => removeIP(i)} className="flex h-10 w-10 items-center justify-center rounded-xl border dark:border-[#475569] border-[#E2E8F0] dark:text-[#64748B] text-[#718096] hover:border-rose-500/50 hover:text-rose-400">×</button>
                 )}
               </div>
             ))}
           </div>
           <div className="mt-3 flex gap-2">
             <Button variant="blue" className="flex-1" onClick={() => void detectMyIP()}>{t("settings.detectIP")}</Button>
-            <button onClick={addIPField} className="flex h-10 w-10 items-center justify-center rounded-xl border dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400 hover:border-blue-500/30 hover:text-blue-400">+</button>
+            <button onClick={addIPField} className="flex h-10 w-10 items-center justify-center rounded-xl border dark:border-[#475569] border-[#E2E8F0] dark:text-[#64748B] text-[#718096] hover:border-[#008080]/30 hover:text-[#008080]">+</button>
           </div>
-          <p className="mt-3 text-[10px] dark:text-zinc-600 text-zinc-400">{t("settings.detectIPDesc")}</p>
+          <p className="mt-3 text-[10px] dark:text-[#475569] text-[#718096]">{t("settings.detectIPDesc")}</p>
         </div>
       </div>
 
@@ -212,22 +212,22 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
       {/* Employees */}
       <div className="px-4 mt-6 pb-24">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-medium uppercase tracking-wider dark:text-zinc-500 text-zinc-400">{t("settings.employees")}</p>
-          <button onClick={() => setShowAddForm(!showAddForm)} className="rounded-xl border dark:border-zinc-700 border-zinc-300 px-3 py-1.5 text-xs dark:text-zinc-400 text-zinc-500 hover:border-blue-500/30 hover:text-blue-500 dark:hover:text-blue-400">
+          <p className="text-xs font-medium uppercase tracking-wider dark:text-[#64748B] text-[#718096]">{t("settings.employees")}</p>
+          <button onClick={() => setShowAddForm(!showAddForm)} className="rounded-xl border dark:border-[#475569] border-[#E2E8F0] px-3 py-1.5 text-xs dark:text-[#94A3B8] text-[#A0AEC0] hover:border-[#008080]/30 hover:text-[#008080] dark:hover:text-[#D6BC97]">
             {showAddForm ? t("settings.hideForm") : t("settings.addEmployee")}
           </button>
         </div>
 
         {showAddForm && (
-          <div className="mb-4 rounded-2xl border border-blue-500/10 dark:bg-blue-500/5 bg-blue-50 p-4 space-y-2">
-            <p className="mb-1 text-sm font-semibold text-blue-600 dark:text-blue-400">{t("settings.newEmployee")}</p>
+          <div className="mb-4 rounded-2xl border border-[#008080]/10 dark:bg-[#D6BC97]/5 bg-[#E6F7F7] p-4 space-y-2">
+            <p className="mb-1 text-sm font-semibold text-[#008080] dark:text-[#D6BC97]">{t("settings.newEmployee")}</p>
             <Input type="text" placeholder={t("settings.namePlaceholder")} value={newName} onChange={(e) => setNewName(e.target.value)} />
             <Input type="number" placeholder={t("settings.telegramIdPlaceholder")} value={newTelegramId} onChange={(e) => setNewTelegramId(e.target.value)} />
             <Input type="text" placeholder={t("settings.positionPlaceholder")} value={newPosition} onChange={(e) => setNewPosition(e.target.value)} />
             <Input type="number" inputMode="decimal" step="0.5" min="0" placeholder={t("settings.ratePlaceholder")} value={newRate} onChange={(e) => setNewRate(e.target.value)} />
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => setNewRole("employee")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${newRole === "employee" ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-50 text-blue-600 dark:text-blue-400" : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"}`}>{t("settings.employeeRole")}</button>
-              <button onClick={() => setNewRole("admin")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${newRole === "admin" ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-50 text-blue-600 dark:text-blue-400" : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"}`}>{t("settings.adminRole")}</button>
+              <button onClick={() => setNewRole("employee")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${newRole === "employee" ? "border-[#008080]/30 dark:bg-[#D6BC97]/10 bg-[#E6F7F7] text-[#008080] dark:text-[#D6BC97]" : "dark:border-[#475569] border-[#E2E8F0] dark:text-[#64748B] text-[#718096]"}`}>{t("settings.employeeRole")}</button>
+              <button onClick={() => setNewRole("admin")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${newRole === "admin" ? "border-[#008080]/30 dark:bg-[#D6BC97]/10 bg-[#E6F7F7] text-[#008080] dark:text-[#D6BC97]" : "dark:border-[#475569] border-[#E2E8F0] dark:text-[#64748B] text-[#718096]"}`}>{t("settings.adminRole")}</button>
             </div>
             <Button variant="blue" className="w-full" onClick={() => void handleAddEmployee()}>{t("settings.addBtn")}</Button>
           </div>
@@ -235,15 +235,15 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
 
         <div className="space-y-2">
           {employees.map((emp) => (
-            <div key={emp.id} className="rounded-2xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80 p-4">
+            <div key={emp.id} className="rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 p-4">
               {editingId === emp.id ? (
                 <div className="space-y-2">
                   <Input type="text" placeholder={t("settings.namePlaceholder")} value={editName} onChange={(e) => setEditName(e.target.value)} />
                   <Input type="text" placeholder={t("settings.positionPlaceholder")} value={editPosition} onChange={(e) => setEditPosition(e.target.value)} />
                   <Input type="number" inputMode="decimal" step="0.5" min="0" placeholder={t("settings.ratePlaceholder")} value={editRate} onChange={(e) => setEditRate(e.target.value)} />
                   <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => setEditRole("employee")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${editRole === "employee" ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-50 text-blue-600 dark:text-blue-400" : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"}`}>{t("settings.employeeRole")}</button>
-                    <button onClick={() => setEditRole("admin")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${editRole === "admin" ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-50 text-blue-600 dark:text-blue-400" : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"}`}>{t("settings.adminRole")}</button>
+                    <button onClick={() => setEditRole("employee")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${editRole === "employee" ? "border-[#008080]/30 dark:bg-[#D6BC97]/10 bg-[#E6F7F7] text-[#008080] dark:text-[#D6BC97]" : "dark:border-[#475569] border-[#E2E8F0] dark:text-[#64748B] text-[#718096]"}`}>{t("settings.employeeRole")}</button>
+                    <button onClick={() => setEditRole("admin")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${editRole === "admin" ? "border-[#008080]/30 dark:bg-[#D6BC97]/10 bg-[#E6F7F7] text-[#008080] dark:text-[#D6BC97]" : "dark:border-[#475569] border-[#E2E8F0] dark:text-[#64748B] text-[#718096]"}`}>{t("settings.adminRole")}</button>
                   </div>
                   <div className="flex gap-2">
                     <Button variant="ghost" className="flex-1" onClick={cancelEdit}>{t("settings.cancel")}</Button>
@@ -253,15 +253,15 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
               ) : (
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-bold dark:text-white text-zinc-900">{emp.full_name}</p>
-                    {emp.position && <p className="text-xs dark:text-zinc-400 text-zinc-500">{emp.position}</p>}
-                    <p className="text-[10px] dark:text-zinc-500 text-zinc-400">
+                    <p className="text-sm font-bold dark:text-[#F8FAFC] text-[#2D3748]">{emp.full_name}</p>
+                    {emp.position && <p className="text-xs dark:text-[#94A3B8] text-[#A0AEC0]">{emp.position}</p>}
+                    <p className="text-[10px] dark:text-[#64748B] text-[#718096]">
                       {emp.role === "admin" ? t("settings.adminRole") : t("settings.employeeRole")} · {emp.hourly_rate} л/ч · TG: {emp.telegram_id}
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => startEdit(emp)} className="rounded-xl border dark:border-zinc-700 border-zinc-300 px-3 py-1.5 text-xs dark:text-zinc-400 text-zinc-500 hover:border-blue-500/30 hover:text-blue-500 dark:hover:text-blue-400">{t("settings.edit")}</button>
-                    <button onClick={() => void handleDeleteEmployee(emp.id)} className="rounded-xl border dark:border-zinc-700 border-zinc-300 px-3 py-1.5 text-xs dark:text-zinc-400 text-zinc-500 hover:border-rose-500/30 hover:text-rose-500 dark:hover:text-rose-400">{t("settings.delete")}</button>
+                    <button onClick={() => startEdit(emp)} className="rounded-xl border dark:border-[#475569] border-[#E2E8F0] px-3 py-1.5 text-xs dark:text-[#94A3B8] text-[#A0AEC0] hover:border-[#008080]/30 hover:text-[#008080] dark:hover:text-[#D6BC97]">{t("settings.edit")}</button>
+                    <button onClick={() => void handleDeleteEmployee(emp.id)} className="rounded-xl border dark:border-[#475569] border-[#E2E8F0] px-3 py-1.5 text-xs dark:text-[#94A3B8] text-[#A0AEC0] hover:border-rose-500/30 hover:text-rose-500 dark:hover:text-rose-400">{t("settings.delete")}</button>
                   </div>
                 </div>
               )}

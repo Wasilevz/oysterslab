@@ -67,7 +67,7 @@ export function EmployeeSalary() {
 
   return (
     <section className="mt-6">
-      <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide dark:text-zinc-600 text-zinc-400">
+      <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide dark:text-[#475569] text-[#718096]">
         {t("employee.salary")}
       </h2>
 
@@ -81,27 +81,27 @@ export function EmployeeSalary() {
               p.status === "paid"
                 ? "border-emerald-500/10 bg-emerald-500/5"
                 : p.status === "approved"
-                  ? "border-blue-500/10 bg-blue-500/5"
-                  : "dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80"
+                  ? "border-[#008080]/10 bg-[#008080]/5"
+                  : "dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80"
             }`}
           >
             <div className="flex items-start justify-between">
-              <p className="text-sm dark:text-zinc-400 text-zinc-600">
+              <p className="text-sm dark:text-[#94A3B8] text-[#718096]">
                 {format(new Date(p.period_start), "d MMM", { locale: ru })} —{" "}
                 {format(new Date(p.period_end), "d MMM", { locale: ru })}
               </p>
               {p.status === "paid" ? (
                 <span className="rounded-lg dark:bg-emerald-500/10 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-400">{t("salary.received")}</span>
               ) : p.status === "approved" ? (
-                <span className="rounded-lg dark:bg-blue-500/10 bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-400">{t("salary.approvedStatus")}</span>
+                <span className="rounded-lg dark:bg-[#D6BC97]/10 bg-[#E6F7F7] px-2 py-0.5 text-[10px] font-bold text-[#008080]">{t("salary.approvedStatus")}</span>
               ) : (
                 <span className="rounded-lg dark:bg-amber-500/10 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-400">{t("salary.waiting")}</span>
               )}
             </div>
 
             <div className="mt-2 flex items-center justify-between">
-              <span className="text-xs dark:text-zinc-400 text-zinc-600">{Number(p.hours_worked).toFixed(1)} ч × {Number(p.hourly_rate)} л/ч</span>
-              <p className="font-mono text-lg font-bold dark:text-white text-zinc-900">{formatMoney(Number(p.total_amount))}</p>
+              <span className="text-xs dark:text-[#94A3B8] text-[#718096]">{Number(p.hours_worked).toFixed(1)} ч × {Number(p.hourly_rate)} л/ч</span>
+              <p className="font-mono text-lg font-bold dark:text-[#F8FAFC] text-[#2D3748]">{formatMoney(Number(p.total_amount))}</p>
             </div>
 
             {p.paid_at && (

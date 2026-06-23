@@ -35,20 +35,20 @@ export function LiveTab({ onBack }: LiveTabProps) {
     <div className="px-4 pt-4 pb-8">
       <div className="mb-4 flex items-center gap-3">
         {onBack && (
-          <button onClick={onBack} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-600 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
+          <button onClick={onBack} className="rounded-xl p-2 dark:text-[#94A3B8] text-[#718096] dark:hover:bg-[#334155] hover:bg-[#F1F5F9] dark:hover:text-[#F8FAFC] hover:text-[#2D3748]">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
           </button>
         )}
-        <h2 className="text-lg font-bold dark:text-white text-zinc-900">{t("nav.shifts")}</h2>
+        <h2 className="text-lg font-bold dark:text-[#F8FAFC] text-[#2D3748]">{t("nav.shifts")}</h2>
       </div>
 
       {loading ? (
-        <p className="text-sm dark:text-zinc-500 text-zinc-400">{t("common.loading")}</p>
+        <p className="text-sm dark:text-[#64748B] text-[#718096]">{t("common.loading")}</p>
       ) : activeShifts.length === 0 ? (
         <div className="flex min-h-[40vh] items-center justify-center">
-          <p className="text-sm font-medium dark:text-zinc-400 text-zinc-600">{t("shift.noOneOnShift")}</p>
+          <p className="text-sm font-medium dark:text-[#94A3B8] text-[#718096]">{t("shift.noOneOnShift")}</p>
         </div>
       ) : (
         <div className="grid gap-3">
@@ -61,22 +61,22 @@ export function LiveTab({ onBack }: LiveTabProps) {
               <article
                 key={shift.id}
                 className={`rounded-2xl border p-4 ${
-                  isLongShift ? "border-amber-500/20 dark:bg-amber-500/5 bg-amber-50" : "border-blue-500/10 dark:bg-blue-500/5 bg-blue-50"
+                  isLongShift ? "border-amber-500/20 dark:bg-amber-500/5 bg-amber-50" : "border-[#008080]/10 dark:bg-[#D6BC97]/5 bg-[#E6F7F7]"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span className="relative flex h-3 w-3">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
-                      <span className="relative inline-flex h-3 w-3 rounded-full bg-blue-500" />
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#008080] opacity-75" />
+                      <span className="relative inline-flex h-3 w-3 rounded-full bg-[#008080]" />
                     </span>
                     <div>
-                      <p className="text-lg font-bold dark:text-white text-zinc-900">{user.full_name}</p>
-                      {user.position && <p className="text-xs font-medium dark:text-zinc-400 text-zinc-600">{user.position}</p>}
+                      <p className="text-lg font-bold dark:text-[#F8FAFC] text-[#2D3748]">{user.full_name}</p>
+                      {user.position && <p className="text-xs font-medium dark:text-[#94A3B8] text-[#718096]">{user.position}</p>}
                     </div>
                   </div>
                   <div className="text-right">
-                    <ShiftTimer clockIn={shift.clock_in} className="font-mono text-2xl font-black tabular-nums text-blue-400" />
+                    <ShiftTimer clockIn={shift.clock_in} className="font-mono text-2xl font-black tabular-nums text-[#008080]" />
                     {isLongShift && <p className="mt-0.5 text-[10px] font-medium text-amber-400">{hours}+ ч</p>}
                   </div>
                 </div>
