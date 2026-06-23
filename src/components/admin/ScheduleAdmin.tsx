@@ -5,19 +5,28 @@ import { getSchedule, setScheduleDay, setBulkWeekends, getWorkingToday } from "@
 import { getEmployees } from "@/actions/employeeActions";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
 import type { Schedule, ScheduleType, User } from "@/types/database";
 
-const TYPE_COLORS: Record<ScheduleType, { bg: string; text: string; dot: string; label: string }> = {
-  work: { bg: "bg-blue-500/20", text: "text-blue-400", dot: "bg-blue-500", label: "Рабочий" },
-  off: { bg: "bg-zinc-700/30", text: "text-zinc-500", dot: "bg-zinc-600", label: "Выходной" },
-  vacation: { bg: "bg-amber-500/20", text: "text-amber-400", dot: "bg-amber-500", label: "Отпуск" },
-  sick: { bg: "bg-rose-500/20", text: "text-rose-400", dot: "bg-rose-500", label: "Больничный" },
+const TYPE_COLORS: Record<ScheduleType, { bg: string; text: string; dot: string }> = {
+  work: { bg: "bg-blue-500/20", text: "text-blue-400", dot: "bg-blue-500" },
+  off: { bg: "bg-zinc-700/30", text: "text-zinc-500", dot: "bg-zinc-600" },
+  vacation: { bg: "bg-amber-500/20", text: "text-amber-400", dot: "bg-amber-500" },
+  sick: { bg: "bg-rose-500/20", text: "text-rose-400", dot: "bg-rose-500" },
+};
+
+const TYPE_LABELS: Record<ScheduleType, string> = {
+  work: "schedule.work",
+  off: "schedule.off",
+  vacation: "schedule.vacation",
+  sick: "schedule.sick",
 };
 
 const TYPE_ORDER: ScheduleType[] = ["work", "off", "vacation", "sick"];
 
 export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
+  const { t } = useI18n();
   const currentUser = useUserStore((s) => s.user);
   const [employees, setEmployees] = useState<User[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -90,11 +99,11 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
   };
 
   const monthNames = [
-    "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-    "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
+    t("month.january"), t("month.february"), t("month.march"), t("month.april"), t("month.may"), t("month.june"),
+    t("month.july"), t("month.august"), t("month.september"), t("month.october"), t("month.november"), t("month.december"),
   ];
 
-  const dayLabels = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+  const dayLabels = [t("day.mon"), t("day.tue"), t("day.wed"), t("day.thu"), t("day.fri"), t("day.sat"), t("day.sun")];
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
@@ -120,9 +129,9 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
           )}
           <div>
             <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
-              Расписание
+              {t("schedule.subtitle")}
             </p>
-            <h1 className="mt-1 text-2xl font-bold text-white">График сотрудников</h1>
+            <h1 className="mt-1 text-2xl font-bold text-white">{t("schedule.title")}</h1>
           </div>
         </div>
       </header>
@@ -130,12 +139,12 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
       <div className="px-4 pt-4">
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold text-white">Мой месяц</p>
+            <p className="text-sm font-semibold text-white">{t("schedule.myMonth")}</p>
             <div className="flex items-center gap-2">
-              {(["work", "off", "vacation", "sick"] as const).map((t) => (
-                <span key={t} className="flex items-center gap-1 text-[10px]">
-                  <span className={`h-1.5 w-1.5 rounded-full ${TYPE_COLORS[t].dot}`} />
-                  <span className={TYPE_COLORS[t].text}>{TYPE_COLORS[t].label}</span>
+              {(["work", "off", "vacation", "sick"] as const).map((type) => (
+                <span key={type} className="flex items-center gap-1 text-[10px]">
+                  <span className={`h-1.5 w-1.5 rounded-full ${TYPE_COLORS[type].dot}`} />
+                  <span className={TYPE_COLORS[type].text}>{t(TYPE_LABELS[type])}</span>
                 </span>
               ))}
             </div>
@@ -196,7 +205,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
           <thead>
             <tr>
               <th className="sticky left-0 z-20 bg-zinc-950 p-1.5 text-left text-[11px] font-medium text-zinc-500 min-w-[100px] shadow-[8px_0_12px_-4px_#09090b]">
-                Сотрудник
+                {t("salary.employee")}
               </th>
               {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
                 const date = new Date(year, month - 1, day);
@@ -246,7 +255,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
       {workingToday.length > 0 && (
         <div className="border-t border-zinc-800/60 px-4 pt-4 pb-24">
           <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
-            Сегодня на смене
+            {t("schedule.todayOnShift")}
           </h2>
           <div className="space-y-2">
             {workingToday.map((w) => (
@@ -266,10 +275,10 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
                     </span>
-                    <span className="text-[10px] text-blue-400">На смене</span>
+                    <span className="text-[10px] text-blue-400">{t("shift.onShift")}</span>
                   </span>
                 ) : (
-                  <span className="text-[10px] text-zinc-600">Ещё не пришёл</span>
+                  <span className="text-[10px] text-zinc-600">{t("schedule.notArrived")}</span>
                 )}
               </div>
             ))}

@@ -59,10 +59,10 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     startTransition(async () => {
       const result = await saveLocationSettings(validIPs, "ip");
       if (!result.success) {
-        setError(result.error ?? "Ошибка сохранения");
+        setError(result.error ?? t("settings.saveError"));
         return;
       }
-      setSuccess("Настройки сохранены");
+      setSuccess(t("settings.saved"));
       setTimeout(() => setSuccess(null), 3000);
     });
   };
@@ -87,11 +87,11 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
       const data = await res.json();
       if (data.ip && data.ip !== "unknown") {
         setAllowedIPs([data.ip]);
-        setSuccess(`IP определён: ${data.ip}`);
+        setSuccess(t("settings.ipDetected", { ip: data.ip }));
         setTimeout(() => setSuccess(null), 3000);
       }
     } catch {
-      setError("Не удалось определить IP");
+      setError(t("settings.detectIPFailed"));
     }
   };
 
@@ -115,13 +115,13 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     if (!editingId) return;
     const rate = Number(editRate);
     if (!Number.isFinite(rate) || rate < 0) {
-      setError("Укажите корректную ставку");
+      setError(t("settings.invalidRate"));
       return;
     }
 
     const result = await updateEmployee(editingId, editName, editPosition, rate, editRole);
     if (!result.success) {
-      setError(result.error ?? "Ошибка сохранения");
+      setError(result.error ?? t("settings.saveError"));
       return;
     }
     setEditingId(null);
@@ -137,21 +137,21 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     const rate = Number(newRate);
 
     if (!newName.trim()) {
-      setError("Введите имя");
+      setError(t("settings.enterName"));
       return;
     }
     if (!Number.isFinite(tgId) || tgId <= 0) {
-      setError("Введите корректный Telegram ID");
+      setError(t("settings.invalidTelegramId"));
       return;
     }
     if (!Number.isFinite(rate) || rate < 0) {
-      setError("Укажите корректную ставку");
+      setError(t("settings.invalidRate"));
       return;
     }
 
     const result = await addEmployee(tgId, newName, newRole, newPosition, rate);
     if (!result.success) {
-      setError(result.error ?? "Ошибка добавления");
+      setError(result.error ?? t("settings.addError"));
       return;
     }
     setNewName("");
@@ -166,7 +166,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const handleDeleteEmployee = async (userId: string) => {
     const result = await deleteEmployee(userId);
     if (!result.success) {
-      setError(result.error ?? "Ошибка удаления");
+      setError(result.error ?? t("settings.deleteError"));
       return;
     }
     void loadSettings();
@@ -195,16 +195,16 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
           )}
           <div>
             <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
-              Настройки
+              {t("settings.title")}
             </p>
-            <h1 className="mt-1 text-2xl font-bold text-white">Безопасность</h1>
+            <h1 className="mt-1 text-2xl font-bold text-white">{t("settings.security")}</h1>
           </div>
         </div>
       </header>
 
       <div className="mt-6 px-4">
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
-          <p className="mb-3 text-sm font-semibold text-white">Язык / Limbă</p>
+          <p className="mb-3 text-sm font-semibold text-white">{t("settings.language")}</p>
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setLocale("ru")}
@@ -242,7 +242,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
               <div key={i} className="flex gap-2">
                 <Input
                   type="text"
-                  placeholder="IP не определён"
+                  placeholder={t("settings.ipPlaceholder")}
                   value={ip}
                   onChange={(e) => updateIP(i, e.target.value)}
                 />
@@ -264,7 +264,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
               className="flex-1"
               onClick={() => void detectMyIP()}
             >
-              Определить мой IP
+              {t("settings.detectIP")}
             </Button>
             <button
               onClick={addIPField}
@@ -275,7 +275,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
           </div>
 
           <p className="mt-3 text-[10px] text-zinc-600">
-            Нажмите «Определить мой IP» будучи подключённым к WiFi заведения
+            {t("settings.detectIPDesc")}
           </p>
         </div>
       </div>
@@ -297,42 +297,42 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
           disabled={isPending}
           onClick={handleSave}
         >
-          {isPending ? "Сохранение..." : "Сохранить настройки"}
+          {isPending ? t("common.processing") : t("settings.save")}
         </Button>
       </div>
 
       <div className="px-4 mt-6 pb-24">
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
-            Сотрудники
+            {t("settings.employees")}
           </p>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
             className="rounded-xl border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 hover:border-blue-500/30 hover:text-blue-400"
           >
-            {showAddForm ? "Скрыть" : "+ Добавить"}
+            {showAddForm ? t("settings.hideForm") : t("settings.addEmployee")}
           </button>
         </div>
 
         {showAddForm && (
           <div className="mb-4 rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4">
-            <p className="mb-3 text-sm font-semibold text-blue-400">Новый сотрудник</p>
+            <p className="mb-3 text-sm font-semibold text-blue-400">{t("settings.newEmployee")}</p>
             <div className="space-y-2">
               <Input
                 type="text"
-                placeholder="Имя и фамилия"
+                placeholder={t("settings.namePlaceholder")}
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
               />
               <Input
                 type="number"
-                placeholder="Telegram ID"
+                placeholder={t("settings.telegramIdPlaceholder")}
                 value={newTelegramId}
                 onChange={(e) => setNewTelegramId(e.target.value)}
               />
               <Input
                 type="text"
-                placeholder="Должность (например: Официант)"
+                placeholder={t("settings.positionPlaceholder")}
                 value={newPosition}
                 onChange={(e) => setNewPosition(e.target.value)}
               />
@@ -341,7 +341,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                 inputMode="decimal"
                 step="0.5"
                 min="0"
-                placeholder="Ставка (л/ч)"
+                placeholder={t("settings.ratePlaceholder")}
                 value={newRate}
                 onChange={(e) => setNewRate(e.target.value)}
               />
@@ -354,7 +354,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                       : "border-zinc-700 text-zinc-500"
                   }`}
                 >
-                  Сотрудник
+                  {t("settings.employeeRole")}
                 </button>
                 <button
                   onClick={() => setNewRole("admin")}
@@ -364,7 +364,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                       : "border-zinc-700 text-zinc-500"
                   }`}
                 >
-                  Админ
+                  {t("settings.adminRole")}
                 </button>
               </div>
               <Button
@@ -372,7 +372,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                 className="w-full"
                 onClick={() => void handleAddEmployee()}
               >
-                Добавить сотрудника
+                {t("settings.addBtn")}
               </Button>
             </div>
           </div>
@@ -388,13 +388,13 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                 <div className="space-y-2">
                   <Input
                     type="text"
-                    placeholder="Имя и фамилия"
+                    placeholder={t("settings.namePlaceholder")}
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                   />
                   <Input
                     type="text"
-                    placeholder="Должность"
+                    placeholder={t("settings.position")}
                     value={editPosition}
                     onChange={(e) => setEditPosition(e.target.value)}
                   />
@@ -403,7 +403,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                     inputMode="decimal"
                     step="0.5"
                     min="0"
-                    placeholder="Ставка (л/ч)"
+                    placeholder={t("settings.ratePlaceholder")}
                     value={editRate}
                     onChange={(e) => setEditRate(e.target.value)}
                   />
@@ -411,12 +411,12 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                     <button
                       onClick={() => setEditRole("employee")}
                       className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${
-                        editRole === "employee"
-                          ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                          : "border-zinc-700 text-zinc-500"
+                      editRole === "employee"
+                        ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                        : "border-zinc-700 text-zinc-500"
                       }`}
                     >
-                      Сотрудник
+                      {t("settings.employeeRole")}
                     </button>
                     <button
                       onClick={() => setEditRole("admin")}
@@ -426,7 +426,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                           : "border-zinc-700 text-zinc-500"
                       }`}
                     >
-                      Админ
+                      {t("settings.adminRole")}
                     </button>
                   </div>
                   <div className="flex gap-2">
@@ -435,14 +435,14 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                       className="flex-1"
                       onClick={cancelEdit}
                     >
-                      Отмена
+                      {t("settings.cancel")}
                     </Button>
                     <Button
                       variant="blue"
                       className="flex-1"
                       onClick={() => void handleSaveEmployee()}
                     >
-                      Сохранить
+                      {t("settings.saveBtn")}
                     </Button>
                   </div>
                 </div>
@@ -454,7 +454,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                       <p className="text-xs text-zinc-400">{emp.position}</p>
                     )}
                     <p className="text-[10px] text-zinc-500">
-                      {emp.role === "admin" ? "Админ" : "Сотрудник"} · {emp.hourly_rate} л/ч · TG: {emp.telegram_id}
+                      {emp.role === "admin" ? t("settings.adminRole") : t("settings.employeeRole")} · {emp.hourly_rate} л/ч · TG: {emp.telegram_id}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -462,13 +462,13 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                       onClick={() => startEdit(emp)}
                       className="rounded-xl border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 hover:border-blue-500/30 hover:text-blue-400"
                     >
-                      Изменить
+                      {t("settings.edit")}
                     </button>
                     <button
                       onClick={() => void handleDeleteEmployee(emp.id)}
                       className="rounded-xl border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 hover:border-rose-500/30 hover:text-rose-400"
                     >
-                      Удалить
+                      {t("settings.delete")}
                     </button>
                   </div>
                 </div>

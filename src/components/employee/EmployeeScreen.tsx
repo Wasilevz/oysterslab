@@ -20,6 +20,7 @@ import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
 import { ScheduleEmployee } from "@/components/employee/ScheduleEmployee";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useI18n } from "@/lib/i18n";
 import { formatHours, getElapsedSeconds } from "@/lib/utils";
 import { useUserStore } from "@/store/userStore";
 import type { EmployeeStats, Shift } from "@/types/database";
@@ -42,6 +43,7 @@ function getInitials(name: string): string {
 }
 
 export function EmployeeScreen() {
+  const { t, locale, setLocale } = useI18n();
   const user = useUserStore((s) => s.user);
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
   const [recentShifts, setRecentShifts] = useState<Shift[]>([]);
@@ -89,14 +91,14 @@ export function EmployeeScreen() {
         const data = await res.json();
 
         if (!res.ok) {
-          setActionError(data.error ?? "Ошибка операции");
+          setActionError(data.error ?? t("common.operationError"));
           return;
         }
 
-        setSuccess(action === "clockOut" ? "Смена завершена" : "Смена начата");
+        setSuccess(action === "clockOut" ? t("shift.closed") : t("shift.opened"));
         void loadData();
       } catch {
-        setActionError("Ошибка сети");
+        setActionError(t("common.networkError"));
       }
     });
   };
@@ -126,7 +128,7 @@ export function EmployeeScreen() {
         </div>
         <div>
           <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-600">
-            Привет
+            {t("employee.hello")}
           </p>
           <h1 className="text-lg font-bold text-white">{user?.full_name}</h1>
         </div>
@@ -149,7 +151,7 @@ export function EmployeeScreen() {
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
                 </span>
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-400">
-                  На смене
+                  {t("shift.onShift")}
                 </p>
               </div>
 
@@ -159,7 +161,7 @@ export function EmployeeScreen() {
               />
 
               <p className="mt-2 text-xs text-zinc-500">
-                Начало в {format(new Date(activeShift.clock_in), "HH:mm")}
+                {t("shift.started")} {format(new Date(activeShift.clock_in), "HH:mm")}
               </p>
             </div>
           ) : (
@@ -180,10 +182,10 @@ export function EmployeeScreen() {
                 </svg>
               </div>
               <p className="text-sm font-semibold text-zinc-400">
-                Смена не начата
+                {t("shift.notStarted")}
               </p>
               <p className="mt-1 text-xs text-zinc-600">
-                Нажмите кнопку ниже, чтобы начать
+                {t("shift.tapToStart")}
               </p>
             </div>
           )}
@@ -198,7 +200,7 @@ export function EmployeeScreen() {
               : "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
           }`}
         >
-          {isPending ? "..." : isOnShift ? "Завершить смену" : "Начать смену"}
+          {isPending ? "..." : isOnShift ? t("shift.end") : t("shift.start")}
         </button>
 
         {actionError && (
@@ -218,7 +220,7 @@ export function EmployeeScreen() {
         <div className="mb-5 grid grid-cols-2 gap-3">
           <div className="rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-4">
             <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
-              На неделе
+              {t("employee.thisWeek")}
             </p>
             <p className="mt-1 font-mono text-2xl font-bold text-white">
               {stats.hoursThisWeek.toFixed(1)}
@@ -229,7 +231,7 @@ export function EmployeeScreen() {
           </div>
           <div className="rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-4">
             <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
-              За месяц
+              {t("employee.thisMonth")}
             </p>
             <p className="mt-1 font-mono text-2xl font-bold text-white">
               {stats.hoursThisMonth.toFixed(1)}
@@ -240,7 +242,7 @@ export function EmployeeScreen() {
           </div>
           <div className="col-span-2 rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4">
             <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
-              Ожидаемая зарплата
+              {t("employee.expectedSalary")}
             </p>
             <p className="mt-1 font-mono text-2xl font-bold text-blue-400">
               {formatMoney(stats.expectedSalary)}
@@ -256,7 +258,7 @@ export function EmployeeScreen() {
       {stats && stats.weeklyHours.some((d) => d.hours > 0) && (
         <div className="mb-5 rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-4">
           <p className="mb-3 text-[10px] font-medium uppercase tracking-wider text-zinc-600">
-            Часы за неделю
+            {t("employee.weeklyHours")}
           </p>
           <ResponsiveContainer width="100%" height={110}>
             <BarChart
@@ -287,12 +289,12 @@ export function EmployeeScreen() {
       {/* Последние смены */}
       <section className="mb-5">
         <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
-          Последние смены
+          {t("employee.lastShifts")}
         </h2>
 
         {recentShifts.length === 0 ? (
           <div className="rounded-2xl border border-zinc-800/30 bg-zinc-900/20 p-8 text-center">
-            <p className="text-xs text-zinc-600">Пока нет смен</p>
+            <p className="text-xs text-zinc-600">{t("employee.noShifts")}</p>
           </div>
         ) : (
           <ul className="space-y-2">
@@ -346,6 +348,34 @@ export function EmployeeScreen() {
       <EmployeeSalary />
 
       <ScheduleEmployee />
+
+      <div className="mt-6 px-4">
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
+          <p className="mb-3 text-sm font-semibold text-white">{t("settings.language")}</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setLocale("ru")}
+              className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${
+                locale === "ru"
+                  ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                  : "border-zinc-700 text-zinc-500"
+              }`}
+            >
+              🇷🇺 Русский
+            </button>
+            <button
+              onClick={() => setLocale("ro")}
+              className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${
+                locale === "ro"
+                  ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                  : "border-zinc-700 text-zinc-500"
+              }`}
+            >
+              🇲🇩 Română
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

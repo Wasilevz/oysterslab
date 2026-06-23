@@ -7,18 +7,27 @@ import { getAllShifts, editShift } from "@/actions/shiftActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useI18n } from "@/lib/i18n";
 import type { Shift } from "@/types/database";
 
 type ShiftWithUser = Shift & { users: { full_name: string; position: string | null } };
 
-const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  ACTIVE: { label: "Активна", color: "text-blue-400" },
-  COMPLETED: { label: "Завершена", color: "text-emerald-400" },
-  AUTO_CLOSED: { label: "Авто", color: "text-amber-400" },
-  REVIEWED: { label: "Проверена", color: "text-violet-400" },
+const STATUS_KEYS: Record<string, string> = {
+  ACTIVE: "shiftEditor.active",
+  COMPLETED: "shiftEditor.completed",
+  AUTO_CLOSED: "shiftEditor.autoClosed",
+  REVIEWED: "shiftEditor.reviewed",
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  ACTIVE: "text-blue-400",
+  COMPLETED: "text-emerald-400",
+  AUTO_CLOSED: "text-amber-400",
+  REVIEWED: "text-violet-400",
 };
 
 export function ShiftEditor({ onBack }: { onBack?: () => void }) {
+  const { t } = useI18n();
   const [shifts, setShifts] = useState<ShiftWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -63,7 +72,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
   const handleSave = () => {
     if (!editingId) return;
     if (!editClockIn) {
-      setError("Укажите время начала");
+      setError(t("shiftEditor.enterStartTime"));
       return;
     }
 
@@ -74,7 +83,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
         editClockOut || null,
       );
       if (!result.success) {
-        setError(result.error ?? "Ошибка");
+        setError(result.error ?? t("common.error"));
         return;
       }
       cancelEdit();
@@ -92,12 +101,12 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
             </svg>
           </button>
         )}
-        <h2 className="text-lg font-bold text-white">Редактирование смен</h2>
+        <h2 className="text-lg font-bold text-white">{t("shiftEditor.title")}</h2>
       </div>
 
       <div className="mb-4 grid grid-cols-2 gap-2">
         <div>
-          <p className="mb-1 text-xs text-zinc-500">С</p>
+          <p className="mb-1 text-xs text-zinc-500">{t("salary.from")}</p>
           <input
             type="date"
             value={dateFrom}
@@ -106,7 +115,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
           />
         </div>
         <div>
-          <p className="mb-1 text-xs text-zinc-500">По</p>
+          <p className="mb-1 text-xs text-zinc-500">{t("salary.to")}</p>
           <input
             type="date"
             value={dateTo}
@@ -126,12 +135,13 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
         <Skeleton className="h-48 w-full rounded-2xl" />
       ) : shifts.length === 0 ? (
         <div className="flex min-h-[30vh] items-center justify-center">
-          <p className="text-zinc-500">Нет смен за этот период</p>
+          <p className="text-zinc-500">{t("shiftEditor.noShifts")}</p>
         </div>
       ) : (
         <div className="space-y-2">
           {shifts.map((shift) => {
-            const status = STATUS_LABELS[shift.status] ?? { label: shift.status, color: "text-zinc-500" };
+            const statusKey = STATUS_KEYS[shift.status] ?? null;
+            const statusColor = STATUS_COLORS[shift.status] ?? "text-zinc-500";
             const isEditing = editingId === shift.id;
 
             return (
@@ -158,8 +168,8 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`text-[10px] font-semibold ${status.color}`}>
-                      {status.label}
+                    <span className={`text-[10px] font-semibold ${statusColor}`}>
+                      {statusKey ? t(statusKey) : shift.status}
                     </span>
                     {!isEditing && (
                       <button
@@ -175,7 +185,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                 {isEditing && (
                   <div className="mt-3 space-y-2 border-t border-zinc-800 pt-3">
                     <div>
-                      <p className="mb-1 text-[10px] text-zinc-500">Приход</p>
+                      <p className="mb-1 text-[10px] text-zinc-500">{t("shiftEditor.clockIn")}</p>
                       <input
                         type="datetime-local"
                         value={editClockIn}
@@ -184,7 +194,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                       />
                     </div>
                     <div>
-                      <p className="mb-1 text-[10px] text-zinc-500">Уход</p>
+                      <p className="mb-1 text-[10px] text-zinc-500">{t("shiftEditor.clockOut")}</p>
                       <input
                         type="datetime-local"
                         value={editClockOut}
@@ -192,15 +202,15 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                         className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
                       />
                       <p className="mt-0.5 text-[10px] text-zinc-600">
-                        Оставьте пустым если смена ещё активна
+                        {t("shiftEditor.clockOutHint")}
                       </p>
                     </div>
                     <div className="flex gap-2">
                       <Button variant="ghost" className="flex-1" onClick={cancelEdit} disabled={isPending}>
-                        Отмена
+                        {t("common.cancel")}
                       </Button>
                       <Button variant="blue" className="flex-1" onClick={handleSave} disabled={isPending}>
-                        {isPending ? "..." : "Сохранить"}
+                        {isPending ? "..." : t("common.save")}
                       </Button>
                     </div>
                   </div>

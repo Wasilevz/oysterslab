@@ -5,6 +5,7 @@ import { verifyTelegramAuth } from "@/actions/authActions";
 import { AdminScreen } from "@/components/admin/AdminScreen";
 import { EmployeeScreen } from "@/components/employee/EmployeeScreen";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
 
 function LoadingSkeleton() {
@@ -24,14 +25,15 @@ function AccessDenied({
   telegramId: number | null;
   message: string;
 }) {
+  const { t } = useI18n();
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-6 text-center">
       <div className="max-w-sm space-y-4">
-        <h1 className="text-2xl font-bold text-white">Доступ закрыт</h1>
+        <h1 className="text-2xl font-bold text-white">{t("auth.accessDenied")}</h1>
         <p className="text-zinc-400">{message}</p>
         {telegramId !== null && (
           <p className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 font-mono text-lg text-zinc-200">
-            Ваш Telegram ID: {telegramId}
+            {t("auth.yourId")} {telegramId}
           </p>
         )}
       </div>
@@ -40,6 +42,7 @@ function AccessDenied({
 }
 
 export default function Home() {
+  const { t } = useI18n();
   const { user, status, telegramId, error, viewAs, setLoading, setUser, setDenied, setError } =
     useUserStore();
   const initialized = useRef(false);
@@ -66,7 +69,7 @@ export default function Home() {
         if (!initData) {
           setDenied(
             WebApp.initDataUnsafe?.user?.id ?? null,
-            "Откройте приложение через Telegram",
+            t("auth.openViaTelegram"),
           );
           return;
         }
@@ -76,7 +79,7 @@ export default function Home() {
         if (!result.success || !result.data) {
           setDenied(
             result.telegramId ?? null,
-            result.error ?? "Доступ закрыт",
+            result.error ?? t("auth.accessDenied"),
           );
           return;
         }
@@ -84,7 +87,7 @@ export default function Home() {
         setUser(result.data, initData);
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Ошибка инициализации приложения",
+          err instanceof Error ? err.message : t("auth.appInitError"),
         );
       }
     }
@@ -100,19 +103,19 @@ export default function Home() {
     return (
       <AccessDenied
         telegramId={telegramId}
-        message={error ?? "Доступ закрыт"}
+        message={error ?? t("auth.accessDenied")}
       />
     );
   }
 
   if (status === "error") {
     return (
-      <AccessDenied telegramId={telegramId} message={error ?? "Ошибка"} />
+      <AccessDenied telegramId={telegramId} message={error ?? t("common.error")} />
     );
   }
 
   if (!user) {
-    return <AccessDenied telegramId={telegramId} message="Пользователь не найден" />;
+    return <AccessDenied telegramId={telegramId} message={t("auth.userNotFound")} />;
   }
 
   const effectiveRole = viewAs ?? user?.role;

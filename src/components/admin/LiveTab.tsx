@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getDashboardStats } from "@/actions/adminActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
+import { useI18n } from "@/lib/i18n";
 import { getElapsedSeconds } from "@/lib/utils";
 import type { ActiveShiftCard } from "@/types/database";
 
@@ -11,6 +12,7 @@ interface LiveTabProps {
 }
 
 export function LiveTab({ onBack }: LiveTabProps) {
+  const { t } = useI18n();
   const [activeShifts, setActiveShifts] = useState<ActiveShiftCard[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -39,14 +41,14 @@ export function LiveTab({ onBack }: LiveTabProps) {
             </svg>
           </button>
         )}
-        <h2 className="text-lg font-bold text-white">Смены</h2>
+        <h2 className="text-lg font-bold text-white">{t("nav.shifts")}</h2>
       </div>
 
       {loading ? (
-        <p className="text-sm text-zinc-500">Загрузка...</p>
+        <p className="text-sm text-zinc-500">{t("common.loading")}</p>
       ) : activeShifts.length === 0 ? (
         <div className="flex min-h-[40vh] items-center justify-center">
-          <p className="text-sm font-medium text-zinc-400">Сейчас никто не на смене</p>
+          <p className="text-sm font-medium text-zinc-400">{t("shift.noOneOnShift")}</p>
         </div>
       ) : (
         <div className="grid gap-3">

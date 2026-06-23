@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertCircle, Clock, Users } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 import type { DashboardStats } from "@/types/database";
 
 interface StatsCardsProps {
@@ -8,11 +9,12 @@ interface StatsCardsProps {
 }
 
 export function StatsCards({ stats }: StatsCardsProps) {
+  const { t } = useI18n();
   const pendingCount = stats.autoClosedShifts.length;
 
   const cards = [
     {
-      label: "На смене",
+      label: t("stats.onShift"),
       value: stats.activeShifts.length,
       icon: Clock,
       color: "text-blue-400",
@@ -21,7 +23,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
       glow: "shadow-blue-500/5",
     },
     {
-      label: "Сотрудников",
+      label: t("stats.employees"),
       value: stats.totalEmployees,
       icon: Users,
       color: "text-blue-300",
@@ -32,7 +34,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
     ...(pendingCount > 0
       ? [
           {
-            label: "Требует внимания",
+            label: t("stats.attention"),
             value: pendingCount,
             icon: AlertCircle,
             color: "text-amber-400",

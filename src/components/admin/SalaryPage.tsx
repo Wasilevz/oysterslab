@@ -16,6 +16,7 @@ import { getFines, deleteFine } from "@/actions/finesActions";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useI18n } from "@/lib/i18n";
 import type { FineWithUser, SalaryPaymentWithUser, User, MonthlyReportEmployee } from "@/types/database";
 
 function formatMoney(amount: number): string {
@@ -31,6 +32,7 @@ interface SalaryPageProps {
 }
 
 export function SalaryPage({ onBack }: SalaryPageProps) {
+  const { t } = useI18n();
   const [employees, setEmployees] = useState<User[]>([]);
   const [payments, setPayments] = useState<SalaryPaymentWithUser[]>([]);
   const [fines, setFines] = useState<FineWithUser[]>([]);
@@ -95,7 +97,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
   const handleCreate = () => {
     if (!selectedEmp || !dateFrom || !dateTo) {
-      setError("Выберите сотрудника и период");
+      setError(t("salary.selectDates"));
       return;
     }
     setError(null);
@@ -104,10 +106,10 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
     startTransition(async () => {
       const result = await createPayment(selectedEmp, dateFrom, dateTo);
       if (!result.success) {
-        setError(result.error ?? "Ошибка");
+        setError(result.error ?? t("common.error"));
         return;
       }
-      setSuccess("Выплата создана");
+      setSuccess(t("salary.created"));
       setSelectedEmp("");
       setDateFrom("");
       setDateTo("");
@@ -120,7 +122,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
     startTransition(async () => {
       const result = await approvePayment(id);
       if (!result.success) {
-        setError(result.error ?? "Ошибка");
+        setError(result.error ?? t("common.error"));
         return;
       }
       void loadData();
@@ -131,7 +133,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
     startTransition(async () => {
       const result = await deletePayment(id);
       if (!result.success) {
-        setError(result.error ?? "Ошибка");
+        setError(result.error ?? t("common.error"));
         return;
       }
       void loadData();
@@ -149,7 +151,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
   const approvedPayments = payments.filter((p) => p.status === "approved");
   const paidPayments = payments.filter((p) => p.status === "paid");
 
-  const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+  const monthNames = [t("month.january"), t("month.february"), t("month.march"), t("month.april"), t("month.may"), t("month.june"), t("month.july"), t("month.august"), t("month.september"), t("month.october"), t("month.november"), t("month.december")];
 
   const setWeekRange = (weeksOffset: number) => {
     const now = new Date();
@@ -181,8 +183,8 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
             </button>
           )}
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">Зарплаты</p>
-            <h1 className="mt-1 text-2xl font-bold text-white">Выплаты</h1>
+            <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">{t("salary.paymentsLabel")}</p>
+            <h1 className="mt-1 text-2xl font-bold text-white">{t("salary.payments")}</h1>
           </div>
         </div>
       </header>
@@ -196,7 +198,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               view === v ? "bg-blue-500/20 text-blue-400" : "text-zinc-500 hover:text-zinc-300"
             }`}
           >
-            {v === "create" ? "Создать" : v === "payments" ? `Выплаты (${pendingPayments.length})` : "Итого за месяц"}
+            {v === "create" ? t("salary.create") : v === "payments" ? `${t("salary.payments")} (${pendingPayments.length})` : t("salary.report")}
           </button>
         ))}
       </div>
@@ -215,16 +217,16 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
       {view === "create" && (
         <div className="px-4 pt-4 pb-24 space-y-4">
           <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4 space-y-3">
-            <p className="text-sm font-semibold text-white">Новая выплата</p>
+            <p className="text-sm font-semibold text-white">{t("salary.newPayment")}</p>
 
             <div>
-              <p className="mb-1 text-xs text-zinc-500">Сотрудник</p>
+              <p className="mb-1 text-xs text-zinc-500">{t("salary.employee")}</p>
               <select
                 value={selectedEmp}
                 onChange={(e) => setSelectedEmp(e.target.value)}
                 className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-sm text-white"
               >
-                <option value="">Выбрать сотрудника</option>
+                <option value="">{t("salary.selectEmployee")}</option>
                 {employees.map((emp) => (
                   <option key={emp.id} value={emp.id}>{emp.full_name} — {emp.hourly_rate} л/ч</option>
                 ))}
@@ -232,55 +234,55 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
             </div>
 
             <div>
-              <p className="mb-1 text-xs text-zinc-500">Быстрые периоды</p>
+              <p className="mb-1 text-xs text-zinc-500">{t("salary.quickPeriods")}</p>
               <div className="flex gap-2">
-                <button onClick={() => setWeekRange(0)} className="flex-1 rounded-xl border border-zinc-700 py-2 text-[10px] text-zinc-400 hover:border-blue-500/30 hover:text-blue-400">Эта неделя</button>
-                <button onClick={() => setWeekRange(-1)} className="flex-1 rounded-xl border border-zinc-700 py-2 text-[10px] text-zinc-400 hover:border-blue-500/30 hover:text-blue-400">Прошлая неделя</button>
+                <button onClick={() => setWeekRange(0)} className="flex-1 rounded-xl border border-zinc-700 py-2 text-[10px] text-zinc-400 hover:border-blue-500/30 hover:text-blue-400">{t("salary.thisWeek")}</button>
+                <button onClick={() => setWeekRange(-1)} className="flex-1 rounded-xl border border-zinc-700 py-2 text-[10px] text-zinc-400 hover:border-blue-500/30 hover:text-blue-400">{t("salary.lastWeek")}</button>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <p className="mb-1 text-xs text-zinc-500">С</p>
-                <DatePicker value={dateFrom} onChange={setDateFrom} placeholder="Начало" maxDate={dateTo || undefined} />
+                <p className="mb-1 text-xs text-zinc-500">{t("salary.from")}</p>
+                <DatePicker value={dateFrom} onChange={setDateFrom} placeholder={t("salary.fromPlaceholder")} maxDate={dateTo || undefined} />
               </div>
               <div>
-                <p className="mb-1 text-xs text-zinc-500">По</p>
-                <DatePicker value={dateTo} onChange={setDateTo} placeholder="Конец" minDate={dateFrom || undefined} />
+                <p className="mb-1 text-xs text-zinc-500">{t("salary.to")}</p>
+                <DatePicker value={dateTo} onChange={setDateTo} placeholder={t("salary.toPlaceholder")} minDate={dateFrom || undefined} />
               </div>
             </div>
           </div>
 
           {preview && (
             <div className="rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4 space-y-2">
-              <p className="text-sm font-semibold text-blue-400">Расчёт</p>
+              <p className="text-sm font-semibold text-blue-400">{t("salary.calculation")}</p>
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">Часы</span>
+                <span className="text-zinc-400">{t("salary.hours")}</span>
                 <span className="font-mono font-bold text-white">{preview.hours.toFixed(1)} ч</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">Ставка</span>
+                <span className="text-zinc-400">{t("salary.rate")}</span>
                 <span className="font-mono text-white">{preview.rate} л/ч</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">Смен</span>
+                <span className="text-zinc-400">{t("salary.shifts")}</span>
                 <span className="font-mono text-white">{preview.shiftCount}</span>
               </div>
               {preview.fines > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-zinc-400">Штрафы</span>
+                  <span className="text-zinc-400">{t("salary.fines")}</span>
                   <span className="font-mono text-rose-400">-{formatMoney(preview.fines)}</span>
                 </div>
               )}
               <div className="border-t border-blue-500/20 pt-2 flex justify-between">
-                <span className="text-sm font-semibold text-white">Итого</span>
+                <span className="text-sm font-semibold text-white">{t("salary.total")}</span>
                 <span className="font-mono text-lg font-bold text-blue-400">{formatMoney(preview.amount)}</span>
               </div>
             </div>
           )}
 
           <Button variant="blue" className="w-full" disabled={isPending || !preview || preview.hours <= 0} onClick={handleCreate}>
-            {isPending ? "Создание..." : "Создать выплату"}
+            {isPending ? t("salary.creating") : t("salary.createPayment")}
           </Button>
         </div>
       )}
@@ -289,7 +291,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
         <div className="px-4 pt-4 pb-24 space-y-4">
           {pendingPayments.length > 0 && (
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-amber-400">Ожидают одобрения ({pendingPayments.length})</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-amber-400">{t("salary.pending", { count: pendingPayments.length })}</p>
               <div className="space-y-2">
                 {pendingPayments.map((p) => (
                   <div key={p.id} className="rounded-2xl border border-amber-500/10 bg-amber-500/5 p-4">
@@ -301,15 +303,15 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
                           {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
                         </p>
                       </div>
-                      <span className="rounded-lg bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">ОЖИДАЕТ</span>
+                      <span className="rounded-lg bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">{t("salary.waiting")}</span>
                     </div>
                     <div className="mt-2 flex justify-between text-sm">
                       <span className="text-zinc-400">{Number(p.hours_worked).toFixed(1)} ч × {Number(p.hourly_rate)} л/ч</span>
                       <span className="font-mono font-bold text-white">{formatMoney(Number(p.total_amount))}</span>
                     </div>
                     <div className="mt-3 flex gap-2">
-                      <Button variant="blue" className="flex-1" disabled={isPending} onClick={() => handleApprove(p.id)}>Одобрить</Button>
-                      <Button variant="ghost" className="flex-1" disabled={isPending} onClick={() => handleDelete(p.id)}>Удалить</Button>
+                      <Button variant="blue" className="flex-1" disabled={isPending} onClick={() => handleApprove(p.id)}>{t("salary.approve")}</Button>
+                      <Button variant="ghost" className="flex-1" disabled={isPending} onClick={() => handleDelete(p.id)}>{t("salary.delete")}</Button>
                     </div>
                   </div>
                 ))}
@@ -319,7 +321,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
           {approvedPayments.length > 0 && (
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-blue-400">Одобрены ({approvedPayments.length})</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-blue-400">{t("salary.approved", { count: approvedPayments.length })}</p>
               <div className="space-y-2">
                 {approvedPayments.map((p) => (
                   <div key={p.id} className="rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4">
@@ -330,7 +332,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
                           {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
                         </p>
                       </div>
-                      <span className="rounded-lg bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-400">ОДОБРЕНО</span>
+                      <span className="rounded-lg bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-400">{t("salary.approvedStatus")}</span>
                     </div>
                     <div className="mt-2 flex justify-between">
                       <span className="text-sm text-zinc-400">{Number(p.hours_worked).toFixed(1)} ч</span>
@@ -344,7 +346,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
           {paidPayments.length > 0 && (
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-emerald-400">Выплачены ({paidPayments.length})</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-emerald-400">{t("salary.paid", { count: paidPayments.length })}</p>
               <div className="space-y-2">
                 {paidPayments.slice(0, 20).map((p) => (
                   <div key={p.id} className="rounded-2xl border border-emerald-500/10 bg-emerald-500/5 p-4">
@@ -355,7 +357,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
                           {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
                         </p>
                       </div>
-                      <span className="rounded-lg bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">ВЫПЛАЧЕНО</span>
+                      <span className="rounded-lg bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">{t("salary.paidStatus")}</span>
                     </div>
                     <div className="mt-2 flex justify-between">
                       <span className="text-sm text-zinc-400">{Number(p.hours_worked).toFixed(1)} ч</span>
@@ -374,7 +376,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
           {payments.length === 0 && (
             <div className="flex min-h-[30vh] items-center justify-center">
-              <p className="text-zinc-500">Нет выплат</p>
+              <p className="text-zinc-500">{t("salary.noPayments")}</p>
             </div>
           )}
         </div>
@@ -395,10 +397,10 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
           {monthlyReport && monthlyReport.employees.length > 0 && (
             <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 overflow-hidden">
               <div className="grid grid-cols-4 gap-px bg-zinc-800 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                <div className="bg-zinc-900 px-3 py-2">Сотрудник</div>
-                <div className="bg-zinc-900 px-3 py-2 text-center">Часы</div>
-                <div className="bg-zinc-900 px-3 py-2 text-center">Смены</div>
-                <div className="bg-zinc-900 px-3 py-2 text-right">Сумма</div>
+                <div className="bg-zinc-900 px-3 py-2">{t("salary.employee")}</div>
+                <div className="bg-zinc-900 px-3 py-2 text-center">{t("salary.hours")}</div>
+                <div className="bg-zinc-900 px-3 py-2 text-center">{t("salary.shiftsPlural")}</div>
+                <div className="bg-zinc-900 px-3 py-2 text-right">{t("salary.amount")}</div>
               </div>
               {monthlyReport.employees.map((emp) => (
                 <div key={emp.id} className="grid grid-cols-4 gap-px bg-zinc-800">
@@ -419,7 +421,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               ))}
               <div className="grid grid-cols-4 gap-px bg-zinc-800">
                 <div className="bg-blue-500/10 px-3 py-3 col-span-3">
-                  <p className="text-sm font-bold text-white">Итого</p>
+                  <p className="text-sm font-bold text-white">{t("salary.total")}</p>
                 </div>
                 <div className="bg-blue-500/10 px-3 py-3 text-right">
                   <p className="font-mono text-lg font-bold text-blue-400">{formatMoney(monthlyReport.grandTotal)}</p>
@@ -430,7 +432,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
           {monthlyReport && monthlyReport.employees.length === 0 && (
             <div className="flex min-h-[30vh] items-center justify-center">
-              <p className="text-zinc-500">Нет данных за этот месяц</p>
+              <p className="text-zinc-500">{t("salary.noData")}</p>
             </div>
           )}
         </div>

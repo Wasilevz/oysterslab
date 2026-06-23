@@ -3,17 +3,26 @@
 import { useCallback, useEffect, useState } from "react";
 import { getMySchedule, getWorkingToday } from "@/actions/scheduleActions";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
 import type { Schedule, ScheduleType } from "@/types/database";
 
-const TYPE_COLORS: Record<ScheduleType, { dot: string; text: string; label: string }> = {
-  work: { dot: "bg-blue-500", text: "text-blue-400", label: "Рабочий" },
-  off: { dot: "bg-zinc-600", text: "text-zinc-500", label: "Выходной" },
-  vacation: { dot: "bg-amber-500", text: "text-amber-400", label: "Отпуск" },
-  sick: { dot: "bg-rose-500", text: "text-rose-400", label: "Больничный" },
+const TYPE_COLORS: Record<ScheduleType, { dot: string; text: string }> = {
+  work: { dot: "bg-blue-500", text: "text-blue-400" },
+  off: { dot: "bg-zinc-600", text: "text-zinc-500" },
+  vacation: { dot: "bg-amber-500", text: "text-amber-400" },
+  sick: { dot: "bg-rose-500", text: "text-rose-400" },
+};
+
+const TYPE_LABELS: Record<ScheduleType, string> = {
+  work: "schedule.work",
+  off: "schedule.off",
+  vacation: "schedule.vacation",
+  sick: "schedule.sick",
 };
 
 export function ScheduleEmployee() {
+  const { t } = useI18n();
   const user = useUserStore((s) => s.user);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [workingToday, setWorkingToday] = useState<{ id: string; full_name: string; position: string | null; clock_in: string | null }[]>([]);
@@ -59,11 +68,11 @@ export function ScheduleEmployee() {
   };
 
   const monthNames = [
-    "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
-    "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
+    t("month.january"), t("month.february"), t("month.march"), t("month.april"), t("month.may"), t("month.june"),
+    t("month.july"), t("month.august"), t("month.september"), t("month.october"), t("month.november"), t("month.december"),
   ];
 
-  const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+  const dayNames = [t("day.mon"), t("day.tue"), t("day.wed"), t("day.thu"), t("day.fri"), t("day.sat"), t("day.sun")];
 
   if (loading) {
     return (
@@ -81,7 +90,7 @@ export function ScheduleEmployee() {
     <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
       <header className="mb-5">
         <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
-          Мой график
+          {t("schedule.mySchedule")}
         </p>
         <h1 className="mt-1 text-2xl font-bold text-white">
           {monthNames[month - 1]} {year}
@@ -95,10 +104,10 @@ export function ScheduleEmployee() {
           </svg>
         </button>
         <div className="flex gap-2">
-          {(["work", "off", "vacation", "sick"] as const).map((t) => (
-            <span key={t} className={`flex items-center gap-1 text-[10px] ${TYPE_COLORS[t].text}`}>
-              <span className={`h-2 w-2 rounded-full ${TYPE_COLORS[t].dot}`} />
-              {TYPE_COLORS[t].label}
+          {(["work", "off", "vacation", "sick"] as const).map((type) => (
+            <span key={type} className={`flex items-center gap-1 text-[10px] ${TYPE_COLORS[type].text}`}>
+              <span className={`h-2 w-2 rounded-full ${TYPE_COLORS[type].dot}`} />
+              {t(TYPE_LABELS[type])}
             </span>
           ))}
         </div>
@@ -144,7 +153,7 @@ export function ScheduleEmployee() {
       {workingToday.length > 0 && (
         <div className="mt-5">
           <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
-            Сегодня на смене
+            {t("schedule.todayOnShift")}
           </h2>
           <div className="space-y-2">
             {workingToday.map((w) => (
@@ -164,10 +173,10 @@ export function ScheduleEmployee() {
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
                     </span>
-                    <span className="text-[10px] text-blue-400">На смене</span>
+                    <span className="text-[10px] text-blue-400">{t("shift.onShift")}</span>
                   </span>
                 ) : (
-                  <span className="text-[10px] text-zinc-600">Ещё не пришёл</span>
+                  <span className="text-[10px] text-zinc-600">{t("schedule.notArrived")}</span>
                 )}
               </div>
             ))}

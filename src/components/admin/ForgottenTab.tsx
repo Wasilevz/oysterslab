@@ -6,6 +6,7 @@ import { ru } from "date-fns/locale";
 import { getDashboardStats } from "@/actions/adminActions";
 import { reviewAutoClosedShift } from "@/actions/shiftActions";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +24,7 @@ interface ForgottenTabProps {
 }
 
 export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
+  const { t } = useI18n();
   const [shifts, setShifts] = useState<ShiftWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<ShiftWithUser | null>(null);
@@ -59,13 +61,13 @@ export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
     if (!selected) return;
     const parsed = Number(hours.replace(",", "."));
     if (!Number.isFinite(parsed)) {
-      setError("Введите число часов");
+      setError(t("forgotten.enterHours"));
       return;
     }
     startTransition(async () => {
       const result = await reviewAutoClosedShift(selected.id, parsed);
       if (!result.success) {
-        setError(result.error ?? "Ошибка");
+        setError(result.error ?? t("common.error"));
         return;
       }
       closeDialog();
@@ -85,19 +87,19 @@ export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
               </svg>
             </button>
           )}
-          <h2 className="text-lg font-bold text-white">Забывашки</h2>
+          <h2 className="text-lg font-bold text-white">{t("nav.forgotten")}</h2>
         </div>
 
         {loading ? (
-          <p className="text-sm text-zinc-500">Загрузка...</p>
+          <p className="text-sm text-zinc-500">{t("common.loading")}</p>
         ) : shifts.length === 0 ? (
           <div className="flex min-h-[40vh] items-center justify-center">
-            <p className="text-sm font-medium text-zinc-400">Забытых смен нет</p>
+            <p className="text-sm font-medium text-zinc-400">{t("shift.forgotten")}</p>
           </div>
         ) : (
           <>
             <p className="mb-3 text-xs text-zinc-500">
-              Система автоматически закрыла смены после 1:30. Проверьте часы и подтвердите.
+              {t("shift.forgottenDesc")}
             </p>
             <div className="grid gap-3">
               {shifts.map((shift) => (
@@ -111,14 +113,14 @@ export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
                       </p>
                     </div>
                     <div className="text-right">
-                      <span className="rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-400">AUTO</span>
+                      <span className="rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-400">{t("shift.autoClosed")}</span>
                       {shift.hours_worked != null && (
-                        <p className="mt-1 font-mono text-xs font-bold text-amber-400">≈ {shift.hours_worked.toFixed(1)} ч</p>
+                        <p className="mt-1 font-mono text-xs font-bold text-amber-400">{t("shift.estimated", { hours: shift.hours_worked.toFixed(1) })}</p>
                       )}
                     </div>
                   </div>
                   <Button variant="outline" className="w-full" onClick={() => openDialog(shift)}>
-                    Проверить и подтвердить
+                    {t("shift.review")}
                   </Button>
                 </article>
               ))}
@@ -130,7 +132,7 @@ export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
       <Dialog open={Boolean(selected)} onOpenChange={(open) => !open && closeDialog()}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Отработанные часы</DialogTitle>
+            <DialogTitle>{t("shift.confirmHours")}</DialogTitle>
             <DialogDescription>
               {selected?.users.full_name} — смена от{" "}
               {selected && format(new Date(selected.clock_in), "d MMM yyyy", { locale: ru })}
@@ -139,14 +141,14 @@ export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
           <div className="space-y-2">
             <Input type="number" inputMode="decimal" step="0.5" min="0.5" max="24" placeholder="8" value={hours} onChange={(e) => setHours(e.target.value)} autoFocus />
             {selected?.hours_worked != null && (
-              <p className="text-xs text-zinc-500">Система рассчитала: {selected.hours_worked.toFixed(1)} ч</p>
+              <p className="text-xs text-zinc-500">{t("shift.systemCalculated")} {selected.hours_worked.toFixed(1)} ч</p>
             )}
           </div>
           {error && <p className="text-sm text-red-400">{error}</p>}
           <DialogFooter>
-            <Button variant="ghost" onClick={closeDialog} disabled={isPending}>Отмена</Button>
+            <Button variant="ghost" onClick={closeDialog} disabled={isPending}>{t("common.cancel")}</Button>
             <Button variant="blue" onClick={handleSubmit} disabled={isPending || !hours}>
-              {isPending ? "..." : "Подтвердить"}
+              {isPending ? "..." : t("common.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
