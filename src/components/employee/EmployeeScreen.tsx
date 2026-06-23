@@ -20,6 +20,8 @@ import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
 import { ScheduleEmployee } from "@/components/employee/ScheduleEmployee";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { PullToRefresh } from "@/components/shared/PullToRefresh";
+import { Onboarding } from "@/components/employee/Onboarding";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import { formatHours, getElapsedSeconds } from "@/lib/utils";
@@ -53,6 +55,7 @@ export function EmployeeScreen() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -74,6 +77,12 @@ export function EmployeeScreen() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    if (!localStorage.getItem("onboarded")) {
+      setShowOnboarding(true);
+    }
+  }, []);
 
   const handleToggleShift = () => {
     if (!user) return;
@@ -106,7 +115,7 @@ export function EmployeeScreen() {
 
   if (loading) {
     return (
-      <div className="flex flex-1 flex-col gap-4 p-4">
+      <div className="flex flex-1 flex-col gap-4 p-4 pb-24">
         <Skeleton className="h-16 w-full rounded-2xl" />
         <Skeleton className="h-40 w-full rounded-3xl" />
         <div className="grid grid-cols-2 gap-3">
@@ -118,10 +127,15 @@ export function EmployeeScreen() {
     );
   }
 
+  if (showOnboarding) {
+    return <Onboarding onComplete={() => setShowOnboarding(false)} />;
+  }
+
   const isOnShift = Boolean(activeShift);
 
   return (
-    <div className="flex min-h-full flex-1 flex-col p-4 pb-8">
+    <PullToRefresh onRefresh={loadData}>
+      <div className="flex min-h-full flex-1 flex-col p-4 pb-8">
       {/* Header */}
       <header className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -258,100 +272,10 @@ export function EmployeeScreen() {
         </div>
       )}
 
-      {/* График часов за неделю */}
-      {stats && stats.weeklyHours.some((d) => d.hours > 0) && (
-        <div className="mb-5 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
-          <p className="mb-3 text-[10px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
-            {t("employee.weeklyHours")}
-          </p>
-          <ResponsiveContainer width="100%" height={110}>
-            <BarChart
-              data={stats.weeklyHours}
-              margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-            >
-              <XAxis
-                dataKey="day"
-                tick={{ fill: "#52525b", fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis hide />
-              <Bar dataKey="hours" radius={[6, 6, 0, 0]} maxBarSize={28}>
-                {stats.weeklyHours.map((entry, i) => (
-                  <Cell
-                    key={i}
-                    fill={entry.hours > 0 ? "#3b82f6" : "#27272a"}
-                    fillOpacity={entry.hours > 0 ? 0.9 : 0.3}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      {/* Последние смены */}
-      <section className="mb-5">
-        <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
-          {t("employee.lastShifts")}
-        </h2>
-
-        {recentShifts.length === 0 ? (
-          <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-8 text-center">
-            <p className="text-xs text-[var(--text-secondary)]">{t("employee.noShifts")}</p>
-          </div>
-        ) : (
-          <ul className="space-y-2">
-            {recentShifts.map((shift) => {
-              const hours =
-                shift.hours_worked ??
-                (shift.clock_out
-                  ? getElapsedSeconds(shift.clock_in, new Date(shift.clock_out)) /
-                    3600
-                  : 0);
-
-              return (
-                <li
-                  key={shift.id}
-                  className="flex items-center justify-between rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-4 py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 flex-col items-center justify-center rounded-xl bg-[var(--bg-surface)]/60 leading-none">
-                      <span className="text-[10px] font-bold text-[var(--text-secondary)]">
-                        {format(new Date(shift.clock_in), "d", { locale: ru })}
-                      </span>
-                      <span className="text-[8px] text-[var(--text-secondary)]">
-                        {format(new Date(shift.clock_in), "MMM", {
-                          locale: ru,
-                        })}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-[var(--text-secondary)]">
-                        {format(new Date(shift.clock_in), "HH:mm")}
-                        {shift.clock_out &&
-                          ` — ${format(new Date(shift.clock_out), "HH:mm")}`}
-                      </p>
-                      <p className="text-[10px] text-[var(--text-secondary)]">
-                        {format(new Date(shift.clock_in), "EEEE", {
-                          locale: ru,
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="font-mono text-sm font-bold text-[var(--text-primary)]">
-                    {formatHours(hours)}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
-
       <EmployeeSalary />
 
       <ScheduleEmployee />
-    </div>
+      </div>
+    </PullToRefresh>
   );
 }
