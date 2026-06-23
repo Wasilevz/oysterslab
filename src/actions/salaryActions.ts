@@ -133,6 +133,10 @@ export async function approvePayment(
       .eq("id", paymentId)
       .eq("status", "pending");
     if (error) return { success: false, error: "Ошибка сервера" };
+
+    const { notifyShiftApproved } = await import("@/lib/telegram-notify");
+    void notifyShiftApproved(paymentId);
+
     return { success: true };
   } catch {
     return { success: false, error: "Ошибка сервера" };
@@ -150,6 +154,10 @@ export async function confirmPayment(
       .eq("id", paymentId)
       .eq("status", "approved");
     if (error) return { success: false, error: "Ошибка сервера" };
+
+    const { notifyPaymentReceived } = await import("@/lib/telegram-notify");
+    void notifyPaymentReceived(paymentId);
+
     return { success: true };
   } catch {
     return { success: false, error: "Ошибка сервера" };
