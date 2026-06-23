@@ -8,7 +8,7 @@ import { useUserStore } from "@/store/userStore";
 import type { Schedule, ScheduleType } from "@/types/database";
 
 const TYPE_COLORS: Record<ScheduleType, { dot: string; text: string }> = {
-  work: { dot: "bg-[var(--brand-primary)]", text: "text-[var(--brand-primary)]" },
+  work: { dot: "bg-emerald-500", text: "text-emerald-600 dark:text-emerald-400" },
   off: { dot: "bg-[var(--text-secondary)]", text: "text-[var(--text-secondary)]" },
   vacation: { dot: "bg-[var(--color-warning)]", text: "text-[var(--color-warning)]" },
   sick: { dot: "bg-[var(--color-error)]", text: "text-[var(--color-error)]" },
@@ -106,10 +106,10 @@ export function ScheduleEmployee() {
         </button>
         <div className="flex gap-2">
           {(["work", "off", "vacation", "sick"] as const).map((type) => (
-            <span key={type} className={`flex items-center gap-1 text-[10px] ${TYPE_COLORS[type].text}`}>
-              <span className={`h-2 w-2 rounded-full ${TYPE_COLORS[type].dot}`} />
-              {t(TYPE_LABELS[type])}
-            </span>
+              <span key={type} className={`flex items-center gap-1.5 text-[10px] font-medium ${TYPE_COLORS[type].text}`}>
+                <span className={`h-2.5 w-2.5 rounded-full ${TYPE_COLORS[type].dot}`} />
+                {t(TYPE_LABELS[type])}
+              </span>
           ))}
         </div>
         <button onClick={nextMonth} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
@@ -144,7 +144,7 @@ export function ScheduleEmployee() {
                 <span className={`text-xs font-medium ${isToday ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}`}>
                   {day}
                 </span>
-                <span className={`mt-0.5 h-1.5 w-1.5 rounded-full ${colors.dot}`} />
+                <span className={`mt-1 h-2 w-2 rounded-full ${colors.dot}`} />
               </div>
             );
           })}

@@ -9,7 +9,7 @@ import { useUserStore } from "@/store/userStore";
 import type { Schedule, ScheduleType, User } from "@/types/database";
 
 const TYPE_COLORS: Record<ScheduleType, { bg: string; text: string; dot: string }> = {
-  work: { bg: "bg-[var(--brand-primary)]/20", text: "text-[var(--brand-primary)]", dot: "bg-[var(--brand-primary)]" },
+  work: { bg: "bg-emerald-500/20", text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" },
   off: { bg: "bg-[var(--text-secondary)]/20", text: "text-[var(--text-secondary)]", dot: "bg-[var(--text-secondary)]" },
   vacation: { bg: "bg-[var(--color-warning)]/20", text: "text-[var(--color-warning)]", dot: "bg-[var(--color-warning)]" },
   sick: { bg: "bg-[var(--color-error)]/20", text: "text-[var(--color-error)]", dot: "bg-[var(--color-error)]" },
@@ -133,7 +133,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
             <div className="flex items-center gap-2">
               {(["work", "off", "vacation", "sick"] as const).map((type) => (
                 <span key={type} className="flex items-center gap-1 text-[10px]">
-                  <span className={`h-1.5 w-1.5 rounded-full ${TYPE_COLORS[type].dot}`} />
+                  <span className={`h-2.5 w-2.5 rounded-full ${TYPE_COLORS[type].dot}`} />
                   <span className={TYPE_COLORS[type].text}>{t(TYPE_LABELS[type])}</span>
                 </span>
               ))}
