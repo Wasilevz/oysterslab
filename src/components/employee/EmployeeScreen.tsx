@@ -125,14 +125,14 @@ export function EmployeeScreen() {
       {/* Header */}
       <header className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent)] to-teal-700 text-sm font-bold text-white shadow-lg shadow-[var(--accent)]/20">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#008080] to-teal-700 text-sm font-bold text-white shadow-lg shadow-[#008080]/20">
             {user?.full_name ? getInitials(user.full_name) : "—"}
           </div>
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-widest text-[var(--muted)]">
+            <p className="text-[10px] font-medium uppercase tracking-widest dark:text-[#475569] text-[#718096]">
               {t("employee.hello")}
             </p>
-            <h1 className="text-lg font-bold text-[var(--fg)]">{user?.full_name}</h1>
+            <h1 className="text-lg font-bold dark:text-[#F8FAFC] text-[#2D3748]">{user?.full_name}</h1>
           </div>
         </div>
         <ThemeToggle />
@@ -142,8 +142,8 @@ export function EmployeeScreen() {
       <div
         className={`relative mb-5 overflow-hidden rounded-3xl border transition-all duration-300 ${
           isOnShift
-            ? "border-[var(--accent)]/30 bg-gradient-to-br from-[var(--accent)]/15 via-[var(--accent)]/5 to-transparent shadow-xl shadow-[var(--accent)]/5"
-            : "border-[var(--card-border)]/80 bg-[var(--card)]"
+            ? "border-[#008080]/30 bg-gradient-to-br dark:from-[#D6BC97]/15 dark:via-[#D6BC97]/5 from-[#E6F7F7] via-[#B2DFDB]/50 to-transparent shadow-xl dark:shadow-[#D6BC97]/5 shadow-[#B2DFDB]/50"
+            : "dark:border-[#334155]/80 border-[#E2E8F0]/80 dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80"
         }`}
       >
         <div className="p-5">
@@ -151,28 +151,28 @@ export function EmployeeScreen() {
             <div className="flex flex-col items-center text-center">
               <div className="mb-1 flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#008080] opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#008080]" />
                 </span>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--accent)]">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#008080]">
                   {t("shift.onShift")}
                 </p>
               </div>
 
               <ShiftTimer
                 clockIn={activeShift.clock_in}
-                className="font-mono text-5xl font-black tabular-nums tracking-tight text-[var(--fg)]"
+                className="font-mono text-5xl font-black tabular-nums tracking-tight dark:text-[#F8FAFC] text-[#2D3748]"
               />
 
-              <p className="mt-2 text-xs text-[var(--muted)]">
+              <p className="mt-2 text-xs dark:text-[#64748B] text-[#718096]">
                 {t("shift.started")} {format(new Date(activeShift.clock_in), "HH:mm")}
               </p>
             </div>
           ) : (
             <div className="flex flex-col items-center text-center">
-              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--card-border)]/50">
+              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-2xl dark:bg-[#334155]/50 bg-[#F1F5F9]/80">
                 <svg
-                  className="h-7 w-7 text-[var(--muted)]"
+                  className="h-7 w-7 dark:text-[#475569] text-[#718096]"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
@@ -185,10 +185,10 @@ export function EmployeeScreen() {
                   />
                 </svg>
               </div>
-              <p className="text-sm font-semibold text-[var(--muted)]">
+              <p className="text-sm font-semibold dark:text-[#94A3B8] text-[#718096]">
                 {t("shift.notStarted")}
               </p>
-              <p className="mt-1 text-xs text-[var(--muted)]">
+              <p className="mt-1 text-xs dark:text-[#475569] text-[#718096]">
                 {t("shift.tapToStart")}
               </p>
             </div>
@@ -200,8 +200,8 @@ export function EmployeeScreen() {
           disabled={isPending}
           className={`w-full py-4 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
             isOnShift
-              ? "bg-rose-100 text-rose-400 hover:bg-rose-500/25"
-              : "bg-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)]/30"
+              ? "dark:bg-rose-500/15 bg-rose-100 text-rose-400 hover:bg-rose-500/25"
+              : "dark:bg-[#D6BC97]/20 bg-[#B2DFDB] text-[#008080] hover:bg-[#008080]/30"
           }`}
         >
           {isPending ? "..." : isOnShift ? t("shift.end") : t("shift.start")}
@@ -213,7 +213,7 @@ export function EmployeeScreen() {
           </p>
         )}
         {success && (
-          <p className="px-5 pb-4 text-center text-xs text-[var(--accent)]">
+          <p className="px-5 pb-4 text-center text-xs text-[#008080]">
             {success}
           </p>
         )}
@@ -222,36 +222,36 @@ export function EmployeeScreen() {
       {/* Статистика */}
       {stats && (
         <div className="mb-5 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-[var(--card-border)]/50 bg-[var(--card)] p-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-[var(--muted)]">
+          <div className="rounded-2xl border dark:border-[#334155]/50 border-[#E2E8F0]/50 dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 p-4">
+            <p className="text-[10px] font-medium uppercase tracking-wider dark:text-[#475569] text-[#718096]">
               {t("employee.thisWeek")}
             </p>
-            <p className="mt-1 font-mono text-2xl font-bold text-[var(--fg)]">
+            <p className="mt-1 font-mono text-2xl font-bold dark:text-[#F8FAFC] text-[#2D3748]">
               {stats.hoursThisWeek.toFixed(1)}
-              <span className="ml-1 text-xs font-normal text-[var(--muted)]">
+              <span className="ml-1 text-xs font-normal dark:text-[#64748B] text-[#718096]">
                 ч
               </span>
             </p>
           </div>
-          <div className="rounded-2xl border border-[var(--card-border)]/50 bg-[var(--card)] p-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-[var(--muted)]">
+          <div className="rounded-2xl border dark:border-[#334155]/50 border-[#E2E8F0]/50 dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 p-4">
+            <p className="text-[10px] font-medium uppercase tracking-wider dark:text-[#475569] text-[#718096]">
               {t("employee.thisMonth")}
             </p>
-            <p className="mt-1 font-mono text-2xl font-bold text-[var(--fg)]">
+            <p className="mt-1 font-mono text-2xl font-bold dark:text-[#F8FAFC] text-[#2D3748]">
               {stats.hoursThisMonth.toFixed(1)}
-              <span className="ml-1 text-xs font-normal text-[var(--muted)]">
+              <span className="ml-1 text-xs font-normal dark:text-[#64748B] text-[#718096]">
                 ч
               </span>
             </p>
           </div>
-          <div className="col-span-2 rounded-2xl border border-[var(--accent)]/10 bg-[var(--accent)] p-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-[var(--muted)]">
+          <div className="col-span-2 rounded-2xl border border-[#008080]/10 dark:bg-[#D6BC97]/5 bg-[#E6F7F7] p-4">
+            <p className="text-[10px] font-medium uppercase tracking-wider dark:text-[#475569] text-[#718096]">
               {t("employee.expectedSalary")}
             </p>
-            <p className="mt-1 font-mono text-2xl font-bold text-[var(--accent)]">
+            <p className="mt-1 font-mono text-2xl font-bold text-[#008080]">
               {formatMoney(stats.expectedSalary)}
             </p>
-            <p className="mt-0.5 text-[10px] text-[var(--muted)]">
+            <p className="mt-0.5 text-[10px] dark:text-[#475569] text-[#718096]">
               {stats.hourlyRate} л/ч · {stats.totalShifts} смен
             </p>
           </div>
@@ -260,8 +260,8 @@ export function EmployeeScreen() {
 
       {/* График часов за неделю */}
       {stats && stats.weeklyHours.some((d) => d.hours > 0) && (
-        <div className="mb-5 rounded-2xl border border-[var(--card-border)]/50 bg-[var(--card)] p-4">
-          <p className="mb-3 text-[10px] font-medium uppercase tracking-wider text-[var(--muted)]">
+        <div className="mb-5 rounded-2xl border dark:border-[#334155]/50 border-[#E2E8F0]/50 dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 p-4">
+          <p className="mb-3 text-[10px] font-medium uppercase tracking-wider dark:text-[#475569] text-[#718096]">
             {t("employee.weeklyHours")}
           </p>
           <ResponsiveContainer width="100%" height={110}>
@@ -292,13 +292,13 @@ export function EmployeeScreen() {
 
       {/* Последние смены */}
       <section className="mb-5">
-        <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-[var(--muted)]">
+        <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest dark:text-[#475569] text-[#718096]">
           {t("employee.lastShifts")}
         </h2>
 
         {recentShifts.length === 0 ? (
-          <div className="rounded-2xl border border-[var(--card-border)]/30 bg-[var(--card)] p-8 text-center">
-            <p className="text-xs text-[var(--muted)]">{t("employee.noShifts")}</p>
+          <div className="rounded-2xl border dark:border-[#334155]/30 border-[#E2E8F0]/30 dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 p-8 text-center">
+            <p className="text-xs dark:text-[#475569] text-[#718096]">{t("employee.noShifts")}</p>
           </div>
         ) : (
           <ul className="space-y-2">
@@ -313,33 +313,33 @@ export function EmployeeScreen() {
               return (
                 <li
                   key={shift.id}
-                  className="flex items-center justify-between rounded-2xl border border-[var(--card-border)]/30 bg-[var(--card)] px-4 py-3"
+                  className="flex items-center justify-between rounded-2xl border dark:border-[#334155]/30 border-[#E2E8F0]/30 dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 px-4 py-3"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 flex-col items-center justify-center rounded-xl bg-[var(--card-border)]/40 leading-none">
-                      <span className="text-[10px] font-bold text-[var(--muted)]">
+                    <div className="flex h-10 w-10 flex-col items-center justify-center rounded-xl dark:bg-[#334155]/40 bg-[#F1F5F9]/60 leading-none">
+                      <span className="text-[10px] font-bold dark:text-[#CBD5E1] text-[#718096]">
                         {format(new Date(shift.clock_in), "d", { locale: ru })}
                       </span>
-                      <span className="text-[8px] text-[var(--muted)]">
+                      <span className="text-[8px] dark:text-[#475569] text-[#718096]">
                         {format(new Date(shift.clock_in), "MMM", {
                           locale: ru,
                         })}
                       </span>
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-[var(--muted)]">
+                      <p className="text-xs font-medium dark:text-[#CBD5E1] text-[#718096]">
                         {format(new Date(shift.clock_in), "HH:mm")}
                         {shift.clock_out &&
                           ` — ${format(new Date(shift.clock_out), "HH:mm")}`}
                       </p>
-                      <p className="text-[10px] text-[var(--muted)]">
+                      <p className="text-[10px] dark:text-[#475569] text-[#718096]">
                         {format(new Date(shift.clock_in), "EEEE", {
                           locale: ru,
                         })}
                       </p>
                     </div>
                   </div>
-                  <span className="font-mono text-sm font-bold text-[var(--fg)]">
+                  <span className="font-mono text-sm font-bold dark:text-[#F8FAFC] text-[#2D3748]">
                     {formatHours(hours)}
                   </span>
                 </li>

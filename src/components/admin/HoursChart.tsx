@@ -22,8 +22,8 @@ export function HoursChart({ data }: HoursChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="flex h-[250px] items-center justify-center rounded-2xl border border-[var(--card-border)] bg-[var(--card)] px-4">
-        <p className="text-sm text-[var(--muted-light)]">Нет данных за этот месяц</p>
+      <div className="flex h-[250px] items-center justify-center rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-white px-4">
+        <p className="text-sm dark:text-[#64748B] text-[#718096]">Нет данных за этот месяц</p>
       </div>
     );
   }
@@ -36,8 +36,8 @@ export function HoursChart({ data }: HoursChartProps) {
   const tooltipLabel = theme === "dark" ? "#94A3B8" : "#718096";
 
   return (
-    <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-4">
-      <p className="mb-4 text-sm font-semibold text-[var(--muted)]">
+    <div className="rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-white p-4">
+      <p className="mb-4 text-sm font-semibold dark:text-[#94A3B8] text-[#718096]">
         Часы по сотрудникам
       </p>
       <ResponsiveContainer width="100%" height={250}>

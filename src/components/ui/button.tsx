@@ -8,11 +8,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-[var(--card)] text-[var(--fg)] hover:bg-[var(--card-border)]",
-        blue: "bg-[var(--accent)] text-[var(--fg)] hover:opacity-90 shadow-lg",
+        default: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200 dark:bg-[#1E293B] dark:text-[#F8FAFC] dark:hover:bg-[#334155]",
+        blue: "bg-[#008080] text-white hover:opacity-90 shadow-lg dark:bg-[#D6BC97] dark:text-[#0F172A] dark:hover:opacity-90 dark:shadow-[#D6BC97]/20",
         rose: "bg-rose-500 text-white hover:bg-rose-400 shadow-lg shadow-rose-500/20",
-        outline: "border border-[var(--card-border)] bg-transparent text-[var(--fg)] hover:bg-[var(--card)]",
-        ghost: "text-[var(--muted)] hover:bg-[var(--card)] hover:text-[var(--fg)]",
+        outline: "border border-[#E2E8F0] bg-transparent text-[#2D3748] hover:bg-[#F7FAFC] dark:border-[#334155] dark:text-[#F8FAFC] dark:hover:bg-[#1E293B]",
+        ghost: "text-[#2D3748] hover:bg-[#F7FAFC] dark:text-[#94A3B8] dark:hover:bg-[#1E293B] dark:hover:text-[#F8FAFC]",
       },
       size: {
         default: "h-11 px-5 py-2 text-base",
