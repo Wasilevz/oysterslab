@@ -75,6 +75,7 @@ export async function updateEmployee(
   fullName: string,
   position: string,
   hourlyRate: number,
+  role?: "employee" | "admin",
 ): Promise<ActionResult<void>> {
   if (!Number.isFinite(hourlyRate) || hourlyRate < 0) {
     return { success: false, error: "Укажите корректную ставку" };
@@ -86,13 +87,19 @@ export async function updateEmployee(
   try {
     const supabase = getSupabaseAdmin();
 
+    const updateData: Record<string, unknown> = {
+      full_name: fullName.trim(),
+      position: position.trim() || null,
+      hourly_rate: hourlyRate,
+    };
+
+    if (role) {
+      updateData.role = role;
+    }
+
     const { error } = await supabase
       .from("users")
-      .update({
-        full_name: fullName.trim(),
-        position: position.trim() || null,
-        hourly_rate: hourlyRate,
-      })
+      .update(updateData)
       .eq("id", userId);
 
     if (error) return { success: false, error: "Ошибка сервера" };

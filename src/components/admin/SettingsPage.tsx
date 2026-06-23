@@ -17,6 +17,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const [editName, setEditName] = useState("");
   const [editPosition, setEditPosition] = useState("");
   const [editRate, setEditRate] = useState("");
+  const [editRole, setEditRole] = useState<"employee" | "admin">("employee");
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState("");
   const [newTelegramId, setNewTelegramId] = useState("");
@@ -97,6 +98,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     setEditName(emp.full_name);
     setEditPosition(emp.position ?? "");
     setEditRate(String(emp.hourly_rate));
+    setEditRole(emp.role as "employee" | "admin");
   };
 
   const cancelEdit = () => {
@@ -104,6 +106,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     setEditName("");
     setEditPosition("");
     setEditRate("");
+    setEditRole("employee");
   };
 
   const handleSaveEmployee = async () => {
@@ -114,7 +117,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
       return;
     }
 
-    const result = await updateEmployee(editingId, editName, editPosition, rate);
+    const result = await updateEmployee(editingId, editName, editPosition, rate, editRole);
     if (!result.success) {
       setError(result.error ?? "Ошибка сохранения");
       return;
@@ -123,6 +126,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     setEditName("");
     setEditPosition("");
     setEditRate("");
+    setEditRole("employee");
     void loadSettings();
   };
 
@@ -373,6 +377,28 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                     value={editRate}
                     onChange={(e) => setEditRate(e.target.value)}
                   />
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setEditRole("employee")}
+                      className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${
+                        editRole === "employee"
+                          ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                          : "border-zinc-700 text-zinc-500"
+                      }`}
+                    >
+                      Сотрудник
+                    </button>
+                    <button
+                      onClick={() => setEditRole("admin")}
+                      className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${
+                        editRole === "admin"
+                          ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
+                          : "border-zinc-700 text-zinc-500"
+                      }`}
+                    >
+                      Админ
+                    </button>
+                  </div>
                   <div className="flex gap-2">
                     <Button
                       variant="ghost"
