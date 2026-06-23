@@ -4,39 +4,16 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
-function roundTo30(date: Date): Date {
-  const rounded = new Date(date);
-  const m = rounded.getMinutes();
-  if (m >= 0 && m <= 15) {
-    rounded.setMinutes(0, 0, 0);
-  } else if (m >= 16 && m <= 30) {
-    rounded.setMinutes(30, 0, 0);
-  } else if (m >= 31 && m <= 45) {
-    rounded.setMinutes(30, 0, 0);
-  } else {
-    rounded.setHours(rounded.getHours() + 1, 0, 0, 0);
-  }
-  return rounded;
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 async function sendMessage(chatId: number, text: string): Promise<boolean> {
   if (!BOT_TOKEN) return false;
-
   try {
     const res = await fetch(`${API_URL}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text,
-        parse_mode: "HTML",
-      }),
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" }),
     });
     return res.ok;
   } catch {
@@ -50,13 +27,21 @@ function getLocalTime(): { hour: number; minute: number } {
   return { hour: local.getHours(), minute: local.getMinutes() };
 }
 
-async function getActiveEmployeeIds(supabase: ReturnType<typeof getSupabaseAdmin>) {
+function parseTime(timeStr: string): { hour: number; minute: number } {
+  const [h, m] = timeStr.split(":").map(Number);
+  return { hour: h, minute: m };
+}
+
+export async function sendShiftReminders(): Promise<{ sent: number; errors: number }> {
+  const supabase = getSupabaseAdmin();
+  const { hour: nowHour, minute: nowMin } = getLocalTime();
+
   const { data: employees } = await supabase
     .from("users")
-    .select("id, telegram_id, full_name")
+    .select("id, telegram_id, full_name, shift_start_time")
     .in("role", ["employee", "admin"]);
 
-  if (!employees || employees.length === 0) return { employees: [], activeIds: new Set<string>() };
+  if (!employees || employees.length === 0) return { sent: 0, errors: 0 };
 
   const ids = employees.map((e) => e.id);
   const { data: active } = await supabase
@@ -65,18 +50,7 @@ async function getActiveEmployeeIds(supabase: ReturnType<typeof getSupabaseAdmin
     .eq("status", "ACTIVE")
     .in("user_id", ids);
 
-  return {
-    employees,
-    activeIds: new Set((active ?? []).map((s) => s.user_id)),
-  };
-}
-
-export async function sendShiftReminders(): Promise<{ sent: number; errors: number }> {
-  const supabase = getSupabaseAdmin();
-  const { hour, minute } = getLocalTime();
-  const { employees, activeIds } = await getActiveEmployeeIds(supabase);
-
-  if (employees.length === 0) return { sent: 0, errors: 0 };
+  const activeIds = new Set((active ?? []).map((s) => s.user_id));
 
   let sent = 0;
   let errors = 0;
@@ -85,64 +59,48 @@ export async function sendShiftReminders(): Promise<{ sent: number; errors: numb
     if (!emp.telegram_id) continue;
 
     const isOnShift = activeIds.has(emp.id);
-    let message: string | null = null;
+    const startTime = emp.shift_start_time || "12:00";
+    const { hour: startH, minute: startM } = parseTime(startTime);
+
     const name = escapeHtml(emp.full_name);
+    let message: string | null = null;
 
-    // === УТРЕННИЕ НАПОМИНАНИЯ (смена начинается в 12:00) ===
+    // За 15 минут до начала смены
+    const reminder15H = startH;
+    const reminder15M = startM - 15;
+    const adjustedReminder = reminder15M < 0
+      ? { hour: reminder15H - 1, minute: reminder15M + 60 }
+      : { hour: reminder15H, minute: reminder15M };
 
-    if (hour === 11 && minute === 45 && !isOnShift) {
-      message = `⏰ ${name}, смена через 15 минут.\nОткрой приложение и нажми «Начать смену».`;
+    if (nowHour === adjustedReminder.hour && nowMin === adjustedReminder.minute && !isOnShift) {
+      message = `\u23F0 ${name}, смена через 15 минут.\nОткрой приложение и нажми \u00ABНачать смену\u00BB.`;
     }
 
-    if (hour === 12 && minute === 0 && !isOnShift) {
-      message = `🔔 ${name}, пора на смену!\nНе забудь нажать «Начать смену».`;
+    // Время начала смены
+    if (nowHour === startH && nowMin === startM && !isOnShift) {
+      message = `\u{1F514} ${name}, пора на смену!\nНе забудь нажать \u00ABНачать смену\u00BB.`;
     }
 
-    // === ВЕЧЕРНИЕ НАПОМИНАНИЯ (с учётом задержек) ===
-
-    // 22:15 — мягкое напоминание за 15 мин до официального окончания
-    if (hour === 22 && minute === 15 && isOnShift) {
-      message = `📋 ${name}, через 15 минут официальное окончание смены.\nЕсли задерживаешься — ничего страшного, просто закрой смену когда уйдёшь.`;
-    }
-
-    // 22:30 — официальное окончание, без давления
-    if (hour === 22 && minute === 30 && isOnShift) {
-      message = `📋 ${name}, 22:30 — официальное окончание смены.\nЗакрой смену в приложении, когда будешь уходить.`;
-    }
-
-    // 23:00 — дружеское напоминание
-    if (hour === 23 && minute === 0 && isOnShift) {
-      message = `👋 ${name}, уже полночь.\nНе забудь закрыть смену, когда уйдёшь.`;
-    }
-
-    // 23:30 — ещё одно напоминание
-    if (hour === 23 && minute === 30 && isOnShift) {
-      message = `📝 ${name}, напоминание: смена всё ещё открыта.\nЗакрой когда уйдёшь.`;
-    }
-
-    // 00:00 — после полуночи
-    if (hour === 0 && minute === 0 && isOnShift) {
-      message = `\u{1F319} ${name}, уже после полуночи.\nЗакрой смену, чтобы часы сохранились.`;
-    }
-
-    // 00:30 — мягкий таймаут
-    if (hour === 0 && minute === 30 && isOnShift) {
-      message = `\u26A0\uFE0F ${name}, смена открыта больше 12 часов.\nПожалуйста, закрой её как можно скорее.`;
-    }
-
-    // 01:00 — предупреждение об автозакрытии
-    if (hour === 1 && minute === 0 && isOnShift) {
-      message = `\u{1F6A8} ${name}, смена будет автоматически закрыта через 30 минут.\nЗакрой её сейчас, чтобы не потерять часы.`;
-    }
-
-    // 00:30 — мягкий таймаут
-    if (hour === 0 && minute === 30 && isOnShift) {
-      message = `⚠️ ${emp.full_name}, смена открыта больше 12 часов.\nПожалуйста, закрой её как можно скорее.`;
-    }
-
-    // 01:00 — предупреждение об автозакрытии
-    if (hour === 1 && minute === 0 && isOnShift) {
-      message = `🚨 ${emp.full_name}, смена будет автоматически закрыта через 30 минут.\nЗакрой её сейчас, чтобы не потерять часы.`;
+    // Вечерние напоминания (только для тех кто на смене)
+    if (isOnShift) {
+      if (nowHour === 22 && nowMin === 15) {
+        message = `\u{1F4CB} ${name}, через 15 минут официальное окончание смены.\nЗакрой смену когда уйдёшь.`;
+      }
+      if (nowHour === 22 && nowMin === 30) {
+        message = `\u{1F4CB} ${name}, 22:30 — официальное окончание смены.\nЗакрой смену в приложении.`;
+      }
+      if (nowHour === 23 && nowMin === 0) {
+        message = `\u{1F44B} ${name}, уже полночь.\nНе забудь закрыть смену.`;
+      }
+      if (nowHour === 0 && nowMin === 0) {
+        message = `\u{1F319} ${name}, уже после полуночи.\nЗакрой смену.`;
+      }
+      if (nowHour === 0 && nowMin === 30) {
+        message = `\u26A0\uFE0F ${name}, смена открыта больше 12 часов.\nПожалуйста, закрой её.`;
+      }
+      if (nowHour === 1 && nowMin === 0) {
+        message = `\u{1F6A8} ${name}, смена будет закрыта через 30 минут.\nЗакрой сейчас.`;
+      }
     }
 
     if (message) {
@@ -159,7 +117,6 @@ export async function autoCloseOverdueShifts(): Promise<{ closed: number }> {
   const supabase = getSupabaseAdmin();
   const { hour, minute } = getLocalTime();
 
-  // Автозакрытие в 1:30 ночи
   if (!(hour === 1 && minute === 30)) return { closed: 0 };
 
   const { data: activeShifts, error } = await supabase
@@ -173,27 +130,25 @@ export async function autoCloseOverdueShifts(): Promise<{ closed: number }> {
 
   for (const shift of activeShifts) {
     const clockIn = new Date(shift.clock_in);
-    const roundedNow = roundTo30(new Date());
-    const hoursWorked = Math.round(((roundedNow.getTime() - clockIn.getTime()) / 3600000) * 100) / 100;
+    const now = new Date();
+    const hoursWorked = Math.round(((now.getTime() - clockIn.getTime()) / 3600000) * 100) / 100;
 
     await supabase
       .from("shifts")
       .update({
-        clock_out: roundedNow.toISOString(),
+        clock_out: now.toISOString(),
         status: "AUTO_CLOSED",
         hours_worked: hoursWorked,
       })
       .eq("id", shift.id);
 
-    const user = (Array.isArray(shift.users) ? shift.users[0] : shift.users) as { full_name: string; telegram_id: number } | undefined;
+    const user = Array.isArray(shift.users) ? shift.users[0] : shift.users;
     if (user?.telegram_id) {
-      const safeName = escapeHtml(user.full_name);
       await sendMessage(
         user.telegram_id,
-        `\u{1F512} ${safeName}, смена автоматически закрыта.\nОтработано: ${hoursWorked.toFixed(1)} \u0447.\nЕсли часы неточные — обратись к администратору.`,
+        `\u{1F512} ${user.full_name}, смена автоматически закрыта.\nОтработано: ${hoursWorked.toFixed(1)} \u0447.`,
       );
     }
-
     closed++;
   }
 

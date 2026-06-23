@@ -13,6 +13,7 @@ export interface User {
   role: UserRole;
   position: string | null;
   hourly_rate: number;
+  shift_start_time: string;
   created_at: string;
 }
 

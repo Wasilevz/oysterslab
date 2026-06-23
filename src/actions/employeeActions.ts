@@ -76,6 +76,7 @@ export async function updateEmployee(
   position: string,
   hourlyRate: number,
   role?: "employee" | "admin",
+  shiftStartTime?: string,
 ): Promise<ActionResult<void>> {
   if (!Number.isFinite(hourlyRate) || hourlyRate < 0) {
     return { success: false, error: "Укажите корректную ставку" };
@@ -93,9 +94,8 @@ export async function updateEmployee(
       hourly_rate: hourlyRate,
     };
 
-    if (role) {
-      updateData.role = role;
-    }
+    if (role) updateData.role = role;
+    if (shiftStartTime !== undefined) updateData.shift_start_time = shiftStartTime;
 
     const { error } = await supabase
       .from("users")

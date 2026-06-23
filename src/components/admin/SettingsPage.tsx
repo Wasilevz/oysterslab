@@ -20,6 +20,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const [editPosition, setEditPosition] = useState("");
   const [editRate, setEditRate] = useState("");
   const [editRole, setEditRole] = useState<"employee" | "admin">("employee");
+  const [editShiftStart, setEditShiftStart] = useState("12:00");
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState("");
   const [newTelegramId, setNewTelegramId] = useState("");
@@ -94,6 +95,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     setEditPosition(emp.position ?? "");
     setEditRate(String(emp.hourly_rate));
     setEditRole(emp.role as "employee" | "admin");
+    setEditShiftStart(emp.shift_start_time ?? "12:00");
   };
 
   const cancelEdit = () => {
@@ -102,13 +104,14 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     setEditPosition("");
     setEditRate("");
     setEditRole("employee");
+    setEditShiftStart("12:00");
   };
 
   const handleSaveEmployee = async () => {
     if (!editingId) return;
     const rate = Number(editRate);
     if (!Number.isFinite(rate) || rate < 0) { setError("Укажите корректную ставку"); return; }
-    const result = await updateEmployee(editingId, editName, editPosition, rate, editRole);
+    const result = await updateEmployee(editingId, editName, editPosition, rate, editRole, editShiftStart);
     if (!result.success) { setError(result.error ?? "Ошибка"); return; }
     cancelEdit();
     void loadSettings();
@@ -241,6 +244,10 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                   <Input type="text" placeholder={t("settings.namePlaceholder")} value={editName} onChange={(e) => setEditName(e.target.value)} />
                   <Input type="text" placeholder={t("settings.positionPlaceholder")} value={editPosition} onChange={(e) => setEditPosition(e.target.value)} />
                   <Input type="number" inputMode="decimal" step="0.5" min="0" placeholder={t("settings.ratePlaceholder")} value={editRate} onChange={(e) => setEditRate(e.target.value)} />
+                  <div>
+                    <label className="mb-1 block text-[10px] text-[var(--text-secondary)]">{t("settings.shiftStart")}</label>
+                    <input type="time" value={editShiftStart} onChange={(e) => setEditShiftStart(e.target.value)} className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm font-medium text-[var(--text-primary)]" />
+                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     <button onClick={() => setEditRole("employee")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${editRole === "employee" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>{t("settings.employeeRole")}</button>
                     <button onClick={() => setEditRole("admin")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${editRole === "admin" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>{t("settings.adminRole")}</button>

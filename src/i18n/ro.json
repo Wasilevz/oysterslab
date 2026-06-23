@@ -124,6 +124,7 @@
   "settings.positionPlaceholder": "Funcția (ex: Chelner)",
   "settings.rate": "Tarif (L/h)",
   "settings.ratePlaceholder": "Tarif (L/h)",
+  "settings.shiftStart": "Început tură",
   "settings.employeeRole": "Angajat",
   "settings.adminRole": "Admin",
   "settings.addBtn": "Adaugă angajat",

@@ -124,6 +124,7 @@
   "settings.positionPlaceholder": "Должность (например: Официант)",
   "settings.rate": "Ставка (л/ч)",
   "settings.ratePlaceholder": "Ставка (л/ч)",
+  "settings.shiftStart": "Начало смены",
   "settings.employeeRole": "Сотрудник",
   "settings.adminRole": "Админ",
   "settings.addBtn": "Добавить сотрудника",
