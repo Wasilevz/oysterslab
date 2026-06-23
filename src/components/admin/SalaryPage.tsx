@@ -384,9 +384,21 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
             </button>
             <p className="text-lg font-bold text-[var(--text-primary)]">{monthNames[reportMonth - 1]} {reportYear}</p>
-            <button onClick={() => { if (reportMonth === 12) { setReportMonth(1); setReportYear(reportYear + 1); } else { setReportMonth(reportMonth + 1); } }} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-            </button>
+            <div className="flex gap-2">
+              <a
+                href={`/api/export/salary?year=${reportYear}&month=${reportMonth}`}
+                download
+                className="rounded-xl p-2 text-[var(--brand-primary)] hover:bg-[var(--bg-surface)]"
+                title="Скачать CSV"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
+              </a>
+              <button onClick={() => { if (reportMonth === 12) { setReportMonth(1); setReportYear(reportYear + 1); } else { setReportMonth(reportMonth + 1); } }} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+              </button>
+            </div>
           </div>
 
           {monthlyReport && monthlyReport.employees.length > 0 && (
