@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 function getClientIP(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -18,5 +19,9 @@ function getClientIP(request: Request): string {
 
 export async function GET(request: Request) {
   const ip = getClientIP(request);
+  const { allowed } = checkRateLimit(`myip:${ip}`, 5, 60000);
+  if (!allowed) {
+    return NextResponse.json({ error: "Rate limit" }, { status: 429 });
+  }
   return NextResponse.json({ ip });
 }

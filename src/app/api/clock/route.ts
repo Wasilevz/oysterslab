@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { isIPAllowed } from "@/lib/location-auth";
 import { verifyRequestAuth } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 function roundTo30(date: Date): Date {
   const rounded = new Date(date);
@@ -36,6 +37,12 @@ function getClientIP(request: Request): string {
 
 export async function POST(request: Request) {
   try {
+    const reqIP = getClientIP(request);
+    const { allowed } = checkRateLimit(`clock:${reqIP}`, 10, 60000);
+    if (!allowed) {
+      return NextResponse.json({ error: "Слишком много запросов. Подождите минуту." }, { status: 429 });
+    }
+
     const body = await request.json();
     const { userId, action, initData } = body as {
       userId: string;
