@@ -5,6 +5,7 @@ import { getDashboardStats } from "@/actions/adminActions";
 import { getActiveShift } from "@/actions/shiftActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUserStore } from "@/store/userStore";
 import { useI18n } from "@/lib/i18n";
@@ -183,9 +184,12 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   return (
     <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
       <header className="mb-5">
-        <p className="text-xs font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
-          {t("nav.dashboard")}
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
+            {t("nav.dashboard")}
+          </p>
+          <ThemeToggle />
+        </div>
         <div className="mt-1 flex items-center justify-between">
           <h1 className="text-2xl font-bold dark:text-white text-zinc-900">{user?.full_name}</h1>
 

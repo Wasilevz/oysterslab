@@ -19,6 +19,7 @@ import { getEmployeeStats } from "@/actions/salaryActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
 import { ScheduleEmployee } from "@/components/employee/ScheduleEmployee";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import { formatHours, getElapsedSeconds } from "@/lib/utils";
@@ -122,16 +123,19 @@ export function EmployeeScreen() {
   return (
     <div className="flex min-h-full flex-1 flex-col p-4 pb-8">
       {/* Header */}
-      <header className="mb-5 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-bold text-white shadow-lg dark:shadow-blue-500/20 shadow-blue-300/50">
-          {user?.full_name ? getInitials(user.full_name) : "—"}
+      <header className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-bold text-white shadow-lg shadow-blue-500/20">
+            {user?.full_name ? getInitials(user.full_name) : "—"}
+          </div>
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
+              {t("employee.hello")}
+            </p>
+            <h1 className="text-lg font-bold dark:text-white text-zinc-900">{user?.full_name}</h1>
+          </div>
         </div>
-        <div>
-          <p className="text-[10px] font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
-            {t("employee.hello")}
-          </p>
-          <h1 className="text-lg font-bold dark:text-white text-zinc-900">{user?.full_name}</h1>
-        </div>
+        <ThemeToggle />
       </header>
 
       {/* Карточка смены — главный элемент */}
@@ -348,34 +352,6 @@ export function EmployeeScreen() {
       <EmployeeSalary />
 
       <ScheduleEmployee />
-
-      <div className="mt-6 px-4">
-        <div className="rounded-2xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80 p-4">
-          <p className="mb-3 text-sm font-semibold dark:text-white text-zinc-900">{t("settings.language")}</p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              onClick={() => setLocale("ru")}
-              className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${
-                locale === "ru"
-                  ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-100 text-blue-400"
-                  : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"
-              }`}
-            >
-              🇷🇺 Русский
-            </button>
-            <button
-              onClick={() => setLocale("ro")}
-              className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${
-                locale === "ro"
-                  ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-100 text-blue-400"
-                  : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"
-              }`}
-            >
-              🇲🇩 Română
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

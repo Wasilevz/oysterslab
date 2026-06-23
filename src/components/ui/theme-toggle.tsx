@@ -8,23 +8,14 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   return (
     <button
       onClick={toggleTheme}
-      className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-300 ${
+      className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition-all ${
         theme === "dark"
-          ? "bg-zinc-700"
-          : "bg-blue-200"
+          ? "border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+          : "border-zinc-300 bg-white text-zinc-600 hover:bg-zinc-50"
       } ${className}`}
-      aria-label="Toggle theme"
     >
-      <span
-        className={`absolute left-1 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm shadow-md transition-transform duration-300 ${
-          theme === "light" ? "translate-x-10" : "translate-x-0"
-        }`}
-      >
-        {theme === "dark" ? "🌙" : "☀️"}
-      </span>
-      <span className="sr-only">
-        {theme === "dark" ? "Switch to light" : "Switch to dark"}
-      </span>
+      <span className="text-base">{theme === "dark" ? "🌙" : "☀️"}</span>
+      <span>{theme === "dark" ? "Тёмная" : "Светлая"}</span>
     </button>
   );
 }
