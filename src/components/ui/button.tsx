@@ -4,16 +4,15 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
   {
     variants: {
       variant: {
-        default: "bg-zinc-100 text-zinc-950 hover:bg-zinc-200",
-        blue: "bg-blue-600 text-white hover:bg-blue-500 shadow-lg shadow-blue-950/40",
-        rose: "bg-rose-600 text-white hover:bg-rose-500 shadow-lg shadow-rose-950/40",
-        outline:
-          "border border-zinc-700 bg-transparent text-zinc-100 hover:bg-zinc-900",
-        ghost: "text-zinc-300 hover:bg-zinc-900 hover:text-white",
+        default: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200 dark:bg-[#1E293B] dark:text-[#F8FAFC] dark:hover:bg-[#334155]",
+        blue: "bg-[#008080] text-white hover:opacity-90 shadow-lg dark:bg-[#D6BC97] dark:text-[#0F172A] dark:hover:opacity-90 dark:shadow-[#D6BC97]/20",
+        rose: "bg-rose-500 text-white hover:bg-rose-400 shadow-lg shadow-rose-500/20",
+        outline: "border border-[#E2E8F0] bg-transparent text-[#2D3748] hover:bg-[#F7FAFC] dark:border-[#334155] dark:text-[#F8FAFC] dark:hover:bg-[#1E293B]",
+        ghost: "text-[#2D3748] hover:bg-[#F7FAFC] dark:text-[#94A3B8] dark:hover:bg-[#1E293B] dark:hover:text-[#F8FAFC]",
       },
       size: {
         default: "h-11 px-5 py-2 text-base",
