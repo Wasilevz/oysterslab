@@ -81,39 +81,39 @@ export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
       <div className="px-4 pt-4 pb-8">
         <div className="mb-4 flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+            <button onClick={onBack} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-600 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
             </button>
           )}
-          <h2 className="text-lg font-bold text-white">{t("nav.forgotten")}</h2>
+          <h2 className="text-lg font-bold dark:text-white text-zinc-900">{t("nav.forgotten")}</h2>
         </div>
 
         {loading ? (
-          <p className="text-sm text-zinc-500">{t("common.loading")}</p>
+          <p className="text-sm dark:text-zinc-500 text-zinc-400">{t("common.loading")}</p>
         ) : shifts.length === 0 ? (
           <div className="flex min-h-[40vh] items-center justify-center">
-            <p className="text-sm font-medium text-zinc-400">{t("shift.forgotten")}</p>
+            <p className="text-sm font-medium dark:text-zinc-400 text-zinc-600">{t("shift.forgotten")}</p>
           </div>
         ) : (
           <>
-            <p className="mb-3 text-xs text-zinc-500">
+            <p className="mb-3 text-xs dark:text-zinc-500 text-zinc-400">
               {t("shift.forgottenDesc")}
             </p>
             <div className="grid gap-3">
               {shifts.map((shift) => (
-                <article key={shift.id} className="rounded-2xl border border-amber-500/10 bg-amber-500/5 p-4">
+                <article key={shift.id} className="rounded-2xl border border-amber-500/10 dark:bg-amber-500/5 bg-amber-50 p-4">
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-lg font-bold text-white">{shift.users.full_name}</p>
-                      {shift.users.position && <p className="text-xs text-zinc-500">{shift.users.position}</p>}
-                      <p className="text-sm text-zinc-400">
+                      <p className="text-lg font-bold dark:text-white text-zinc-900">{shift.users.full_name}</p>
+                      {shift.users.position && <p className="text-xs dark:text-zinc-500 text-zinc-400">{shift.users.position}</p>}
+                      <p className="text-sm dark:text-zinc-400 text-zinc-600">
                         {format(new Date(shift.clock_in), "d MMMM, HH:mm", { locale: ru })}
                       </p>
                     </div>
                     <div className="text-right">
-                      <span className="rounded-lg bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-400">{t("shift.autoClosed")}</span>
+                      <span className="rounded-lg dark:bg-amber-500/10 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-400">{t("shift.autoClosed")}</span>
                       {shift.hours_worked != null && (
                         <p className="mt-1 font-mono text-xs font-bold text-amber-400">{t("shift.estimated", { hours: shift.hours_worked.toFixed(1) })}</p>
                       )}
@@ -141,7 +141,7 @@ export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
           <div className="space-y-2">
             <Input type="number" inputMode="decimal" step="0.5" min="0.5" max="24" placeholder="8" value={hours} onChange={(e) => setHours(e.target.value)} autoFocus />
             {selected?.hours_worked != null && (
-              <p className="text-xs text-zinc-500">{t("shift.systemCalculated")} {selected.hours_worked.toFixed(1)} ч</p>
+              <p className="text-xs dark:text-zinc-500 text-zinc-400">{t("shift.systemCalculated")} {selected.hours_worked.toFixed(1)} ч</p>
             )}
           </div>
           {error && <p className="text-sm text-red-400">{error}</p>}

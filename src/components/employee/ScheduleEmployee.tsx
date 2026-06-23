@@ -9,7 +9,7 @@ import type { Schedule, ScheduleType } from "@/types/database";
 
 const TYPE_COLORS: Record<ScheduleType, { dot: string; text: string }> = {
   work: { dot: "bg-blue-500", text: "text-blue-400" },
-  off: { dot: "bg-zinc-600", text: "text-zinc-500" },
+  off: { dot: "dark:bg-zinc-600 bg-zinc-400", text: "dark:text-zinc-500 text-zinc-400" },
   vacation: { dot: "bg-amber-500", text: "text-amber-400" },
   sick: { dot: "bg-rose-500", text: "text-rose-400" },
 };
@@ -89,16 +89,16 @@ export function ScheduleEmployee() {
   return (
     <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
       <header className="mb-5">
-        <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
+        <p className="text-xs font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
           {t("schedule.mySchedule")}
         </p>
-        <h1 className="mt-1 text-2xl font-bold text-white">
+        <h1 className="mt-1 text-2xl font-bold dark:text-white text-zinc-900">
           {monthNames[month - 1]} {year}
         </h1>
       </header>
 
       <div className="flex items-center justify-between mb-4">
-        <button onClick={prevMonth} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+        <button onClick={prevMonth} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-600 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
@@ -111,17 +111,17 @@ export function ScheduleEmployee() {
             </span>
           ))}
         </div>
-        <button onClick={nextMonth} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+        <button onClick={nextMonth} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-600 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </button>
       </div>
 
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-3">
+      <div className="rounded-2xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80 p-3">
         <div className="grid grid-cols-7 gap-1 mb-2">
           {dayNames.map((d) => (
-            <div key={d} className="py-1 text-center text-[10px] font-medium text-zinc-500">{d}</div>
+            <div key={d} className="py-1 text-center text-[10px] font-medium dark:text-zinc-500 text-zinc-400">{d}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1">
@@ -140,7 +140,7 @@ export function ScheduleEmployee() {
                   isToday ? "ring-1 ring-blue-500/50" : ""
                 }`}
               >
-                <span className={`text-xs font-medium ${isToday ? "text-white" : "text-zinc-400"}`}>
+                <span className={`text-xs font-medium ${isToday ? "dark:text-white text-zinc-900" : "dark:text-zinc-400 text-zinc-600"}`}>
                   {day}
                 </span>
                 <span className={`mt-0.5 h-1.5 w-1.5 rounded-full ${colors.dot}`} />
@@ -152,19 +152,19 @@ export function ScheduleEmployee() {
 
       {workingToday.length > 0 && (
         <div className="mt-5">
-          <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
+          <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
             {t("schedule.todayOnShift")}
           </h2>
           <div className="space-y-2">
             {workingToday.map((w) => (
               <div
                 key={w.id}
-                className="flex items-center justify-between rounded-2xl border border-zinc-800/30 bg-zinc-900/20 px-4 py-3"
+                className="flex items-center justify-between rounded-2xl border dark:border-zinc-800/30 border-zinc-200/30 dark:bg-zinc-900/20 bg-zinc-100/80 px-4 py-3"
               >
                 <div>
-                  <p className="text-sm font-medium text-white">{w.full_name}</p>
+                  <p className="text-sm font-medium dark:text-white text-zinc-900">{w.full_name}</p>
                   {w.position && (
-                    <p className="text-[10px] text-zinc-500">{w.position}</p>
+                    <p className="text-[10px] dark:text-zinc-500 text-zinc-400">{w.position}</p>
                   )}
                 </div>
                 {w.clock_in ? (
@@ -176,7 +176,7 @@ export function ScheduleEmployee() {
                     <span className="text-[10px] text-blue-400">{t("shift.onShift")}</span>
                   </span>
                 ) : (
-                  <span className="text-[10px] text-zinc-600">{t("schedule.notArrived")}</span>
+                  <span className="text-[10px] dark:text-zinc-600 text-zinc-400">{t("schedule.notArrived")}</span>
                 )}
               </div>
             ))}

@@ -184,34 +184,34 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <header className="border-b border-zinc-800/60 px-4 py-5">
+      <header className="border-b dark:border-zinc-800/60 border-zinc-200/60 px-4 py-5">
         <div className="flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+            <button onClick={onBack} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-600 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
             </button>
           )}
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
+            <p className="text-xs font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
               {t("settings.title")}
             </p>
-            <h1 className="mt-1 text-2xl font-bold text-white">{t("settings.security")}</h1>
+            <h1 className="mt-1 text-2xl font-bold dark:text-white text-zinc-900">{t("settings.security")}</h1>
           </div>
         </div>
       </header>
 
       <div className="mt-6 px-4">
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
-          <p className="mb-3 text-sm font-semibold text-white">{t("settings.language")}</p>
+        <div className="rounded-2xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80 p-4">
+          <p className="mb-3 text-sm font-semibold dark:text-white text-zinc-900">{t("settings.language")}</p>
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setLocale("ru")}
               className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${
                 locale === "ru"
-                  ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                  : "border-zinc-700 text-zinc-500"
+                  ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-100 text-blue-400"
+                  : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"
               }`}
             >
               🇷🇺 Русский
@@ -220,8 +220,8 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
               onClick={() => setLocale("ro")}
               className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${
                 locale === "ro"
-                  ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                  : "border-zinc-700 text-zinc-500"
+                  ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-100 text-blue-400"
+                  : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"
               }`}
             >
               🇲🇩 Română
@@ -231,91 +231,15 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
       </div>
 
       <div className="mt-4 px-4">
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
-          <p className="mb-1 text-sm font-semibold text-white">{t("settings.location")}</p>
-          <p className="mb-3 text-[10px] text-zinc-500">
+        <div className="rounded-2xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80 p-4">
+          <p className="mb-1 text-sm font-semibold dark:text-white text-zinc-900">{t("settings.location")}</p>
+          <p className="mb-3 text-[10px] dark:text-zinc-500 text-zinc-400">
             {t("settings.locationDesc")}
           </p>
-
-          <div className="space-y-2">
-            {allowedIPs.map((ip, i) => (
-              <div key={i} className="flex gap-2">
-                <Input
-                  type="text"
-                  placeholder={t("settings.ipPlaceholder")}
-                  value={ip}
-                  onChange={(e) => updateIP(i, e.target.value)}
-                />
-                {allowedIPs.length > 1 && (
-                  <button
-                    onClick={() => removeIP(i)}
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 text-zinc-500 hover:border-rose-500/50 hover:text-rose-400"
-                  >
-                    ×
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-3 flex gap-2">
-            <Button
-              variant="blue"
-              className="flex-1"
-              onClick={() => void detectMyIP()}
-            >
-              {t("settings.detectIP")}
-            </Button>
-            <button
-              onClick={addIPField}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 text-zinc-500 hover:border-blue-500/30 hover:text-blue-400"
-            >
-              +
-            </button>
-          </div>
-
-          <p className="mt-3 text-[10px] text-zinc-600">
-            {t("settings.detectIPDesc")}
-          </p>
-        </div>
-      </div>
-
-      <div className="px-4 mt-6">
-        {error && (
-          <div className="mb-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
-            <p className="text-sm text-red-400">{error}</p>
-          </div>
-        )}
-        {success && (
-          <div className="mb-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3">
-            <p className="text-sm text-emerald-400">{success}</p>
-          </div>
-        )}
-        <Button
-          variant="blue"
-          className="w-full"
-          disabled={isPending}
-          onClick={handleSave}
-        >
-          {isPending ? t("common.processing") : t("settings.save")}
-        </Button>
-      </div>
-
-      <div className="px-4 mt-6 pb-24">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
-            {t("settings.employees")}
-          </p>
-          <button
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="rounded-xl border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 hover:border-blue-500/30 hover:text-blue-400"
-          >
-            {showAddForm ? t("settings.hideForm") : t("settings.addEmployee")}
-          </button>
         </div>
 
         {showAddForm && (
-          <div className="mb-4 rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4">
+          <div className="mb-4 rounded-2xl border border-blue-500/10 dark:bg-blue-500/5 bg-blue-50 p-4">
             <p className="mb-3 text-sm font-semibold text-blue-400">{t("settings.newEmployee")}</p>
             <div className="space-y-2">
               <Input
@@ -350,8 +274,8 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                   onClick={() => setNewRole("employee")}
                   className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${
                     newRole === "employee"
-                      ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                      : "border-zinc-700 text-zinc-500"
+                      ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-100 text-blue-400"
+                      : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"
                   }`}
                 >
                   {t("settings.employeeRole")}
@@ -360,8 +284,8 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                   onClick={() => setNewRole("admin")}
                   className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${
                     newRole === "admin"
-                      ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                      : "border-zinc-700 text-zinc-500"
+                      ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-100 text-blue-400"
+                      : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"
                   }`}
                 >
                   {t("settings.adminRole")}
@@ -382,7 +306,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
           {employees.map((emp) => (
             <div
               key={emp.id}
-              className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4"
+              className="rounded-2xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80 p-4"
             >
               {editingId === emp.id ? (
                 <div className="space-y-2">
@@ -412,8 +336,8 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                       onClick={() => setEditRole("employee")}
                       className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${
                       editRole === "employee"
-                        ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                        : "border-zinc-700 text-zinc-500"
+                        ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-100 text-blue-400"
+                        : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"
                       }`}
                     >
                       {t("settings.employeeRole")}
@@ -422,8 +346,8 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                       onClick={() => setEditRole("admin")}
                       className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${
                         editRole === "admin"
-                          ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                          : "border-zinc-700 text-zinc-500"
+                          ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-100 text-blue-400"
+                          : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"
                       }`}
                     >
                       {t("settings.adminRole")}
@@ -449,24 +373,24 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
               ) : (
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-bold text-white">{emp.full_name}</p>
+                    <p className="text-sm font-bold dark:text-white text-zinc-900">{emp.full_name}</p>
                     {emp.position && (
-                      <p className="text-xs text-zinc-400">{emp.position}</p>
+                      <p className="text-xs dark:text-zinc-400 text-zinc-600">{emp.position}</p>
                     )}
-                    <p className="text-[10px] text-zinc-500">
+                    <p className="text-[10px] dark:text-zinc-500 text-zinc-400">
                       {emp.role === "admin" ? t("settings.adminRole") : t("settings.employeeRole")} · {emp.hourly_rate} л/ч · TG: {emp.telegram_id}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => startEdit(emp)}
-                      className="rounded-xl border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 hover:border-blue-500/30 hover:text-blue-400"
+            className="rounded-xl border dark:border-zinc-700 border-zinc-300 px-3 py-1.5 text-xs dark:text-zinc-400 text-zinc-600 hover:border-blue-500/30 hover:text-blue-400"
                     >
                       {t("settings.edit")}
                     </button>
                     <button
                       onClick={() => void handleDeleteEmployee(emp.id)}
-                      className="rounded-xl border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 hover:border-rose-500/30 hover:text-rose-400"
+                      className="rounded-xl border dark:border-zinc-700 border-zinc-300 px-3 py-1.5 text-xs dark:text-zinc-400 text-zinc-600 hover:border-rose-500/30 hover:text-rose-400"
                     >
                       {t("settings.delete")}
                     </button>

@@ -173,18 +173,18 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <header className="border-b border-zinc-800/60 px-4 py-5">
+      <header className="border-b dark:border-zinc-800/60 border-zinc-200/60 px-4 py-5">
         <div className="flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+            <button onClick={onBack} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-600 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
             </button>
           )}
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">{t("salary.paymentsLabel")}</p>
-            <h1 className="mt-1 text-2xl font-bold text-white">{t("salary.payments")}</h1>
+            <p className="text-xs font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">{t("salary.paymentsLabel")}</p>
+            <h1 className="mt-1 text-2xl font-bold dark:text-white text-zinc-900">{t("salary.payments")}</h1>
           </div>
         </div>
       </header>
@@ -195,7 +195,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
             key={v}
             onClick={() => setView(v)}
             className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
-              view === v ? "bg-blue-500/20 text-blue-400" : "text-zinc-500 hover:text-zinc-300"
+              view === v ? "dark:bg-blue-500/20 bg-blue-100 text-blue-400" : "dark:text-zinc-500 text-zinc-400 dark:hover:text-zinc-300 hover:text-zinc-600"
             }`}
           >
             {v === "create" ? t("salary.create") : v === "payments" ? `${t("salary.payments")} (${pendingPayments.length})` : t("salary.report")}
@@ -216,15 +216,15 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
       {view === "create" && (
         <div className="px-4 pt-4 pb-24 space-y-4">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4 space-y-3">
-            <p className="text-sm font-semibold text-white">{t("salary.newPayment")}</p>
+          <div className="rounded-2xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80 p-4 space-y-3">
+            <p className="text-sm font-semibold dark:text-white text-zinc-900">{t("salary.newPayment")}</p>
 
             <div>
-              <p className="mb-1 text-xs text-zinc-500">{t("salary.employee")}</p>
+              <p className="mb-1 text-xs dark:text-zinc-500 text-zinc-400">{t("salary.employee")}</p>
               <select
                 value={selectedEmp}
                 onChange={(e) => setSelectedEmp(e.target.value)}
-                className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-sm text-white"
+                className="w-full rounded-xl border dark:border-zinc-700 border-zinc-300 dark:bg-zinc-800 bg-zinc-200 px-3 py-2.5 text-sm dark:text-white text-zinc-900"
               >
                 <option value="">{t("salary.selectEmployee")}</option>
                 {employees.map((emp) => (
@@ -234,39 +234,39 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
             </div>
 
             <div>
-              <p className="mb-1 text-xs text-zinc-500">{t("salary.quickPeriods")}</p>
+              <p className="mb-1 text-xs dark:text-zinc-500 text-zinc-400">{t("salary.quickPeriods")}</p>
               <div className="flex gap-2">
-                <button onClick={() => setWeekRange(0)} className="flex-1 rounded-xl border border-zinc-700 py-2 text-[10px] text-zinc-400 hover:border-blue-500/30 hover:text-blue-400">{t("salary.thisWeek")}</button>
-                <button onClick={() => setWeekRange(-1)} className="flex-1 rounded-xl border border-zinc-700 py-2 text-[10px] text-zinc-400 hover:border-blue-500/30 hover:text-blue-400">{t("salary.lastWeek")}</button>
+                <button onClick={() => setWeekRange(0)} className="flex-1 rounded-xl border dark:border-zinc-700 border-zinc-300 py-2 text-[10px] dark:text-zinc-400 text-zinc-600 hover:border-blue-500/30 hover:text-blue-400">{t("salary.thisWeek")}</button>
+                <button onClick={() => setWeekRange(-1)} className="flex-1 rounded-xl border dark:border-zinc-700 border-zinc-300 py-2 text-[10px] dark:text-zinc-400 text-zinc-600 hover:border-blue-500/30 hover:text-blue-400">{t("salary.lastWeek")}</button>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <p className="mb-1 text-xs text-zinc-500">{t("salary.from")}</p>
+                <p className="mb-1 text-xs dark:text-zinc-500 text-zinc-400">{t("salary.from")}</p>
                 <DatePicker value={dateFrom} onChange={setDateFrom} placeholder={t("salary.fromPlaceholder")} maxDate={dateTo || undefined} />
               </div>
               <div>
-                <p className="mb-1 text-xs text-zinc-500">{t("salary.to")}</p>
+                <p className="mb-1 text-xs dark:text-zinc-500 text-zinc-400">{t("salary.to")}</p>
                 <DatePicker value={dateTo} onChange={setDateTo} placeholder={t("salary.toPlaceholder")} minDate={dateFrom || undefined} />
               </div>
             </div>
           </div>
 
           {preview && (
-            <div className="rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4 space-y-2">
+            <div className="rounded-2xl border border-blue-500/10 dark:bg-blue-500/5 bg-blue-50 p-4 space-y-2">
               <p className="text-sm font-semibold text-blue-400">{t("salary.calculation")}</p>
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">{t("salary.hours")}</span>
-                <span className="font-mono font-bold text-white">{preview.hours.toFixed(1)} ч</span>
+                <span className="dark:text-zinc-400 text-zinc-600">{t("salary.hours")}</span>
+                <span className="font-mono font-bold dark:text-white text-zinc-900">{preview.hours.toFixed(1)} ч</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">{t("salary.rate")}</span>
-                <span className="font-mono text-white">{preview.rate} л/ч</span>
+                <span className="dark:text-zinc-400 text-zinc-600">{t("salary.rate")}</span>
+                <span className="font-mono dark:text-white text-zinc-900">{preview.rate} л/ч</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-zinc-400">{t("salary.shifts")}</span>
-                <span className="font-mono text-white">{preview.shiftCount}</span>
+                <span className="dark:text-zinc-400 text-zinc-600">{t("salary.shifts")}</span>
+                <span className="font-mono dark:text-white text-zinc-900">{preview.shiftCount}</span>
               </div>
               {preview.fines > 0 && (
                 <div className="flex justify-between text-sm">
@@ -275,7 +275,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
                 </div>
               )}
               <div className="border-t border-blue-500/20 pt-2 flex justify-between">
-                <span className="text-sm font-semibold text-white">{t("salary.total")}</span>
+                <span className="text-sm font-semibold dark:text-white text-zinc-900">{t("salary.total")}</span>
                 <span className="font-mono text-lg font-bold text-blue-400">{formatMoney(preview.amount)}</span>
               </div>
             </div>
@@ -294,20 +294,20 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-amber-400">{t("salary.pending", { count: pendingPayments.length })}</p>
               <div className="space-y-2">
                 {pendingPayments.map((p) => (
-                  <div key={p.id} className="rounded-2xl border border-amber-500/10 bg-amber-500/5 p-4">
+                  <div key={p.id} className="rounded-2xl border border-amber-500/10 dark:bg-amber-500/5 bg-amber-50 p-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-bold text-white">{p.users.full_name}</p>
-                        {p.users.position && <p className="text-[10px] text-zinc-500">{p.users.position}</p>}
-                        <p className="text-xs text-zinc-500">
+                        <p className="font-bold dark:text-white text-zinc-900">{p.users.full_name}</p>
+                        {p.users.position && <p className="text-[10px] dark:text-zinc-500 text-zinc-400">{p.users.position}</p>}
+                        <p className="text-xs dark:text-zinc-500 text-zinc-400">
                           {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
                         </p>
                       </div>
-                      <span className="rounded-lg bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">{t("salary.waiting")}</span>
+                      <span className="rounded-lg dark:bg-amber-500/10 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-400">{t("salary.waiting")}</span>
                     </div>
                     <div className="mt-2 flex justify-between text-sm">
-                      <span className="text-zinc-400">{Number(p.hours_worked).toFixed(1)} ч × {Number(p.hourly_rate)} л/ч</span>
-                      <span className="font-mono font-bold text-white">{formatMoney(Number(p.total_amount))}</span>
+                      <span className="dark:text-zinc-400 text-zinc-600">{Number(p.hours_worked).toFixed(1)} ч × {Number(p.hourly_rate)} л/ч</span>
+                      <span className="font-mono font-bold dark:text-white text-zinc-900">{formatMoney(Number(p.total_amount))}</span>
                     </div>
                     <div className="mt-3 flex gap-2">
                       <Button variant="blue" className="flex-1" disabled={isPending} onClick={() => handleApprove(p.id)}>{t("salary.approve")}</Button>
@@ -324,19 +324,19 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-blue-400">{t("salary.approved", { count: approvedPayments.length })}</p>
               <div className="space-y-2">
                 {approvedPayments.map((p) => (
-                  <div key={p.id} className="rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4">
+                  <div key={p.id} className="rounded-2xl border border-blue-500/10 dark:bg-blue-500/5 bg-blue-50 p-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-bold text-white">{p.users.full_name}</p>
-                        <p className="text-xs text-zinc-500">
+                        <p className="font-bold dark:text-white text-zinc-900">{p.users.full_name}</p>
+                        <p className="text-xs dark:text-zinc-500 text-zinc-400">
                           {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
                         </p>
                       </div>
-                      <span className="rounded-lg bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-400">{t("salary.approvedStatus")}</span>
+                      <span className="rounded-lg dark:bg-blue-500/10 bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-400">{t("salary.approvedStatus")}</span>
                     </div>
                     <div className="mt-2 flex justify-between">
-                      <span className="text-sm text-zinc-400">{Number(p.hours_worked).toFixed(1)} ч</span>
-                      <span className="font-mono font-bold text-white">{formatMoney(Number(p.total_amount))}</span>
+                      <span className="text-sm dark:text-zinc-400 text-zinc-600">{Number(p.hours_worked).toFixed(1)} ч</span>
+                      <span className="font-mono font-bold dark:text-white text-zinc-900">{formatMoney(Number(p.total_amount))}</span>
                     </div>
                   </div>
                 ))}
@@ -349,19 +349,19 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-emerald-400">{t("salary.paid", { count: paidPayments.length })}</p>
               <div className="space-y-2">
                 {paidPayments.slice(0, 20).map((p) => (
-                  <div key={p.id} className="rounded-2xl border border-emerald-500/10 bg-emerald-500/5 p-4">
+                  <div key={p.id} className="rounded-2xl border border-emerald-500/10 dark:bg-emerald-500/5 bg-emerald-50 p-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-bold text-white">{p.users.full_name}</p>
-                        <p className="text-xs text-zinc-500">
+                        <p className="font-bold dark:text-white text-zinc-900">{p.users.full_name}</p>
+                        <p className="text-xs dark:text-zinc-500 text-zinc-400">
                           {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
                         </p>
                       </div>
-                      <span className="rounded-lg bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">{t("salary.paidStatus")}</span>
+                      <span className="rounded-lg dark:bg-emerald-500/10 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-400">{t("salary.paidStatus")}</span>
                     </div>
                     <div className="mt-2 flex justify-between">
-                      <span className="text-sm text-zinc-400">{Number(p.hours_worked).toFixed(1)} ч</span>
-                      <span className="font-mono font-bold text-white">{formatMoney(Number(p.total_amount))}</span>
+                      <span className="text-sm dark:text-zinc-400 text-zinc-600">{Number(p.hours_worked).toFixed(1)} ч</span>
+                      <span className="font-mono font-bold dark:text-white text-zinc-900">{formatMoney(Number(p.total_amount))}</span>
                     </div>
                     {p.paid_at && (
                       <p className="mt-1 text-[10px] text-emerald-400">
@@ -376,7 +376,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
           {payments.length === 0 && (
             <div className="flex min-h-[30vh] items-center justify-center">
-              <p className="text-zinc-500">{t("salary.noPayments")}</p>
+              <p className="dark:text-zinc-500 text-zinc-400">{t("salary.noPayments")}</p>
             </div>
           )}
         </div>
@@ -385,45 +385,45 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
       {view === "report" && (
         <div className="px-4 pt-4 pb-24 space-y-4">
           <div className="flex items-center justify-between">
-            <button onClick={() => { if (reportMonth === 1) { setReportMonth(12); setReportYear(reportYear - 1); } else { setReportMonth(reportMonth - 1); } }} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+            <button onClick={() => { if (reportMonth === 1) { setReportMonth(12); setReportYear(reportYear - 1); } else { setReportMonth(reportMonth - 1); } }} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-600 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
             </button>
-            <p className="text-lg font-bold text-white">{monthNames[reportMonth - 1]} {reportYear}</p>
-            <button onClick={() => { if (reportMonth === 12) { setReportMonth(1); setReportYear(reportYear + 1); } else { setReportMonth(reportMonth + 1); } }} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+            <p className="text-lg font-bold dark:text-white text-zinc-900">{monthNames[reportMonth - 1]} {reportYear}</p>
+            <button onClick={() => { if (reportMonth === 12) { setReportMonth(1); setReportYear(reportYear + 1); } else { setReportMonth(reportMonth + 1); } }} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-600 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
             </button>
           </div>
 
           {monthlyReport && monthlyReport.employees.length > 0 && (
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 overflow-hidden">
-              <div className="grid grid-cols-4 gap-px bg-zinc-800 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                <div className="bg-zinc-900 px-3 py-2">{t("salary.employee")}</div>
-                <div className="bg-zinc-900 px-3 py-2 text-center">{t("salary.hours")}</div>
-                <div className="bg-zinc-900 px-3 py-2 text-center">{t("salary.shiftsPlural")}</div>
-                <div className="bg-zinc-900 px-3 py-2 text-right">{t("salary.amount")}</div>
+            <div className="rounded-2xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80 overflow-hidden">
+              <div className="grid grid-cols-4 gap-px dark:bg-zinc-800 bg-zinc-200 text-[10px] font-semibold uppercase tracking-wider dark:text-zinc-500 text-zinc-400">
+                <div className="dark:bg-zinc-900 bg-white px-3 py-2">{t("salary.employee")}</div>
+                <div className="dark:bg-zinc-900 bg-white px-3 py-2 text-center">{t("salary.hours")}</div>
+                <div className="dark:bg-zinc-900 bg-white px-3 py-2 text-center">{t("salary.shiftsPlural")}</div>
+                <div className="dark:bg-zinc-900 bg-white px-3 py-2 text-right">{t("salary.amount")}</div>
               </div>
               {monthlyReport.employees.map((emp) => (
-                <div key={emp.id} className="grid grid-cols-4 gap-px bg-zinc-800">
-                  <div className="bg-zinc-900 px-3 py-3">
-                    <p className="text-sm font-medium text-white">{emp.full_name}</p>
-                    {emp.position && <p className="text-[10px] text-zinc-500">{emp.position}</p>}
+                <div key={emp.id} className="grid grid-cols-4 gap-px dark:bg-zinc-800 bg-zinc-200">
+                  <div className="dark:bg-zinc-900 bg-white px-3 py-3">
+                    <p className="text-sm font-medium dark:text-white text-zinc-900">{emp.full_name}</p>
+                    {emp.position && <p className="text-[10px] dark:text-zinc-500 text-zinc-400">{emp.position}</p>}
                   </div>
-                  <div className="bg-zinc-900 px-3 py-3 text-center">
-                    <p className="font-mono text-sm font-bold text-white">{emp.totalHours.toFixed(1)}</p>
+                  <div className="dark:bg-zinc-900 bg-white px-3 py-3 text-center">
+                    <p className="font-mono text-sm font-bold dark:text-white text-zinc-900">{emp.totalHours.toFixed(1)}</p>
                   </div>
-                  <div className="bg-zinc-900 px-3 py-3 text-center">
-                    <p className="font-mono text-sm font-bold text-white">{emp.totalShifts}</p>
+                  <div className="dark:bg-zinc-900 bg-white px-3 py-3 text-center">
+                    <p className="font-mono text-sm font-bold dark:text-white text-zinc-900">{emp.totalShifts}</p>
                   </div>
-                  <div className="bg-zinc-900 px-3 py-3 text-right">
+                  <div className="dark:bg-zinc-900 bg-white px-3 py-3 text-right">
                     <p className="font-mono text-sm font-bold text-blue-400">{formatMoney(emp.totalAmount)}</p>
                   </div>
                 </div>
               ))}
-              <div className="grid grid-cols-4 gap-px bg-zinc-800">
-                <div className="bg-blue-500/10 px-3 py-3 col-span-3">
-                  <p className="text-sm font-bold text-white">{t("salary.total")}</p>
+              <div className="grid grid-cols-4 gap-px dark:bg-zinc-800 bg-zinc-200">
+                <div className="dark:bg-blue-500/10 bg-blue-50 px-3 py-3 col-span-3">
+                  <p className="text-sm font-bold dark:text-white text-zinc-900">{t("salary.total")}</p>
                 </div>
-                <div className="bg-blue-500/10 px-3 py-3 text-right">
+                <div className="dark:bg-blue-500/10 bg-blue-50 px-3 py-3 text-right">
                   <p className="font-mono text-lg font-bold text-blue-400">{formatMoney(monthlyReport.grandTotal)}</p>
                 </div>
               </div>
@@ -432,7 +432,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
           {monthlyReport && monthlyReport.employees.length === 0 && (
             <div className="flex min-h-[30vh] items-center justify-center">
-              <p className="text-zinc-500">{t("salary.noData")}</p>
+              <p className="dark:text-zinc-500 text-zinc-400">{t("salary.noData")}</p>
             </div>
           )}
         </div>

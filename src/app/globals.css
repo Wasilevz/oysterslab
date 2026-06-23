@@ -1,8 +1,53 @@
 @import "tailwindcss";
 
 :root {
+  --background: #ffffff;
+  --foreground: #09090b;
+  --card-bg: #f4f4f5;
+  --card-border: #e4e4e7;
+  --muted: #71717a;
+  --muted-light: #a1a1aa;
+  --accent: #3b82f6;
+  --accent-bg: #eff6ff;
+  --accent-border: #bfdbfe;
+  --destructive: #ef4444;
+  --destructive-bg: #fef2f2;
+  --destructive-border: #fecaca;
+  --success: #10b981;
+  --success-bg: #ecfdf5;
+  --success-border: #a7f3d0;
+  --warning: #f59e0b;
+  --warning-bg: #fffbeb;
+  --warning-border: #fde68a;
+  --input-bg: #ffffff;
+  --input-border: #d4d4d8;
+  --scrollbar: #d4d4d8;
+  --scrollbar-hover: #a1a1aa;
+}
+
+.dark {
   --background: #09090b;
   --foreground: #fafafa;
+  --card-bg: #18181b;
+  --card-border: #27272a;
+  --muted: #71717a;
+  --muted-light: #52525b;
+  --accent: #3b82f6;
+  --accent-bg: #1e3a5f;
+  --accent-border: #1e40af;
+  --destructive: #ef4444;
+  --destructive-bg: #450a0a;
+  --destructive-border: #7f1d1d;
+  --success: #10b981;
+  --success-bg: #064e3b;
+  --success-border: #065f46;
+  --warning: #f59e0b;
+  --warning-bg: #78350f;
+  --warning-border: #92400e;
+  --input-bg: #27272a;
+  --input-border: #3f3f46;
+  --scrollbar: #27272a;
+  --scrollbar-hover: #3f3f46;
 }
 
 @theme inline {
@@ -20,6 +65,7 @@ body {
   touch-action: manipulation;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 * {
@@ -39,14 +85,22 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: var(--scrollbar);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: var(--scrollbar-hover);
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.6);
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.6);
+}
+
+.light input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.3);
 }

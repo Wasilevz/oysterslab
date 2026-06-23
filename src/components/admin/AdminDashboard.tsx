@@ -105,10 +105,10 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </svg>
       ),
       color: "text-blue-400",
-      bg: "from-blue-500/10 to-blue-600/5",
+      bg: "dark:from-blue-500/10 dark:to-blue-600/5 from-blue-50 to-blue-100/50",
       border: "border-blue-500/20",
       badge: stats?.activeShifts.length,
-      badgeColor: "bg-blue-500/20 text-blue-400",
+      badgeColor: "dark:bg-blue-500/20 bg-blue-100 text-blue-400",
     },
     {
       key: "forgotten" as const,
@@ -120,10 +120,10 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </svg>
       ),
       color: "text-amber-400",
-      bg: "from-amber-500/10 to-amber-600/5",
+      bg: "dark:from-amber-500/10 dark:to-amber-600/5 from-amber-50 to-amber-100/50",
       border: "border-amber-500/20",
       badge: stats?.autoClosedShifts.length,
-      badgeColor: "bg-amber-500/20 text-amber-400",
+      badgeColor: "dark:bg-amber-500/20 bg-amber-100 text-amber-400",
     },
     {
       key: "salary" as const,
@@ -135,7 +135,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </svg>
       ),
       color: "text-emerald-400",
-      bg: "from-emerald-500/10 to-emerald-600/5",
+      bg: "dark:from-emerald-500/10 dark:to-emerald-600/5 from-emerald-50 to-emerald-100/50",
       border: "border-emerald-500/20",
     },
     {
@@ -148,7 +148,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </svg>
       ),
       color: "text-violet-400",
-      bg: "from-violet-500/10 to-violet-600/5",
+      bg: "dark:from-violet-500/10 dark:to-violet-600/5 from-violet-50 to-violet-100/50",
       border: "border-violet-500/20",
     },
     {
@@ -161,7 +161,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </svg>
       ),
       color: "text-orange-400",
-      bg: "from-orange-500/10 to-orange-600/5",
+      bg: "dark:from-orange-500/10 dark:to-orange-600/5 from-orange-50 to-orange-100/50",
       border: "border-orange-500/20",
     },
     {
@@ -175,7 +175,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </svg>
       ),
       color: "text-zinc-400",
-      bg: "from-zinc-500/10 to-zinc-600/5",
+      bg: "dark:from-zinc-500/10 dark:to-zinc-600/5 from-zinc-50 to-zinc-100/50",
       border: "border-zinc-500/20",
     },
   ];
@@ -183,19 +183,19 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   return (
     <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
       <header className="mb-5">
-        <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
+        <p className="text-xs font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
           {t("nav.dashboard")}
         </p>
         <div className="mt-1 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">{user?.full_name}</h1>
+          <h1 className="text-2xl font-bold dark:text-white text-zinc-900">{user?.full_name}</h1>
 
           <button
             onClick={handleToggleShift}
             disabled={isPending}
             className={`rounded-2xl px-6 py-3.5 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
               myShift
-                ? "bg-rose-500/15 text-rose-400 hover:bg-rose-500/25"
-                : "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                ? "dark:bg-rose-500/15 bg-rose-100 text-rose-400 hover:bg-rose-500/25"
+                : "dark:bg-blue-500/20 bg-blue-100 text-blue-400 hover:bg-blue-500/30"
             }`}
           >
             {isPending ? "..." : myShift ? t("shift.end") : t("shift.start")}
@@ -203,7 +203,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </div>
 
         {myShift && (
-          <div className="mt-3 flex items-center justify-between rounded-2xl border border-blue-500/10 bg-blue-500/5 px-4 py-3">
+          <div className="mt-3 flex items-center justify-between rounded-2xl border border-blue-500/10 dark:bg-blue-500/5 bg-blue-50 px-4 py-3">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
@@ -213,7 +213,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             </div>
             <ShiftTimer
               clockIn={myShift.clock_in}
-              className="font-mono text-lg font-black tabular-nums text-white"
+              className="font-mono text-lg font-black tabular-nums dark:text-white text-zinc-900"
             />
           </div>
         )}
@@ -231,8 +231,8 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             className={`relative overflow-hidden rounded-2xl border ${item.border} bg-gradient-to-br ${item.bg} p-4 text-left transition-all active:scale-[0.98]`}
           >
             <div className={`mb-3 ${item.color}`}>{item.icon}</div>
-            <p className="text-sm font-bold text-white">{item.title}</p>
-            <p className="mt-0.5 text-[10px] text-zinc-500">{item.desc}</p>
+            <p className="text-sm font-bold dark:text-white text-zinc-900">{item.title}</p>
+            <p className="mt-0.5 text-[10px] dark:text-zinc-500 text-zinc-400">{item.desc}</p>
             {item.badge != null && item.badge > 0 && (
               <span className={`absolute right-3 top-3 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${item.badgeColor}`}>
                 {item.badge}

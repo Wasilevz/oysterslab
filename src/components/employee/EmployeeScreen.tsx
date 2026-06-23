@@ -123,14 +123,14 @@ export function EmployeeScreen() {
     <div className="flex min-h-full flex-1 flex-col p-4 pb-8">
       {/* Header */}
       <header className="mb-5 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-bold text-white shadow-lg shadow-blue-500/20">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-sm font-bold text-white shadow-lg dark:shadow-blue-500/20 shadow-blue-300/50">
           {user?.full_name ? getInitials(user.full_name) : "—"}
         </div>
         <div>
-          <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-600">
+          <p className="text-[10px] font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
             {t("employee.hello")}
           </p>
-          <h1 className="text-lg font-bold text-white">{user?.full_name}</h1>
+          <h1 className="text-lg font-bold dark:text-white text-zinc-900">{user?.full_name}</h1>
         </div>
       </header>
 
@@ -138,8 +138,8 @@ export function EmployeeScreen() {
       <div
         className={`relative mb-5 overflow-hidden rounded-3xl border transition-all duration-300 ${
           isOnShift
-            ? "border-blue-500/30 bg-gradient-to-br from-blue-500/15 via-blue-600/5 to-transparent shadow-xl shadow-blue-500/5"
-            : "border-zinc-800/80 bg-zinc-900/40"
+            ? "border-blue-500/30 bg-gradient-to-br dark:from-blue-500/15 dark:via-blue-600/5 from-blue-50 via-blue-100/50 to-transparent shadow-xl dark:shadow-blue-500/5 shadow-blue-200/50"
+            : "dark:border-zinc-800/80 border-zinc-200/80 dark:bg-zinc-900/40 bg-zinc-100/80"
         }`}
       >
         <div className="p-5">
@@ -157,18 +157,18 @@ export function EmployeeScreen() {
 
               <ShiftTimer
                 clockIn={activeShift.clock_in}
-                className="font-mono text-5xl font-black tabular-nums tracking-tight text-white"
+                className="font-mono text-5xl font-black tabular-nums tracking-tight dark:text-white text-zinc-900"
               />
 
-              <p className="mt-2 text-xs text-zinc-500">
+              <p className="mt-2 text-xs dark:text-zinc-500 text-zinc-400">
                 {t("shift.started")} {format(new Date(activeShift.clock_in), "HH:mm")}
               </p>
             </div>
           ) : (
             <div className="flex flex-col items-center text-center">
-              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-800/50">
+              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-2xl dark:bg-zinc-800/50 bg-zinc-200/80">
                 <svg
-                  className="h-7 w-7 text-zinc-600"
+                  className="h-7 w-7 dark:text-zinc-600 text-zinc-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
@@ -181,10 +181,10 @@ export function EmployeeScreen() {
                   />
                 </svg>
               </div>
-              <p className="text-sm font-semibold text-zinc-400">
+              <p className="text-sm font-semibold dark:text-zinc-400 text-zinc-600">
                 {t("shift.notStarted")}
               </p>
-              <p className="mt-1 text-xs text-zinc-600">
+              <p className="mt-1 text-xs dark:text-zinc-600 text-zinc-400">
                 {t("shift.tapToStart")}
               </p>
             </div>
@@ -196,8 +196,8 @@ export function EmployeeScreen() {
           disabled={isPending}
           className={`w-full py-4 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
             isOnShift
-              ? "bg-rose-500/15 text-rose-400 hover:bg-rose-500/25"
-              : "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+              ? "dark:bg-rose-500/15 bg-rose-100 text-rose-400 hover:bg-rose-500/25"
+              : "dark:bg-blue-500/20 bg-blue-100 text-blue-400 hover:bg-blue-500/30"
           }`}
         >
           {isPending ? "..." : isOnShift ? t("shift.end") : t("shift.start")}
@@ -218,36 +218,36 @@ export function EmployeeScreen() {
       {/* Статистика */}
       {stats && (
         <div className="mb-5 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+          <div className="rounded-2xl border dark:border-zinc-800/50 border-zinc-200/50 dark:bg-zinc-900/30 bg-zinc-100/80 p-4">
+            <p className="text-[10px] font-medium uppercase tracking-wider dark:text-zinc-600 text-zinc-400">
               {t("employee.thisWeek")}
             </p>
-            <p className="mt-1 font-mono text-2xl font-bold text-white">
+            <p className="mt-1 font-mono text-2xl font-bold dark:text-white text-zinc-900">
               {stats.hoursThisWeek.toFixed(1)}
-              <span className="ml-1 text-xs font-normal text-zinc-500">
+              <span className="ml-1 text-xs font-normal dark:text-zinc-500 text-zinc-400">
                 ч
               </span>
             </p>
           </div>
-          <div className="rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+          <div className="rounded-2xl border dark:border-zinc-800/50 border-zinc-200/50 dark:bg-zinc-900/30 bg-zinc-100/80 p-4">
+            <p className="text-[10px] font-medium uppercase tracking-wider dark:text-zinc-600 text-zinc-400">
               {t("employee.thisMonth")}
             </p>
-            <p className="mt-1 font-mono text-2xl font-bold text-white">
+            <p className="mt-1 font-mono text-2xl font-bold dark:text-white text-zinc-900">
               {stats.hoursThisMonth.toFixed(1)}
-              <span className="ml-1 text-xs font-normal text-zinc-500">
+              <span className="ml-1 text-xs font-normal dark:text-zinc-500 text-zinc-400">
                 ч
               </span>
             </p>
           </div>
-          <div className="col-span-2 rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+          <div className="col-span-2 rounded-2xl border border-blue-500/10 dark:bg-blue-500/5 bg-blue-50 p-4">
+            <p className="text-[10px] font-medium uppercase tracking-wider dark:text-zinc-600 text-zinc-400">
               {t("employee.expectedSalary")}
             </p>
             <p className="mt-1 font-mono text-2xl font-bold text-blue-400">
               {formatMoney(stats.expectedSalary)}
             </p>
-            <p className="mt-0.5 text-[10px] text-zinc-600">
+            <p className="mt-0.5 text-[10px] dark:text-zinc-600 text-zinc-400">
               {stats.hourlyRate} л/ч · {stats.totalShifts} смен
             </p>
           </div>
@@ -256,8 +256,8 @@ export function EmployeeScreen() {
 
       {/* График часов за неделю */}
       {stats && stats.weeklyHours.some((d) => d.hours > 0) && (
-        <div className="mb-5 rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-4">
-          <p className="mb-3 text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+        <div className="mb-5 rounded-2xl border dark:border-zinc-800/50 border-zinc-200/50 dark:bg-zinc-900/30 bg-zinc-100/80 p-4">
+          <p className="mb-3 text-[10px] font-medium uppercase tracking-wider dark:text-zinc-600 text-zinc-400">
             {t("employee.weeklyHours")}
           </p>
           <ResponsiveContainer width="100%" height={110}>
@@ -288,13 +288,13 @@ export function EmployeeScreen() {
 
       {/* Последние смены */}
       <section className="mb-5">
-        <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-600">
+        <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
           {t("employee.lastShifts")}
         </h2>
 
         {recentShifts.length === 0 ? (
-          <div className="rounded-2xl border border-zinc-800/30 bg-zinc-900/20 p-8 text-center">
-            <p className="text-xs text-zinc-600">{t("employee.noShifts")}</p>
+          <div className="rounded-2xl border dark:border-zinc-800/30 border-zinc-200/30 dark:bg-zinc-900/20 bg-zinc-100/80 p-8 text-center">
+            <p className="text-xs dark:text-zinc-600 text-zinc-400">{t("employee.noShifts")}</p>
           </div>
         ) : (
           <ul className="space-y-2">
@@ -309,33 +309,33 @@ export function EmployeeScreen() {
               return (
                 <li
                   key={shift.id}
-                  className="flex items-center justify-between rounded-2xl border border-zinc-800/30 bg-zinc-900/20 px-4 py-3"
+                  className="flex items-center justify-between rounded-2xl border dark:border-zinc-800/30 border-zinc-200/30 dark:bg-zinc-900/20 bg-zinc-100/80 px-4 py-3"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 flex-col items-center justify-center rounded-xl bg-zinc-800/40 leading-none">
-                      <span className="text-[10px] font-bold text-zinc-300">
+                    <div className="flex h-10 w-10 flex-col items-center justify-center rounded-xl dark:bg-zinc-800/40 bg-zinc-200/60 leading-none">
+                      <span className="text-[10px] font-bold dark:text-zinc-300 text-zinc-600">
                         {format(new Date(shift.clock_in), "d", { locale: ru })}
                       </span>
-                      <span className="text-[8px] text-zinc-600">
+                      <span className="text-[8px] dark:text-zinc-600 text-zinc-400">
                         {format(new Date(shift.clock_in), "MMM", {
                           locale: ru,
                         })}
                       </span>
                     </div>
                     <div>
-                      <p className="text-xs font-medium text-zinc-300">
+                      <p className="text-xs font-medium dark:text-zinc-300 text-zinc-600">
                         {format(new Date(shift.clock_in), "HH:mm")}
                         {shift.clock_out &&
                           ` — ${format(new Date(shift.clock_out), "HH:mm")}`}
                       </p>
-                      <p className="text-[10px] text-zinc-600">
+                      <p className="text-[10px] dark:text-zinc-600 text-zinc-400">
                         {format(new Date(shift.clock_in), "EEEE", {
                           locale: ru,
                         })}
                       </p>
                     </div>
                   </div>
-                  <span className="font-mono text-sm font-bold text-white">
+                  <span className="font-mono text-sm font-bold dark:text-white text-zinc-900">
                     {formatHours(hours)}
                   </span>
                 </li>
@@ -350,15 +350,15 @@ export function EmployeeScreen() {
       <ScheduleEmployee />
 
       <div className="mt-6 px-4">
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4">
-          <p className="mb-3 text-sm font-semibold text-white">{t("settings.language")}</p>
+        <div className="rounded-2xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80 p-4">
+          <p className="mb-3 text-sm font-semibold dark:text-white text-zinc-900">{t("settings.language")}</p>
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setLocale("ru")}
               className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${
                 locale === "ru"
-                  ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                  : "border-zinc-700 text-zinc-500"
+                  ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-100 text-blue-400"
+                  : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"
               }`}
             >
               🇷🇺 Русский
@@ -367,8 +367,8 @@ export function EmployeeScreen() {
               onClick={() => setLocale("ro")}
               className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${
                 locale === "ro"
-                  ? "border-blue-500/30 bg-blue-500/10 text-blue-400"
-                  : "border-zinc-700 text-zinc-500"
+                  ? "border-blue-500/30 dark:bg-blue-500/10 bg-blue-100 text-blue-400"
+                  : "dark:border-zinc-700 border-zinc-300 dark:text-zinc-500 text-zinc-400"
               }`}
             >
               🇲🇩 Română

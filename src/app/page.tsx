@@ -10,7 +10,7 @@ import { useUserStore } from "@/store/userStore";
 
 function LoadingSkeleton() {
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-950 p-4">
+    <div className="flex min-h-screen flex-col dark:bg-zinc-950 bg-white p-4">
       <Skeleton className="mb-6 h-10 w-48" />
       <Skeleton className="mb-6 min-h-[40vh] w-full rounded-2xl" />
       <Skeleton className="h-32 w-full rounded-2xl" />
@@ -27,12 +27,12 @@ function AccessDenied({
 }) {
   const { t } = useI18n();
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950 px-6 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center dark:bg-zinc-950 bg-white px-6 text-center">
       <div className="max-w-sm space-y-4">
-        <h1 className="text-2xl font-bold text-white">{t("auth.accessDenied")}</h1>
-        <p className="text-zinc-400">{message}</p>
+        <h1 className="text-2xl font-bold dark:text-white text-zinc-900">{t("auth.accessDenied")}</h1>
+        <p className="dark:text-zinc-400 text-zinc-600">{message}</p>
         {telegramId !== null && (
-          <p className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3 font-mono text-lg text-zinc-200">
+          <p className="rounded-xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900 bg-zinc-50 px-4 py-3 font-mono text-lg dark:text-zinc-200 text-zinc-800">
             {t("auth.yourId")} {telegramId}
           </p>
         )}
@@ -121,7 +121,7 @@ export default function Home() {
   const effectiveRole = viewAs ?? user?.role;
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100">
+    <main className="min-h-screen dark:bg-zinc-950 dark:text-zinc-100 bg-white text-zinc-900">
       {effectiveRole === "admin" ? <AdminScreen /> : <EmployeeScreen />}
     </main>
   );

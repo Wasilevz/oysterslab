@@ -95,32 +95,32 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
     <div className="px-4 pt-4 pb-24">
       <div className="mb-4 flex items-center gap-3">
         {onBack && (
-          <button onClick={onBack} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+          <button onClick={onBack} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-600 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
           </button>
         )}
-        <h2 className="text-lg font-bold text-white">{t("shiftEditor.title")}</h2>
+        <h2 className="text-lg font-bold dark:text-white text-zinc-900">{t("shiftEditor.title")}</h2>
       </div>
 
       <div className="mb-4 grid grid-cols-2 gap-2">
         <div>
-          <p className="mb-1 text-xs text-zinc-500">{t("salary.from")}</p>
+          <p className="mb-1 text-xs dark:text-zinc-500 text-zinc-400">{t("salary.from")}</p>
           <input
             type="date"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+            className="w-full rounded-xl border dark:border-zinc-700 border-zinc-300 dark:bg-zinc-800 bg-zinc-200 px-3 py-2 text-sm dark:text-white text-zinc-900"
           />
         </div>
         <div>
-          <p className="mb-1 text-xs text-zinc-500">{t("salary.to")}</p>
+          <p className="mb-1 text-xs dark:text-zinc-500 text-zinc-400">{t("salary.to")}</p>
           <input
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
-            className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+            className="w-full rounded-xl border dark:border-zinc-700 border-zinc-300 dark:bg-zinc-800 bg-zinc-200 px-3 py-2 text-sm dark:text-white text-zinc-900"
           />
         </div>
       </div>
@@ -135,7 +135,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
         <Skeleton className="h-48 w-full rounded-2xl" />
       ) : shifts.length === 0 ? (
         <div className="flex min-h-[30vh] items-center justify-center">
-          <p className="text-zinc-500">{t("shiftEditor.noShifts")}</p>
+          <p className="dark:text-zinc-500 text-zinc-400">{t("shiftEditor.noShifts")}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -147,22 +147,22 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
             return (
               <div
                 key={shift.id}
-                className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-4"
+                className="rounded-2xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900/30 bg-zinc-100/80 p-4"
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-bold text-white">{shift.users.full_name}</p>
+                    <p className="font-bold dark:text-white text-zinc-900">{shift.users.full_name}</p>
                     {shift.users.position && (
-                      <p className="text-[10px] text-zinc-500">{shift.users.position}</p>
+                      <p className="text-[10px] dark:text-zinc-500 text-zinc-400">{shift.users.position}</p>
                     )}
-                    <p className="mt-1 text-xs text-zinc-400">
+                    <p className="mt-1 text-xs dark:text-zinc-400 text-zinc-600">
                       {format(new Date(shift.clock_in), "d MMM, HH:mm", { locale: ru })}
                       {shift.clock_out && (
                         <> → {format(new Date(shift.clock_out), "HH:mm", { locale: ru })}</>
                       )}
                     </p>
                     {shift.hours_worked != null && (
-                      <p className="text-[10px] text-zinc-500">
+                      <p className="text-[10px] dark:text-zinc-500 text-zinc-400">
                         {shift.hours_worked.toFixed(1)} ч
                       </p>
                     )}
@@ -174,7 +174,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                     {!isEditing && (
                       <button
                         onClick={() => startEdit(shift)}
-                        className="rounded-lg border border-zinc-700 px-2 py-1 text-[10px] text-zinc-400 hover:border-blue-500/30 hover:text-blue-400"
+                        className="rounded-lg border dark:border-zinc-700 border-zinc-300 px-2 py-1 text-[10px] dark:text-zinc-400 text-zinc-600 hover:border-blue-500/30 hover:text-blue-400"
                       >
                         ✎
                       </button>
@@ -183,25 +183,25 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                 </div>
 
                 {isEditing && (
-                  <div className="mt-3 space-y-2 border-t border-zinc-800 pt-3">
+                  <div className="mt-3 space-y-2 border-t dark:border-zinc-800 border-zinc-200 pt-3">
                     <div>
-                      <p className="mb-1 text-[10px] text-zinc-500">{t("shiftEditor.clockIn")}</p>
+                      <p className="mb-1 text-[10px] dark:text-zinc-500 text-zinc-400">{t("shiftEditor.clockIn")}</p>
                       <input
                         type="datetime-local"
                         value={editClockIn}
                         onChange={(e) => setEditClockIn(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+                        className="w-full rounded-xl border dark:border-zinc-700 border-zinc-300 dark:bg-zinc-800 bg-zinc-200 px-3 py-2 text-sm dark:text-white text-zinc-900"
                       />
                     </div>
                     <div>
-                      <p className="mb-1 text-[10px] text-zinc-500">{t("shiftEditor.clockOut")}</p>
+                      <p className="mb-1 text-[10px] dark:text-zinc-500 text-zinc-400">{t("shiftEditor.clockOut")}</p>
                       <input
                         type="datetime-local"
                         value={editClockOut}
                         onChange={(e) => setEditClockOut(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white"
+                        className="w-full rounded-xl border dark:border-zinc-700 border-zinc-300 dark:bg-zinc-800 bg-zinc-200 px-3 py-2 text-sm dark:text-white text-zinc-900"
                       />
-                      <p className="mt-0.5 text-[10px] text-zinc-600">
+                      <p className="mt-0.5 text-[10px] dark:text-zinc-600 text-zinc-400">
                         {t("shiftEditor.clockOutHint")}
                       </p>
                     </div>

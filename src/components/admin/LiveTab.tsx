@@ -35,20 +35,20 @@ export function LiveTab({ onBack }: LiveTabProps) {
     <div className="px-4 pt-4 pb-8">
       <div className="mb-4 flex items-center gap-3">
         {onBack && (
-          <button onClick={onBack} className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+          <button onClick={onBack} className="rounded-xl p-2 dark:text-zinc-400 text-zinc-600 dark:hover:bg-zinc-800 hover:bg-zinc-100 dark:hover:text-white hover:text-zinc-900">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
           </button>
         )}
-        <h2 className="text-lg font-bold text-white">{t("nav.shifts")}</h2>
+        <h2 className="text-lg font-bold dark:text-white text-zinc-900">{t("nav.shifts")}</h2>
       </div>
 
       {loading ? (
-        <p className="text-sm text-zinc-500">{t("common.loading")}</p>
+        <p className="text-sm dark:text-zinc-500 text-zinc-400">{t("common.loading")}</p>
       ) : activeShifts.length === 0 ? (
         <div className="flex min-h-[40vh] items-center justify-center">
-          <p className="text-sm font-medium text-zinc-400">{t("shift.noOneOnShift")}</p>
+          <p className="text-sm font-medium dark:text-zinc-400 text-zinc-600">{t("shift.noOneOnShift")}</p>
         </div>
       ) : (
         <div className="grid gap-3">
@@ -61,7 +61,7 @@ export function LiveTab({ onBack }: LiveTabProps) {
               <article
                 key={shift.id}
                 className={`rounded-2xl border p-4 ${
-                  isLongShift ? "border-amber-500/20 bg-amber-500/5" : "border-blue-500/10 bg-blue-500/5"
+                  isLongShift ? "border-amber-500/20 dark:bg-amber-500/5 bg-amber-50" : "border-blue-500/10 dark:bg-blue-500/5 bg-blue-50"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -71,8 +71,8 @@ export function LiveTab({ onBack }: LiveTabProps) {
                       <span className="relative inline-flex h-3 w-3 rounded-full bg-blue-500" />
                     </span>
                     <div>
-                      <p className="text-lg font-bold text-white">{user.full_name}</p>
-                      {user.position && <p className="text-xs font-medium text-zinc-400">{user.position}</p>}
+                      <p className="text-lg font-bold dark:text-white text-zinc-900">{user.full_name}</p>
+                      {user.position && <p className="text-xs font-medium dark:text-zinc-400 text-zinc-600">{user.position}</p>}
                     </div>
                   </div>
                   <div className="text-right">
