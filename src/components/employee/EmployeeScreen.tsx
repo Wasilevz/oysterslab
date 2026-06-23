@@ -209,17 +209,19 @@ export function EmployeeScreen() {
           )}
         </div>
 
+        <div className="flex justify-center">
         <button
           onClick={handleToggleShift}
           disabled={isPending}
-          className={`w-full rounded-2xl py-4 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
+          className={`w-auto px-8 rounded-2xl py-4 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
             isOnShift
               ? "bg-[var(--color-error)]/15 text-[var(--color-error)] hover:bg-[var(--color-error)]/25"
               : "bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/25"
           }`}
         >
           {isPending ? "..." : isOnShift ? t("shift.end") : t("shift.start")}
-        </button>
+          </button>
+        </div>
 
         {actionError && (
           <p className="px-5 pb-4 text-center text-xs text-rose-400">
