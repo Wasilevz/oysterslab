@@ -8,16 +8,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200 dark:bg-[#1E293B] dark:text-[#F8FAFC] dark:hover:bg-[#334155]",
-        blue: "bg-[#008080] text-white hover:opacity-90 shadow-lg dark:bg-[#D6BC97] dark:text-[#0F172A] dark:hover:opacity-90 dark:shadow-[#D6BC97]/20",
-        rose: "bg-rose-500 text-white hover:bg-rose-400 shadow-lg shadow-rose-500/20",
-        outline: "border border-[#E2E8F0] bg-transparent text-[#2D3748] hover:bg-[#F7FAFC] dark:border-[#334155] dark:text-[#F8FAFC] dark:hover:bg-[#1E293B]",
-        ghost: "text-[#2D3748] hover:bg-[#F7FAFC] dark:text-[#94A3B8] dark:hover:bg-[#1E293B] dark:hover:text-[#F8FAFC]",
+        default: "bg-[var(--bg-surface)] text-[var(--text-primary)] hover:opacity-90 border border-[var(--border-color)]",
+        blue: "bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-hover)] shadow-lg",
+        rose: "bg-[var(--color-error)] text-white hover:opacity-90 shadow-lg",
+        outline: "border border-[var(--border-color)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--bg-surface)]",
+        ghost: "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]",
       },
       size: {
         default: "h-11 px-5 py-2 text-base",
         lg: "h-14 px-8 text-lg",
-        xl: "h-auto min-h-[45vh] w-full px-8 py-10 text-3xl font-black tracking-wide",
         icon: "h-11 w-11",
       },
     },

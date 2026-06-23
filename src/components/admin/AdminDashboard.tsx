@@ -105,11 +105,11 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      color: "text-[#008080]",
-      bg: "dark:from-[#D6BC97]/10 dark:to-[#D6BC97]/5 from-[#E6F7F7] to-[#B2DFDB]/50",
-      border: "border-[#008080]/20",
+      color: "text-[var(--brand-primary)]",
+      bg: "from-[var(--brand-primary)]/10 to-[var(--brand-primary)]/5",
+      border: "border-[var(--brand-primary)]/20",
       badge: stats?.activeShifts.length,
-      badgeColor: "dark:bg-[#D6BC97]/20 bg-[#B2DFDB] text-[#008080]",
+      badgeColor: "bg-[var(--accent-money)]/20 text-[var(--brand-primary)]",
     },
     {
       key: "forgotten" as const,
@@ -120,11 +120,11 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
         </svg>
       ),
-      color: "text-amber-400",
-      bg: "dark:from-amber-500/10 dark:to-amber-600/5 from-amber-50 to-amber-100/50",
-      border: "border-amber-500/20",
+      color: "text-[var(--color-warning)]",
+      bg: "from-[var(--color-warning)]/10 to-[var(--color-warning)]/5",
+      border: "border-[var(--color-warning)]/20",
       badge: stats?.autoClosedShifts.length,
-      badgeColor: "dark:bg-amber-500/20 bg-amber-100 text-amber-400",
+      badgeColor: "bg-[var(--color-warning)]/20 text-[var(--color-warning)]",
     },
     {
       key: "salary" as const,
@@ -135,9 +135,9 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
         </svg>
       ),
-      color: "text-emerald-400",
-      bg: "dark:from-emerald-500/10 dark:to-emerald-600/5 from-emerald-50 to-emerald-100/50",
-      border: "border-emerald-500/20",
+      color: "text-[var(--color-success)]",
+      bg: "from-[var(--color-success)]/10 to-[var(--color-success)]/5",
+      border: "border-[var(--color-success)]/20",
     },
     {
       key: "schedule" as const,
@@ -149,7 +149,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </svg>
       ),
       color: "text-violet-400",
-      bg: "dark:from-violet-500/10 dark:to-violet-600/5 from-violet-50 to-violet-100/50",
+      bg: "from-violet-500/10 to-violet-600/5",
       border: "border-violet-500/20",
     },
     {
@@ -162,7 +162,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </svg>
       ),
       color: "text-orange-400",
-      bg: "dark:from-orange-500/10 dark:to-orange-600/5 from-orange-50 to-orange-100/50",
+      bg: "from-orange-500/10 to-orange-600/5",
       border: "border-orange-500/20",
     },
     {
@@ -175,9 +175,9 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       ),
-      color: "text-[#718096]",
-      bg: "dark:from-[#64748B]/10 dark:to-[#475569]/5 from-[#F1F5F9] to-[#F1F5F9]/50",
-      border: "border-[#A0AEC0]/20",
+      color: "text-[var(--text-secondary)]",
+      bg: "from-[var(--text-secondary)]/10 to-[var(--text-secondary)]/5",
+      border: "border-[var(--text-secondary)]/20",
     },
   ];
 
@@ -185,21 +185,21 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
       <header className="mb-5">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-widest dark:text-[#475569] text-[#718096]">
+          <p className="text-xs font-medium uppercase tracking-widest text-[var(--text-secondary)]">
             {t("nav.dashboard")}
           </p>
           <ThemeToggle />
         </div>
         <div className="mt-1 flex items-center justify-between">
-          <h1 className="text-2xl font-bold dark:text-[#F8FAFC] text-[#2D3748]">{user?.full_name}</h1>
+          <h1 className="text-2xl font-bold text-[var(--text-primary)]">{user?.full_name}</h1>
 
           <button
             onClick={handleToggleShift}
             disabled={isPending}
             className={`rounded-2xl px-6 py-3.5 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
               myShift
-                ? "dark:bg-rose-500/15 bg-rose-100 text-rose-400 hover:bg-rose-500/25"
-                : "dark:bg-[#D6BC97]/20 bg-[#B2DFDB] text-[#008080] hover:bg-[#008080]/30"
+                ? "bg-rose-100 text-rose-400 hover:bg-rose-500/25"
+                : "bg-[var(--brand-primary)]/20 text-[var(--brand-primary)] hover:bg-[var(--brand-primary-hover)]"
             }`}
           >
             {isPending ? "..." : myShift ? t("shift.end") : t("shift.start")}
@@ -207,17 +207,17 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </div>
 
         {myShift && (
-          <div className="mt-3 flex items-center justify-between rounded-2xl border border-[#008080]/10 dark:bg-[#D6BC97]/5 bg-[#E6F7F7] px-4 py-3">
+          <div className="mt-3 flex items-center justify-between rounded-2xl border border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5 px-4 py-3">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#008080] opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#008080]" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--brand-primary)] opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--brand-primary)]" />
               </span>
-              <span className="text-xs font-medium text-[#008080]">{t("shift.active")}</span>
+              <span className="text-xs font-medium text-[var(--brand-primary)]">{t("shift.active")}</span>
             </div>
             <ShiftTimer
               clockIn={myShift.clock_in}
-              className="font-mono text-lg font-black tabular-nums dark:text-[#F8FAFC] text-[#2D3748]"
+              className="font-mono text-lg font-black tabular-nums text-[var(--text-primary)]"
             />
           </div>
         )}
@@ -235,8 +235,8 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             className={`relative overflow-hidden rounded-2xl border ${item.border} bg-gradient-to-br ${item.bg} p-4 text-left transition-all active:scale-[0.98]`}
           >
             <div className={`mb-3 ${item.color}`}>{item.icon}</div>
-            <p className="text-sm font-bold dark:text-[#F8FAFC] text-[#2D3748]">{item.title}</p>
-            <p className="mt-0.5 text-[10px] dark:text-[#64748B] text-[#718096]">{item.desc}</p>
+            <p className="text-sm font-bold text-[var(--text-primary)]">{item.title}</p>
+            <p className="mt-0.5 text-[10px] text-[var(--text-secondary)]">{item.desc}</p>
             {item.badge != null && item.badge > 0 && (
               <span className={`absolute right-3 top-3 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-bold ${item.badgeColor}`}>
                 {item.badge}

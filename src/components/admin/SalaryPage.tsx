@@ -168,18 +168,18 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
   return (
     <div className="flex min-h-full flex-1 flex-col">
-      <header className="border-b dark:border-[#334155]/60 border-[#E2E8F0]/60 px-4 py-5">
+      <header className="border-b border-[var(--border-color)] px-4 py-5">
         <div className="flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} className="rounded-xl p-2 dark:text-[#94A3B8] text-[#718096] dark:hover:bg-[#334155] hover:bg-[#F1F5F9] dark:hover:text-[#F8FAFC] hover:text-[#2D3748]">
+            <button onClick={onBack} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
             </button>
           )}
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest dark:text-[#475569] text-[#718096]">{t("salary.paymentsLabel")}</p>
-            <h1 className="mt-1 text-2xl font-bold dark:text-[#F8FAFC] text-[#2D3748]">{t("salary.payments")}</h1>
+            <p className="text-xs font-medium uppercase tracking-widest text-[var(--text-secondary)]">{t("salary.paymentsLabel")}</p>
+            <h1 className="mt-1 text-2xl font-bold text-[var(--text-primary)]">{t("salary.payments")}</h1>
           </div>
         </div>
       </header>
@@ -190,7 +190,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
             key={v}
             onClick={() => setView(v)}
             className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
-              view === v ? "dark:bg-[#D6BC97]/20 bg-[#B2DFDB] text-[#008080]" : "dark:text-[#64748B] text-[#718096] dark:hover:text-[#CBD5E1] hover:text-[#718096]"
+              view === v ? "bg-[var(--brand-primary)]/20 text-[var(--brand-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             {v === "create" ? t("salary.create") : v === "payments" ? `${t("salary.payments")} (${pendingPayments.length})` : t("salary.report")}
@@ -211,15 +211,15 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
       {view === "create" && (
         <div className="px-4 pt-4 pb-24 space-y-4">
-          <div className="rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 p-4 space-y-3">
-            <p className="text-sm font-semibold dark:text-[#F8FAFC] text-[#2D3748]">{t("salary.newPayment")}</p>
+          <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 space-y-3">
+            <p className="text-sm font-semibold text-[var(--text-primary)]">{t("salary.newPayment")}</p>
 
             <div>
-              <p className="mb-1 text-xs dark:text-[#64748B] text-[#718096]">{t("salary.employee")}</p>
+              <p className="mb-1 text-xs text-[var(--text-secondary)]">{t("salary.employee")}</p>
               <select
                 value={selectedEmp}
                 onChange={(e) => setSelectedEmp(e.target.value)}
-                className="w-full rounded-xl border dark:border-[#475569] border-[#E2E8F0] dark:bg-[#334155] bg-[#F1F5F9] px-3 py-2.5 text-sm dark:text-[#F8FAFC] text-[#2D3748]"
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2.5 text-sm text-[var(--text-primary)]"
               >
                 <option value="">{t("salary.selectEmployee")}</option>
                 {employees.map((emp) => (
@@ -229,49 +229,49 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
             </div>
 
             <div>
-              <p className="mb-1 text-xs dark:text-[#64748B] text-[#718096]">{t("salary.quickPeriods")}</p>
+              <p className="mb-1 text-xs text-[var(--text-secondary)]">{t("salary.quickPeriods")}</p>
               <div className="flex gap-2">
-                <button onClick={() => setWeekRange(0)} className="flex-1 rounded-xl border dark:border-[#475569] border-[#E2E8F0] py-2 text-[10px] dark:text-[#94A3B8] text-[#718096] hover:border-[#008080]/30 hover:text-[#008080]">{t("salary.thisWeek")}</button>
-                <button onClick={() => setWeekRange(-1)} className="flex-1 rounded-xl border dark:border-[#475569] border-[#E2E8F0] py-2 text-[10px] dark:text-[#94A3B8] text-[#718096] hover:border-[#008080]/30 hover:text-[#008080]">{t("salary.lastWeek")}</button>
+                <button onClick={() => setWeekRange(0)} className="flex-1 rounded-xl border border-[var(--border-color)] py-2 text-[10px] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">{t("salary.thisWeek")}</button>
+                <button onClick={() => setWeekRange(-1)} className="flex-1 rounded-xl border border-[var(--border-color)] py-2 text-[10px] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">{t("salary.lastWeek")}</button>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <p className="mb-1 text-xs dark:text-[#64748B] text-[#718096]">{t("salary.from")}</p>
+                <p className="mb-1 text-xs text-[var(--text-secondary)]">{t("salary.from")}</p>
                 <DatePicker value={dateFrom} onChange={setDateFrom} placeholder={t("salary.fromPlaceholder")} maxDate={dateTo || undefined} />
               </div>
               <div>
-                <p className="mb-1 text-xs dark:text-[#64748B] text-[#718096]">{t("salary.to")}</p>
+                <p className="mb-1 text-xs text-[var(--text-secondary)]">{t("salary.to")}</p>
                 <DatePicker value={dateTo} onChange={setDateTo} placeholder={t("salary.toPlaceholder")} minDate={dateFrom || undefined} />
               </div>
             </div>
           </div>
 
           {preview && (
-            <div className="rounded-2xl border border-[#008080]/10 dark:bg-[#D6BC97]/5 bg-[#E6F7F7] p-4 space-y-2">
-              <p className="text-sm font-semibold text-[#008080]">{t("salary.calculation")}</p>
+            <div className="rounded-2xl border border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5 p-4 space-y-2">
+              <p className="text-sm font-semibold text-[var(--brand-primary)]">{t("salary.calculation")}</p>
               <div className="flex justify-between text-sm">
-                <span className="dark:text-[#94A3B8] text-[#718096]">{t("salary.hours")}</span>
-                <span className="font-mono font-bold dark:text-[#F8FAFC] text-[#2D3748]">{preview.hours.toFixed(1)} ч</span>
+                <span className="text-[var(--text-secondary)]">{t("salary.hours")}</span>
+                <span className="font-mono font-bold text-[var(--text-primary)]">{preview.hours.toFixed(1)} ч</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="dark:text-[#94A3B8] text-[#718096]">{t("salary.rate")}</span>
-                <span className="font-mono dark:text-[#F8FAFC] text-[#2D3748]">{preview.rate} л/ч</span>
+                <span className="text-[var(--text-secondary)]">{t("salary.rate")}</span>
+                <span className="font-mono text-[var(--text-primary)]">{preview.rate} л/ч</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="dark:text-[#94A3B8] text-[#718096]">{t("salary.shifts")}</span>
-                <span className="font-mono dark:text-[#F8FAFC] text-[#2D3748]">{preview.shiftCount}</span>
+                <span className="text-[var(--text-secondary)]">{t("salary.shifts")}</span>
+                <span className="font-mono text-[var(--text-primary)]">{preview.shiftCount}</span>
               </div>
               {preview.fines > 0 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#718096]">{t("salary.fines")}</span>
+                  <span className="text-[var(--text-secondary)]">{t("salary.fines")}</span>
                   <span className="font-mono text-rose-400">-{formatMoney(preview.fines)}</span>
                 </div>
               )}
-              <div className="border-t border-[#008080]/20 pt-2 flex justify-between">
-                <span className="text-sm font-semibold dark:text-[#F8FAFC] text-[#2D3748]">{t("salary.total")}</span>
-                <span className="font-mono text-lg font-bold text-[#008080]">{formatMoney(preview.amount)}</span>
+              <div className="border-t border-[var(--brand-primary)]/20 pt-2 flex justify-between">
+                <span className="text-sm font-semibold text-[var(--text-primary)]">{t("salary.total")}</span>
+                <span className="font-mono text-lg font-bold text-[var(--brand-primary)]">{formatMoney(preview.amount)}</span>
               </div>
             </div>
           )}
@@ -289,20 +289,20 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-amber-400">{t("salary.pending", { count: pendingPayments.length })}</p>
               <div className="space-y-2">
                 {pendingPayments.map((p) => (
-                  <div key={p.id} className="rounded-2xl border border-amber-500/10 dark:bg-amber-500/5 bg-amber-50 p-4">
+                  <div key={p.id} className="rounded-2xl border border-amber-500/10 bg-amber-500/5 p-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-bold dark:text-[#F8FAFC] text-[#2D3748]">{p.users.full_name}</p>
-                        {p.users.position && <p className="text-[10px] dark:text-[#64748B] text-[#718096]">{p.users.position}</p>}
-                        <p className="text-xs dark:text-[#64748B] text-[#718096]">
+                        <p className="font-bold text-[var(--text-primary)]">{p.users.full_name}</p>
+                        {p.users.position && <p className="text-[10px] text-[var(--text-secondary)]">{p.users.position}</p>}
+                        <p className="text-xs text-[var(--text-secondary)]">
                           {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
                         </p>
                       </div>
-                      <span className="rounded-lg dark:bg-amber-500/10 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-400">{t("salary.waiting")}</span>
+                      <span className="rounded-lg bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">{t("salary.waiting")}</span>
                     </div>
                     <div className="mt-2 flex justify-between text-sm">
-                      <span className="dark:text-[#94A3B8] text-[#718096]">{Number(p.hours_worked).toFixed(1)} ч × {Number(p.hourly_rate)} л/ч</span>
-                      <span className="font-mono font-bold dark:text-[#F8FAFC] text-[#2D3748]">{formatMoney(Number(p.total_amount))}</span>
+                      <span className="text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} ч × {Number(p.hourly_rate)} л/ч</span>
+                      <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</span>
                     </div>
                     <div className="mt-3 flex gap-2">
                       <Button variant="blue" className="flex-1" disabled={isPending} onClick={() => handleApprove(p.id)}>{t("salary.approve")}</Button>
@@ -316,22 +316,22 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
           {approvedPayments.length > 0 && (
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#008080]">{t("salary.approved", { count: approvedPayments.length })}</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--brand-primary)]">{t("salary.approved", { count: approvedPayments.length })}</p>
               <div className="space-y-2">
                 {approvedPayments.map((p) => (
-                  <div key={p.id} className="rounded-2xl border border-[#008080]/10 dark:bg-[#D6BC97]/5 bg-[#E6F7F7] p-4">
+                  <div key={p.id} className="rounded-2xl border border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5 p-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-bold dark:text-[#F8FAFC] text-[#2D3748]">{p.users.full_name}</p>
-                        <p className="text-xs dark:text-[#64748B] text-[#718096]">
+                        <p className="font-bold text-[var(--text-primary)]">{p.users.full_name}</p>
+                        <p className="text-xs text-[var(--text-secondary)]">
                           {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
                         </p>
                       </div>
-                      <span className="rounded-lg dark:bg-[#D6BC97]/10 bg-[#E6F7F7] px-2 py-0.5 text-[10px] font-bold text-[#008080]">{t("salary.approvedStatus")}</span>
+                      <span className="rounded-lg bg-[var(--accent-money)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--brand-primary)]">{t("salary.approvedStatus")}</span>
                     </div>
                     <div className="mt-2 flex justify-between">
-                      <span className="text-sm dark:text-[#94A3B8] text-[#718096]">{Number(p.hours_worked).toFixed(1)} ч</span>
-                      <span className="font-mono font-bold dark:text-[#F8FAFC] text-[#2D3748]">{formatMoney(Number(p.total_amount))}</span>
+                      <span className="text-sm text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} ч</span>
+                      <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</span>
                     </div>
                   </div>
                 ))}
@@ -344,19 +344,19 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-emerald-400">{t("salary.paid", { count: paidPayments.length })}</p>
               <div className="space-y-2">
                 {paidPayments.slice(0, 20).map((p) => (
-                  <div key={p.id} className="rounded-2xl border border-emerald-500/10 dark:bg-emerald-500/5 bg-emerald-50 p-4">
+                  <div key={p.id} className="rounded-2xl border border-emerald-500/10 bg-emerald-500/5 p-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-bold dark:text-[#F8FAFC] text-[#2D3748]">{p.users.full_name}</p>
-                        <p className="text-xs dark:text-[#64748B] text-[#718096]">
+                        <p className="font-bold text-[var(--text-primary)]">{p.users.full_name}</p>
+                        <p className="text-xs text-[var(--text-secondary)]">
                           {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
                         </p>
                       </div>
-                      <span className="rounded-lg dark:bg-emerald-500/10 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-400">{t("salary.paidStatus")}</span>
+                      <span className="rounded-lg bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">{t("salary.paidStatus")}</span>
                     </div>
                     <div className="mt-2 flex justify-between">
-                      <span className="text-sm dark:text-[#94A3B8] text-[#718096]">{Number(p.hours_worked).toFixed(1)} ч</span>
-                      <span className="font-mono font-bold dark:text-[#F8FAFC] text-[#2D3748]">{formatMoney(Number(p.total_amount))}</span>
+                      <span className="text-sm text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} ч</span>
+                      <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</span>
                     </div>
                     {p.paid_at && (
                       <p className="mt-1 text-[10px] text-emerald-400">
@@ -371,7 +371,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
           {payments.length === 0 && (
             <div className="flex min-h-[30vh] items-center justify-center">
-              <p className="dark:text-[#64748B] text-[#718096]">{t("salary.noPayments")}</p>
+              <p className="text-[var(--text-secondary)]">{t("salary.noPayments")}</p>
             </div>
           )}
         </div>
@@ -380,46 +380,46 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
       {view === "report" && (
         <div className="px-4 pt-4 pb-24 space-y-4">
           <div className="flex items-center justify-between">
-            <button onClick={() => { if (reportMonth === 1) { setReportMonth(12); setReportYear(reportYear - 1); } else { setReportMonth(reportMonth - 1); } }} className="rounded-xl p-2 dark:text-[#94A3B8] text-[#718096] dark:hover:bg-[#334155] hover:bg-[#F1F5F9] dark:hover:text-[#F8FAFC] hover:text-[#2D3748]">
+            <button onClick={() => { if (reportMonth === 1) { setReportMonth(12); setReportYear(reportYear - 1); } else { setReportMonth(reportMonth - 1); } }} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
             </button>
-            <p className="text-lg font-bold dark:text-[#F8FAFC] text-[#2D3748]">{monthNames[reportMonth - 1]} {reportYear}</p>
-            <button onClick={() => { if (reportMonth === 12) { setReportMonth(1); setReportYear(reportYear + 1); } else { setReportMonth(reportMonth + 1); } }} className="rounded-xl p-2 dark:text-[#94A3B8] text-[#718096] dark:hover:bg-[#334155] hover:bg-[#F1F5F9] dark:hover:text-[#F8FAFC] hover:text-[#2D3748]">
+            <p className="text-lg font-bold text-[var(--text-primary)]">{monthNames[reportMonth - 1]} {reportYear}</p>
+            <button onClick={() => { if (reportMonth === 12) { setReportMonth(1); setReportYear(reportYear + 1); } else { setReportMonth(reportMonth + 1); } }} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
             </button>
           </div>
 
           {monthlyReport && monthlyReport.employees.length > 0 && (
-            <div className="rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-[#F1F5F9]/80 overflow-hidden">
-              <div className="grid grid-cols-4 gap-px dark:bg-[#334155] bg-[#F1F5F9] text-[10px] font-semibold uppercase tracking-wider dark:text-[#64748B] text-[#718096]">
-                <div className="dark:bg-[#1E293B] bg-white px-3 py-2">{t("salary.employee")}</div>
-                <div className="dark:bg-[#1E293B] bg-white px-3 py-2 text-center">{t("salary.hours")}</div>
-                <div className="dark:bg-[#1E293B] bg-white px-3 py-2 text-center">{t("salary.shiftsPlural")}</div>
-                <div className="dark:bg-[#1E293B] bg-white px-3 py-2 text-right">{t("salary.amount")}</div>
+            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-hidden">
+              <div className="grid grid-cols-4 gap-px bg-[var(--border-color)] text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
+                <div className="bg-[var(--bg-surface)] px-3 py-2">{t("salary.employee")}</div>
+                <div className="bg-[var(--bg-surface)] px-3 py-2 text-center">{t("salary.hours")}</div>
+                <div className="bg-[var(--bg-surface)] px-3 py-2 text-center">{t("salary.shiftsPlural")}</div>
+                <div className="bg-[var(--bg-surface)] px-3 py-2 text-right">{t("salary.amount")}</div>
               </div>
               {monthlyReport.employees.map((emp) => (
-                <div key={emp.id} className="grid grid-cols-4 gap-px dark:bg-[#334155] bg-[#F1F5F9]">
-                  <div className="dark:bg-[#1E293B] bg-white px-3 py-3">
-                    <p className="text-sm font-medium dark:text-[#F8FAFC] text-[#2D3748]">{emp.full_name}</p>
-                    {emp.position && <p className="text-[10px] dark:text-[#64748B] text-[#718096]">{emp.position}</p>}
+                <div key={emp.id} className="grid grid-cols-4 gap-px bg-[var(--border-color)]">
+                  <div className="bg-[var(--bg-surface)] px-3 py-3">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{emp.full_name}</p>
+                    {emp.position && <p className="text-[10px] text-[var(--text-secondary)]">{emp.position}</p>}
                   </div>
-                  <div className="dark:bg-[#1E293B] bg-white px-3 py-3 text-center">
-                    <p className="font-mono text-sm font-bold dark:text-[#F8FAFC] text-[#2D3748]">{emp.totalHours.toFixed(1)}</p>
+                  <div className="bg-[var(--bg-surface)] px-3 py-3 text-center">
+                    <p className="font-mono text-sm font-bold text-[var(--text-primary)]">{emp.totalHours.toFixed(1)}</p>
                   </div>
-                  <div className="dark:bg-[#1E293B] bg-white px-3 py-3 text-center">
-                    <p className="font-mono text-sm font-bold dark:text-[#F8FAFC] text-[#2D3748]">{emp.totalShifts}</p>
+                  <div className="bg-[var(--bg-surface)] px-3 py-3 text-center">
+                    <p className="font-mono text-sm font-bold text-[var(--text-primary)]">{emp.totalShifts}</p>
                   </div>
-                  <div className="dark:bg-[#1E293B] bg-white px-3 py-3 text-right">
-                    <p className="font-mono text-sm font-bold text-[#008080]">{formatMoney(emp.totalAmount)}</p>
+                  <div className="bg-[var(--bg-surface)] px-3 py-3 text-right">
+                    <p className="font-mono text-sm font-bold text-[var(--brand-primary)]">{formatMoney(emp.totalAmount)}</p>
                   </div>
                 </div>
               ))}
-              <div className="grid grid-cols-4 gap-px dark:bg-[#334155] bg-[#F1F5F9]">
-                <div className="dark:bg-[#D6BC97]/10 bg-[#E6F7F7] px-3 py-3 col-span-3">
-                  <p className="text-sm font-bold dark:text-[#F8FAFC] text-[#2D3748]">{t("salary.total")}</p>
+              <div className="grid grid-cols-4 gap-px bg-[var(--border-color)]">
+                <div className="bg-[var(--accent-money)]/10 px-3 py-3 col-span-3">
+                  <p className="text-sm font-bold text-[var(--text-primary)]">{t("salary.total")}</p>
                 </div>
-                <div className="dark:bg-[#D6BC97]/10 bg-[#E6F7F7] px-3 py-3 text-right">
-                  <p className="font-mono text-lg font-bold text-[#008080]">{formatMoney(monthlyReport.grandTotal)}</p>
+                <div className="bg-[var(--accent-money)]/10 px-3 py-3 text-right">
+                  <p className="font-mono text-lg font-bold text-[var(--brand-primary)]">{formatMoney(monthlyReport.grandTotal)}</p>
                 </div>
               </div>
             </div>
@@ -427,7 +427,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
           {monthlyReport && monthlyReport.employees.length === 0 && (
             <div className="flex min-h-[30vh] items-center justify-center">
-              <p className="dark:text-[#64748B] text-[#718096]">{t("salary.noData")}</p>
+              <p className="text-[var(--text-secondary)]">{t("salary.noData")}</p>
             </div>
           )}
         </div>

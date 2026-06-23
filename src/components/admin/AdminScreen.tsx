@@ -34,7 +34,7 @@ export function AdminScreen() {
   };
 
   return (
-    <main className="min-h-screen dark:bg-[#0F172A] dark:text-[#F8FAFC] bg-white text-[#2D3748]">
+    <main className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)]">
       {renderView()}
     </main>
   );

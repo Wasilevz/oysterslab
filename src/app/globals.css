@@ -2,75 +2,63 @@
 
 @custom-variant dark (&:is(.dark *));
 
-:root {
-  --background: #FAFAFA;
-  --foreground: #2D3748;
-  --card-bg: #FFFFFF;
-  --card-border: #E2E8F0;
-  --muted: #718096;
-  --accent: #008080;
-  --accent-light: #E6F5F5;
-  --accent-gold: #C5A880;
-  --scrollbar: #CBD5E0;
-  --scrollbar-hover: #A0AEC0;
-}
-
-.dark {
-  --background: #0F172A;
-  --foreground: #F8FAFC;
-  --card-bg: #1E293B;
-  --card-border: #334155;
-  --muted: #94A3B8;
-  --accent: #D6BC97;
-  --accent-light: rgba(214, 188, 151, 0.1);
-  --accent-gold: #D6BC97;
-  --scrollbar: #334155;
-  --scrollbar-hover: #475569;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-app: var(--bg-app);
+  --color-surface: var(--bg-surface);
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-border: var(--border-color);
+  --color-brand: var(--brand-primary);
+  --color-brand-hover: var(--brand-primary-hover);
+  --color-money: var(--accent-money);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.3s, color 0.3s;
+@layer base {
+  :root {
+    --bg-app: #FDFBF7;
+    --bg-surface: #FFFFFF;
+    --text-primary: #1E293B;
+    --text-secondary: #64748B;
+    --border-color: #E2E8F0;
+    --brand-primary: #2A5A57;
+    --brand-primary-hover: #1E4240;
+    --accent-money: #0F766E;
+    --color-success: #10B981;
+    --color-warning: #F59E0B;
+    --color-error: #EF4444;
+  }
+
+  .dark {
+    --bg-app: #0B131E;
+    --bg-surface: #162032;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --border-color: #1E293B;
+    --brand-primary: #4CA8A4;
+    --brand-primary-hover: #3A8784;
+    --accent-money: #D6BC97;
+  }
+
+  body {
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s, color 0.3s;
+  }
 }
 
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--scrollbar);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-hover);
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.6);
-}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6); }
