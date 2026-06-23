@@ -5,7 +5,6 @@ import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { getAllShifts, editShift } from "@/actions/shiftActions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import type { Shift } from "@/types/database";

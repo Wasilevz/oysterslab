@@ -8,23 +8,18 @@ import { SalaryPage } from "@/components/admin/SalaryPage";
 import { ScheduleAdmin } from "@/components/admin/ScheduleAdmin";
 import { ShiftEditor } from "@/components/admin/ShiftEditor";
 import { SettingsPage } from "@/components/admin/SettingsPage";
-import { useUserStore } from "@/store/userStore";
 
 type AdminView = "dashboard" | "live" | "forgotten" | "salary" | "schedule" | "settings" | "shifts";
 
 export function AdminScreen() {
-  const user = useUserStore((s) => s.user);
   const [view, setView] = useState<AdminView>("dashboard");
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  const refresh = () => setRefreshKey((k) => k + 1);
 
   const renderView = () => {
     switch (view) {
       case "live":
         return <LiveTab onBack={() => setView("dashboard")} />;
       case "forgotten":
-        return <ForgottenTab onBack={() => setView("dashboard")} onReviewed={refresh} />;
+        return <ForgottenTab onBack={() => setView("dashboard")} />;
       case "salary":
         return <SalaryPage onBack={() => setView("dashboard")} />;
       case "schedule":

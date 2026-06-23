@@ -93,7 +93,7 @@ export default function Home() {
     }
 
     void bootstrap();
-  }, [setLoading, setUser, setDenied, setError]);
+  }, [setLoading, setUser, setDenied, setError, t]);
 
   if (status === "idle" || status === "loading") {
     return <LoadingSkeleton />;

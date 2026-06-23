@@ -35,7 +35,7 @@ export function EmployeeSalary() {
       setError(result.error ?? t("common.error"));
     }
     setLoading(false);
-  }, [user]);
+  }, [user, t]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

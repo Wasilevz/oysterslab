@@ -44,7 +44,7 @@ function getInitials(name: string): string {
 }
 
 export function EmployeeScreen() {
-  const { t, locale, setLocale } = useI18n();
+  const { t } = useI18n();
   const user = useUserStore((s) => s.user);
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
   const [recentShifts, setRecentShifts] = useState<Shift[]>([]);

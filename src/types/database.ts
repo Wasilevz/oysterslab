@@ -16,7 +16,7 @@ export interface User {
   created_at: string;
 }
 
-export interface UserWithPosition extends Pick<User, "id" | "full_name" | "position" | "hourly_rate"> {}
+export type UserWithPosition = Pick<User, "id" | "full_name" | "position" | "hourly_rate">;
 
 export interface Shift {
   id: string;

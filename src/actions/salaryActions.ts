@@ -7,23 +7,7 @@ import type {
   SalaryPayment,
   SalaryPaymentWithUser,
   User,
-  MonthlyReportEmployee,
 } from "@/types/database";
-
-function getWeekBounds(date: Date): { start: string; end: string } {
-  const d = new Date(date);
-  const day = (d.getDay() + 6) % 7;
-  const monday = new Date(d);
-  monday.setDate(d.getDate() - day);
-  monday.setHours(0, 0, 0, 0);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  sunday.setHours(23, 59, 59, 999);
-  return {
-    start: monday.toISOString().split("T")[0],
-    end: sunday.toISOString().split("T")[0],
-  };
-}
 
 export async function getEmployees(): Promise<ActionResult<User[]>> {
   try {

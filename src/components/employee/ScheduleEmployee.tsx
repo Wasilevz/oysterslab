@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getMySchedule, getWorkingToday } from "@/actions/scheduleActions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
@@ -33,7 +33,7 @@ export function ScheduleEmployee() {
   const month = currentDate.getMonth() + 1;
   const daysInMonth = new Date(year, month, 0).getDate();
 
-  const loadData = useCallback(async () => {
+  async function loadData() {
     if (!user) return;
     const [schedResult, todayResult] = await Promise.all([
       getMySchedule(user.id, year, month),
@@ -42,12 +42,13 @@ export function ScheduleEmployee() {
     if (schedResult.success && schedResult.data) setSchedules(schedResult.data);
     if (todayResult.success && todayResult.data) setWorkingToday(todayResult.data);
     setLoading(false);
-  }, [user, year, month]);
+  }
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadData();
-  }, [loadData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [year, month]);
 
   const getDayType = (day: number): ScheduleType => {
     const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;

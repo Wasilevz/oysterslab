@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
-import { getSchedule, setScheduleDay, setBulkWeekends, getWorkingToday } from "@/actions/scheduleActions";
+import { useEffect, useState } from "react";
+import { getSchedule, setScheduleDay, getWorkingToday } from "@/actions/scheduleActions";
 import { getEmployees } from "@/actions/employeeActions";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
@@ -33,13 +32,12 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
   const [workingToday, setWorkingToday] = useState<{ id: string; full_name: string; position: string | null; clock_in: string | null }[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [loading, setLoading] = useState(true);
-  const [isPending, startTransition] = useTransition();
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
   const daysInMonth = new Date(year, month, 0).getDate();
 
-  const loadData = useCallback(async () => {
+  async function loadData() {
     const [schedResult, empResult, todayResult] = await Promise.all([
       getSchedule(year, month),
       getEmployees(),
@@ -49,13 +47,14 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
     if (empResult.success && empResult.data) setEmployees(empResult.data);
     if (todayResult.success && todayResult.data) setWorkingToday(todayResult.data);
     setLoading(false);
-  }, [year, month]);
+  }
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     void loadData();
-  }, [loadData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [year, month]);
 
   const getScheduleType = (userId: string, day: number): ScheduleType => {
     const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -74,16 +73,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
       return [...filtered, { id: "temp", user_id: userId, date: dateStr, type: next, created_at: "" }];
     });
 
-    startTransition(async () => {
-      await setScheduleDay(userId, dateStr, next);
-    });
-  };
-
-  const handleSetWeekends = () => {
-    startTransition(async () => {
-      await setBulkWeekends(year, month, "off");
-      void loadData();
-    });
+    void setScheduleDay(userId, dateStr, next);
   };
 
   const prevMonth = () => {

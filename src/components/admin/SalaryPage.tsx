@@ -12,7 +12,7 @@ import {
   getMonthlyReport,
   deletePayment,
 } from "@/actions/salaryActions";
-import { getFines, deleteFine } from "@/actions/finesActions";
+import { getFines } from "@/actions/finesActions";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -80,11 +80,12 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
   useEffect(() => {
     if (!selectedEmp || !dateFrom || !dateTo) {
-      setPreview(null);
       return;
     }
+    let cancelled = false;
     startTransition(async () => {
       const calc = await getShiftsForPeriod(selectedEmp, dateFrom, dateTo);
+      if (cancelled) return;
       if (calc.success && calc.data) {
         const empFines = fines.filter(
           (f) => f.user_id === selectedEmp && f.period_start >= dateFrom && f.period_end <= dateTo,
@@ -93,6 +94,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
         setPreview({ ...calc.data, fines: totalFines });
       }
     });
+    return () => { cancelled = true; };
   }, [selectedEmp, dateFrom, dateTo, fines]);
 
   const handleCreate = () => {
@@ -136,13 +138,6 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
         setError(result.error ?? t("common.error"));
         return;
       }
-      void loadData();
-    });
-  };
-
-  const handleDeleteFine = (id: string) => {
-    startTransition(async () => {
-      await deleteFine(id);
       void loadData();
     });
   };
