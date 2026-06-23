@@ -19,7 +19,6 @@ const POLL_INTERVAL_MS = 15000;
 
 export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const user = useUserStore((s) => s.user);
-  const toggleViewAs = useUserStore((s) => s.toggleViewAs);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -182,17 +181,9 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   return (
     <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
       <header className="mb-5">
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
-            Панель управления
-          </p>
-          <button
-            onClick={toggleViewAs}
-            className="rounded-xl border border-zinc-700 px-3 py-1.5 text-[10px] font-semibold text-zinc-400 hover:border-blue-500/30 hover:text-blue-400"
-          >
-            Как сотрудник
-          </button>
-        </div>
+        <p className="text-xs font-medium uppercase tracking-widest text-zinc-600">
+          Панель управления
+        </p>
         <div className="mt-1 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-white">{user?.full_name}</h1>
 
