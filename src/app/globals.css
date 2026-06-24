@@ -36,12 +36,12 @@
   [data-theme="dark"] {
     --bg-app: #08080A;
     --bg-surface: #121317;
-    --text-primary: #F8FAFC;
-    --text-secondary: #777A88;
-    --border-color: #2E3038;
-    --brand-primary: #CC9166;
-    --brand-primary-hover: #AE9357;
-    --accent-money: #CC9166;
+    --text-primary: #e2e3e9;
+    --text-secondary: #777a88;
+    --border-color: #2e3038;
+    --brand-primary: #cc9166;
+    --brand-primary-hover: #ae9357;
+    --accent-money: #cc9166;
     --color-success: #10B981;
     --color-warning: #F59E0B;
     --color-error: #EF4444;
