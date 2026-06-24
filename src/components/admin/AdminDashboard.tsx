@@ -192,18 +192,6 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           >
             {isPending ? "..." : myShift ? t("shift.end") : t("shift.start")}
           </button>
-
-          {!adminLocationId && locations.length > 0 && (
-            <span className="rounded-xl border border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 px-3 py-2 text-xs font-semibold text-[var(--brand-primary)]">
-              Все локации
-            </span>
-          )}
-
-          {adminLocationId && locations.length > 0 && (
-            <span className="rounded-xl border border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 px-3 py-2 text-xs font-semibold text-[var(--brand-primary)]">
-              {locations.find((l) => l.id === adminLocationId)?.name || "Локация"}
-            </span>
-          )}
         </div>
 
         {myShift && (
