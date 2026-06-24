@@ -1,6 +1,7 @@
 "use server";
 
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { logAction } from "@/lib/audit";
 import type {
   ActionResult,
   EmployeeStats,
@@ -142,6 +143,7 @@ export async function approvePayment(
 
     const { notifyShiftApproved } = await import("@/lib/telegram-notify");
     void notifyShiftApproved(paymentId);
+    if (callerId) void logAction(callerId, "approve_payment", "salary_payment", paymentId);
 
     return { success: true };
   } catch {
@@ -163,6 +165,7 @@ export async function confirmPayment(
 
     const { notifyPaymentReceived } = await import("@/lib/telegram-notify");
     void notifyPaymentReceived(paymentId);
+    void logAction("system", "confirm_payment", "salary_payment", paymentId);
 
     return { success: true };
   } catch {

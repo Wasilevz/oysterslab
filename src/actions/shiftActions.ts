@@ -1,6 +1,7 @@
 "use server";
 
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { logAction } from "@/lib/audit";
 import type { ActionResult, Shift } from "@/types/database";
 
 function roundTo30(date: Date): Date {
@@ -296,6 +297,8 @@ export async function editShift(
       .single();
 
     if (error) return { success: false, error: "Ошибка сервера" };
+
+    if (callerId) void logAction(callerId, "edit_shift", "shift", shiftId, `clock_in: ${clockIn}, clock_out: ${clockOut}`);
 
     return { success: true, data: updated as Shift };
   } catch {

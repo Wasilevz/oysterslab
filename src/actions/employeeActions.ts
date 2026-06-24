@@ -1,6 +1,7 @@
 "use server";
 
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { logAction } from "@/lib/audit";
 import type { ActionResult, User } from "@/types/database";
 
 async function verifyAdmin(callerId: string): Promise<string | null> {
@@ -79,6 +80,8 @@ export async function addEmployee(
 
     if (error) return { success: false, error: "Ошибка сервера" };
 
+    void logAction(callerId, "add_employee", "user", data?.id, `${fullName} (${role})`);
+
     return { success: true, data: data as User };
   } catch {
     return { success: false, error: "Ошибка сервера" };
@@ -127,6 +130,8 @@ export async function updateEmployee(
 
     if (error) return { success: false, error: "Ошибка сервера" };
 
+    if (callerId) void logAction(callerId, "update_employee", "user", userId);
+
     return { success: true };
   } catch {
     return { success: false, error: "Ошибка сервера" };
@@ -143,6 +148,8 @@ export async function deleteEmployee(userId: string, callerId: string): Promise<
     const { error } = await supabase.from("users").delete().eq("id", userId);
 
     if (error) return { success: false, error: "Ошибка сервера" };
+
+    void logAction(callerId, "delete_employee", "user", userId);
 
     return { success: true };
   } catch {
