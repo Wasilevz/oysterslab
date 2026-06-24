@@ -181,6 +181,18 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         <div className="mt-1 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">{user?.full_name}</h1>
 
+          <button
+            onClick={handleToggleShift}
+            disabled={isPending}
+            className={`rounded-2xl px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
+              myShift
+                ? "bg-[var(--color-error)]/15 text-[var(--color-error)] hover:bg-[var(--color-error)]/25"
+                : "bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/25"
+            }`}
+          >
+            {isPending ? "..." : myShift ? t("shift.end") : t("shift.start")}
+          </button>
+
           {!adminLocationId && locations.length > 0 && (
             <span className="rounded-xl border border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 px-3 py-2 text-xs font-semibold text-[var(--brand-primary)]">
               Все локации
