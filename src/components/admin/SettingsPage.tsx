@@ -16,6 +16,16 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Location, User } from "@/types/database";
 
+interface AuditEntry {
+  id: string;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  details: string | null;
+  created_at: string;
+  users?: { full_name: string };
+}
+
 export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const { t, locale, setLocale } = useI18n();
   const [employees, setEmployees] = useState<User[]>([]);
@@ -36,6 +46,8 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const [locations, setLocations] = useState<Location[]>([]);
   const [newLocationName, setNewLocationName] = useState("");
   const [newLocationAddress, setNewLocationAddress] = useState("");
+  const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([]);
+  const [showLogs, setShowLogs] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -57,6 +69,16 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
       setLocations(locationsResult.data);
     }
     setLoading(false);
+  }, []);
+
+  const loadLogs = useCallback(async () => {
+    try {
+      const res = await fetch("/api/audit?limit=30", {
+        headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET || ""}` },
+      });
+      const data = await res.json();
+      if (data.ok) setAuditLogs(data.logs);
+    } catch {}
   }, []);
 
   useEffect(() => {
@@ -334,6 +356,44 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Audit Logs */}
+      <div className="px-4 mt-6 pb-24">
+        <button
+          onClick={() => { setShowLogs(!showLogs); if (!showLogs) void loadLogs(); }}
+          className="flex w-full items-center justify-between rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4"
+        >
+          <span className="text-sm font-semibold text-[var(--text-primary)]">Журнал действий</span>
+          <svg className={`h-4 w-4 text-[var(--text-secondary)] transition-transform ${showLogs ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        {showLogs && (
+          <div className="mt-2 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
+            {auditLogs.length === 0 ? (
+              <p className="text-center text-sm text-[var(--text-secondary)]">Нет записей</p>
+            ) : (
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {auditLogs.map((log) => (
+                  <div key={log.id} className="flex items-start justify-between rounded-xl border border-[var(--border-color)] px-3 py-2">
+                    <div>
+                      <p className="text-xs font-medium text-[var(--text-primary)]">
+                        {log.users?.full_name || "System"} — {log.action}
+                      </p>
+                      <p className="text-[10px] text-[var(--text-secondary)]">
+                        {log.entity_type}{log.details ? `: ${log.details}` : ""}
+                      </p>
+                    </div>
+                    <p className="text-[10px] text-[var(--text-secondary)] whitespace-nowrap">
+                      {new Date(log.created_at).toLocaleString("ru-RU")}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
