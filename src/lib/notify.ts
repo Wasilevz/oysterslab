@@ -117,7 +117,9 @@ export async function autoCloseOverdueShifts(): Promise<{ closed: number }> {
   const supabase = getSupabaseAdmin();
   const { hour, minute } = getLocalTime();
 
-  if (!(hour === 1 && minute === 30)) return { closed: 0 };
+  const afterCutoff = hour > 1 || (hour === 1 && minute >= 30);
+  const beforeNextDay = hour < 2;
+  if (!afterCutoff || !beforeNextDay) return { closed: 0 };
 
   const { data: activeShifts, error } = await supabase
     .from("shifts")
