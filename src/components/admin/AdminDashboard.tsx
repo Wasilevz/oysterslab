@@ -32,8 +32,11 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [myShift, setMyShift] = useState<Shift | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const adminLocationId = user?.location_id;
+  const effectiveLocationId = adminLocationId || selectedLocationId || undefined;
+
   const loadStats = useCallback(async () => {
-    const result = await getDashboardStats(selectedLocationId ?? undefined);
+    const result = await getDashboardStats(effectiveLocationId);
     if (result.success && result.data) {
       setStats(result.data);
       setError(null);
@@ -41,7 +44,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       setError(result.error ?? "Ошибка");
     }
     setLoading(false);
-  }, [selectedLocationId]);
+  }, [effectiveLocationId]);
 
   const loadLocations = useCallback(async () => {
     const result = await getLocations();
@@ -203,7 +206,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         <div className="mt-1 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">{user?.full_name}</h1>
 
-          {locations.length > 0 && (
+          {locations.length > 0 && !adminLocationId && (
             <select
               value={selectedLocationId ?? ""}
               onChange={(e) => {
@@ -216,6 +219,12 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
                 <option key={loc.id} value={loc.id}>{loc.name}</option>
               ))}
             </select>
+          )}
+
+          {adminLocationId && locations.length > 0 && (
+            <span className="rounded-xl border border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 px-3 py-2 text-xs font-semibold text-[var(--brand-primary)]">
+              📍 {locations.find((l) => l.id === adminLocationId)?.name || "Локация"}
+            </span>
           )}
 
           <button
