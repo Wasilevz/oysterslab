@@ -6,6 +6,13 @@ export type PayrollStatus = "DRAFT" | "APPROVED";
 
 export type SalaryStatus = "pending" | "approved" | "paid";
 
+export interface Location {
+  id: string;
+  name: string;
+  address: string | null;
+  created_at: string;
+}
+
 export interface User {
   id: string;
   telegram_id: number;
@@ -14,6 +21,7 @@ export interface User {
   position: string | null;
   hourly_rate: number;
   shift_start_time: string;
+  location_id: string;
   created_at: string;
 }
 

@@ -93,6 +93,7 @@ export async function updateEmployee(
   role?: "employee" | "admin",
   shiftStartTime?: string,
   callerId?: string,
+  locationId?: string,
 ): Promise<ActionResult<void>> {
   if (callerId) {
     const adminError = await verifyAdmin(callerId);
@@ -117,6 +118,7 @@ export async function updateEmployee(
 
     if (role) updateData.role = role;
     if (shiftStartTime !== undefined) updateData.shift_start_time = shiftStartTime;
+    if (locationId !== undefined) updateData.location_id = locationId || null;
 
     const { error } = await supabase
       .from("users")

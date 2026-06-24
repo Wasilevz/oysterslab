@@ -1,7 +1,112 @@
 "use server";
 
 import { getSupabaseAdmin } from "@/lib/supabase";
-import type { ActionResult } from "@/types/database";
+import type { ActionResult, Location } from "@/types/database";
+
+// === Multi-location management ===
+
+export async function getLocations(): Promise<ActionResult<Location[]>> {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("locations")
+      .select("*")
+      .order("name");
+
+    if (error) return { success: false, error: "Ошибка сервера" };
+    return { success: true, data: (data ?? []) as Location[] };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
+  }
+}
+
+export async function addLocation(
+  name: string,
+  address: string,
+  callerId: string,
+): Promise<ActionResult<Location>> {
+  if (!name.trim()) return { success: false, error: "Введите название" };
+
+  try {
+    const supabase = getSupabaseAdmin();
+
+    const { data: caller } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", callerId)
+      .single();
+    if (!caller || caller.role !== "admin") return { success: false, error: "Нет доступа" };
+
+    const { data, error } = await supabase
+      .from("locations")
+      .insert({ name: name.trim(), address: address.trim() || null })
+      .select("*")
+      .single();
+
+    if (error) return { success: false, error: "Ошибка сервера" };
+    return { success: true, data: data as Location };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
+  }
+}
+
+export async function deleteLocation(
+  locationId: string,
+  callerId: string,
+): Promise<ActionResult<void>> {
+  try {
+    const supabase = getSupabaseAdmin();
+
+    const { data: caller } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", callerId)
+      .single();
+    if (!caller || caller.role !== "admin") return { success: false, error: "Нет доступа" };
+
+    const { error } = await supabase
+      .from("locations")
+      .delete()
+      .eq("id", locationId);
+
+    if (error) return { success: false, error: "Ошибка сервера" };
+    return { success: true };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
+  }
+}
+
+export async function updateLocation(
+  locationId: string,
+  name: string,
+  address: string,
+  callerId: string,
+): Promise<ActionResult<void>> {
+  if (!name.trim()) return { success: false, error: "Введите название" };
+
+  try {
+    const supabase = getSupabaseAdmin();
+
+    const { data: caller } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", callerId)
+      .single();
+    if (!caller || caller.role !== "admin") return { success: false, error: "Нет доступа" };
+
+    const { error } = await supabase
+      .from("locations")
+      .update({ name: name.trim(), address: address.trim() || null })
+      .eq("id", locationId);
+
+    if (error) return { success: false, error: "Ошибка сервера" };
+    return { success: true };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
+  }
+}
+
+// === IP location settings ===
 
 export async function getLocationSettings(): Promise<
   ActionResult<{ allowedIPs: string[]; authMode: string }>
@@ -28,11 +133,8 @@ export async function getLocationSettings(): Promise<
         authMode: data.auth_mode ?? "ip",
       },
     };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось загрузить настройки",
-    };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
   }
 }
 
@@ -50,13 +152,10 @@ export async function saveLocationSettings(
         { onConflict: "id" },
       );
 
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true };
-  } catch (err) {
-    return {
-      success: false,
-      error: err instanceof Error ? err.message : "Не удалось сохранить настройки",
-    };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
   }
 }

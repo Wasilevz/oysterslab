@@ -4,6 +4,9 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import {
   getLocationSettings,
   saveLocationSettings,
+  getLocations,
+  addLocation,
+  deleteLocation,
 } from "@/actions/locationActions";
 import { getEmployees, addEmployee, updateEmployee, deleteEmployee } from "@/actions/employeeActions";
 import { useI18n } from "@/lib/i18n";
@@ -11,7 +14,7 @@ import { useUserStore } from "@/store/userStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { User } from "@/types/database";
+import type { Location, User } from "@/types/database";
 
 export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const { t, locale, setLocale } = useI18n();
@@ -22,6 +25,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const [editRate, setEditRate] = useState("");
   const [editRole, setEditRole] = useState<"employee" | "admin">("employee");
   const [editShiftStart, setEditShiftStart] = useState("12:00");
+  const [editLocationId, setEditLocationId] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState("");
   const [newTelegramId, setNewTelegramId] = useState("");
@@ -29,21 +33,28 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const [newRate, setNewRate] = useState("");
   const [newRole, setNewRole] = useState<"employee" | "admin">("employee");
   const [allowedIPs, setAllowedIPs] = useState<string[]>([""]);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [newLocationName, setNewLocationName] = useState("");
+  const [newLocationAddress, setNewLocationAddress] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const loadSettings = useCallback(async () => {
-    const [settingsResult, employeesResult] = await Promise.all([
+    const [settingsResult, employeesResult, locationsResult] = await Promise.all([
       getLocationSettings(),
       getEmployees(),
+      getLocations(),
     ]);
     if (settingsResult.success && settingsResult.data) {
       setAllowedIPs(settingsResult.data.allowedIPs.length > 0 ? settingsResult.data.allowedIPs : [""]);
     }
     if (employeesResult.success && employeesResult.data) {
       setEmployees(employeesResult.data);
+    }
+    if (locationsResult.success && locationsResult.data) {
+      setLocations(locationsResult.data);
     }
     setLoading(false);
   }, []);
@@ -97,6 +108,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     setEditRate(String(emp.hourly_rate));
     setEditRole(emp.role as "employee" | "admin");
     setEditShiftStart(emp.shift_start_time ?? "12:00");
+    setEditLocationId(emp.location_id ?? "");
   };
 
   const cancelEdit = () => {
@@ -112,7 +124,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     if (!editingId) return;
     const rate = Number(editRate);
     if (!Number.isFinite(rate) || rate < 0) { setError("Укажите корректную ставку"); return; }
-    const result = await updateEmployee(editingId, editName, editPosition, rate, editRole, editShiftStart);
+    const result = await updateEmployee(editingId, editName, editPosition, rate, editRole, editShiftStart, useUserStore.getState().user?.id ?? "", editLocationId);
     if (!result.success) { setError(result.error ?? "Ошибка"); return; }
     cancelEdit();
     void loadSettings();
@@ -133,6 +145,20 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
 
   const handleDeleteEmployee = async (userId: string) => {
     const result = await deleteEmployee(userId, useUserStore.getState().user?.id ?? "");
+    if (!result.success) { setError(result.error ?? "Ошибка"); return; }
+    void loadSettings();
+  };
+
+  const handleAddLocation = async () => {
+    if (!newLocationName.trim()) { setError("Введите название"); return; }
+    const result = await addLocation(newLocationName, newLocationAddress, useUserStore.getState().user?.id ?? "");
+    if (!result.success) { setError(result.error ?? "Ошибка"); return; }
+    setNewLocationName(""); setNewLocationAddress("");
+    void loadSettings();
+  };
+
+  const handleDeleteLocation = async (id: string) => {
+    const result = await deleteLocation(id, useUserStore.getState().user?.id ?? "");
     if (!result.success) { setError(result.error ?? "Ошибка"); return; }
     void loadSettings();
   };
@@ -213,6 +239,29 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
         </Button>
       </div>
 
+      {/* Locations */}
+      <div className="px-4 mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Локации</p>
+        </div>
+        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 space-y-3">
+          {locations.map((loc) => (
+            <div key={loc.id} className="flex items-center justify-between rounded-xl border border-[var(--border-color)] px-3 py-2">
+              <div>
+                <p className="text-sm font-bold text-[var(--text-primary)]">{loc.name}</p>
+                {loc.address && <p className="text-[10px] text-[var(--text-secondary)]">{loc.address}</p>}
+              </div>
+              <button onClick={() => void handleDeleteLocation(loc.id)} className="rounded-lg px-2 py-1 text-[10px] text-[var(--color-error)] hover:bg-[var(--color-error)]/10">Удалить</button>
+            </div>
+          ))}
+          <div className="flex gap-2">
+            <Input placeholder="Название заведения" value={newLocationName} onChange={(e) => setNewLocationName(e.target.value)} className="flex-1" />
+            <Input placeholder="Адрес (необязательно)" value={newLocationAddress} onChange={(e) => setNewLocationAddress(e.target.value)} className="flex-1" />
+            <Button variant="blue" onClick={() => void handleAddLocation()}>+</Button>
+          </div>
+        </div>
+      </div>
+
       {/* Employees */}
       <div className="px-4 mt-6 pb-24">
         <div className="flex items-center justify-between mb-3">
@@ -248,6 +297,15 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                   <div>
                     <label className="mb-1 block text-[10px] text-[var(--text-secondary)]">{t("settings.shiftStart")}</label>
                     <input type="time" value={editShiftStart} onChange={(e) => setEditShiftStart(e.target.value)} className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm font-medium text-[var(--text-primary)]" />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[10px] text-[var(--text-secondary)]">Локация</label>
+                    <select value={editLocationId} onChange={(e) => setEditLocationId(e.target.value)} className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm font-medium text-[var(--text-primary)]">
+                      <option value="">Без локации</option>
+                      {locations.map((loc) => (
+                        <option key={loc.id} value={loc.id}>{loc.name}</option>
+                      ))}
+                    </select>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <button onClick={() => setEditRole("employee")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${editRole === "employee" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>{t("settings.employeeRole")}</button>
