@@ -13,7 +13,7 @@ function getMonthLabel(date: Date): string {
   return date.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" });
 }
 
-export async function getDashboardStats(): Promise<ActionResult<DashboardStats>> {
+export async function getDashboardStats(locationId?: string): Promise<ActionResult<DashboardStats>> {
   try {
     const supabase = getSupabaseAdmin();
 
@@ -21,33 +21,44 @@ export async function getDashboardStats(): Promise<ActionResult<DashboardStats>>
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
 
+    const locationFilter = locationId ? { column: "users.location_id", value: locationId } : null;
+
+    const buildShiftQuery = (status: string) => {
+      let q = supabase
+        .from("shifts")
+        .select("*, users!inner(id, full_name, telegram_id, position, location_id)")
+        .eq("status", status);
+      if (locationFilter) q = q.eq("users.location_id", locationFilter.value);
+      return q;
+    };
+
     const [activeResult, autoClosedResult, payrollsResult, employeesResult, shiftsMonthResult, payrollsAllResult] =
       await Promise.all([
-        supabase
-          .from("shifts")
-          .select("*, users!inner(id, full_name, telegram_id, position)")
-          .eq("status", "ACTIVE")
-          .order("clock_in", { ascending: true }),
-        supabase
-          .from("shifts")
-          .select("*, users!inner(id, full_name, telegram_id, position)")
-          .eq("status", "AUTO_CLOSED")
-          .order("clock_in", { ascending: false }),
+        buildShiftQuery("ACTIVE").order("clock_in", { ascending: true }),
+        buildShiftQuery("AUTO_CLOSED").order("clock_in", { ascending: false }),
         supabase
           .from("payrolls")
           .select("*, users!inner(id, full_name, position)")
           .eq("status", "DRAFT")
           .order("period_end", { ascending: false }),
-        supabase
-          .from("users")
-          .select("id, hourly_rate")
-          .in("role", ["employee", "admin"]),
-        supabase
-          .from("shifts")
-          .select("user_id, hours_worked, users!inner(full_name)")
-          .in("status", ["COMPLETED", "REVIEWED"])
-          .gte("clock_in", monthStart)
-          .lte("clock_in", monthEnd),
+        (() => {
+          let q = supabase
+            .from("users")
+            .select("id, hourly_rate")
+            .eq("role", "employee");
+          if (locationFilter) q = q.eq("location_id", locationFilter.value);
+          return q;
+        })(),
+        (() => {
+          let q = supabase
+            .from("shifts")
+            .select("user_id, hours_worked, users!inner(full_name, location_id)")
+            .in("status", ["COMPLETED", "REVIEWED"])
+            .gte("clock_in", monthStart)
+            .lte("clock_in", monthEnd);
+          if (locationFilter) q = q.eq("users.location_id", locationFilter.value);
+          return q;
+        })(),
         supabase
           .from("payrolls")
           .select("period_start, total_amount, total_hours")

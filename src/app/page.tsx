@@ -43,7 +43,7 @@ function AccessDenied({
 
 export default function Home() {
   const { t } = useI18n();
-  const { user, status, telegramId, error, viewAs, setLoading, setUser, setDenied, setError } =
+  const { user, status, telegramId, error, setLoading, setUser, setDenied, setError } =
     useUserStore();
   const initialized = useRef(false);
   const initDataRef = useRef<string | null>(null);
@@ -118,7 +118,7 @@ export default function Home() {
     return <AccessDenied telegramId={telegramId} message={t("auth.userNotFound")} />;
   }
 
-  const effectiveRole = viewAs ?? user?.role;
+  const effectiveRole = user?.role;
 
   return (
     <main className="min-h-screen dark:bg-zinc-950 dark:text-zinc-100 bg-white text-zinc-900">

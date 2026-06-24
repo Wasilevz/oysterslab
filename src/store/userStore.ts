@@ -9,12 +9,12 @@ interface UserState {
   status: AuthStatus;
   error: string | null;
   initData: string | null;
-  viewAs: "admin" | "employee" | null;
+  selectedLocationId: string | null;
   setLoading: () => void;
   setUser: (user: User, initData?: string) => void;
   setDenied: (telegramId: number | null, message?: string) => void;
   setError: (message: string) => void;
-  toggleViewAs: () => void;
+  setSelectedLocation: (locationId: string | null) => void;
   reset: () => void;
 }
 
@@ -24,18 +24,20 @@ export const useUserStore = create<UserState>((set) => ({
   status: "idle",
   error: null,
   initData: null,
-  viewAs: null,
+  selectedLocationId: typeof window !== "undefined" ? localStorage.getItem("selectedLocation") : null,
   setLoading: () =>
     set({ status: "loading", error: null }),
-  setUser: (user, initData) =>
+  setUser: (user, initData) => {
+    const storedLocation = typeof window !== "undefined" ? localStorage.getItem("selectedLocation") : null;
     set({
       user,
       telegramId: user.telegram_id,
       status: "authenticated",
       error: null,
       initData: initData ?? null,
-      viewAs: null,
-    }),
+      selectedLocationId: storedLocation,
+    });
+  },
   setDenied: (telegramId, message) =>
     set({
       user: null,
@@ -49,12 +51,13 @@ export const useUserStore = create<UserState>((set) => ({
       status: "error",
       error: message,
     }),
-  toggleViewAs: () =>
-    set((state) => ({
-      viewAs: state.viewAs === null
-        ? state.user?.role === "admin" ? "employee" : "admin"
-        : null,
-    })),
+  setSelectedLocation: (locationId) => {
+    if (typeof window !== "undefined") {
+      if (locationId) localStorage.setItem("selectedLocation", locationId);
+      else localStorage.removeItem("selectedLocation");
+    }
+    set({ selectedLocationId: locationId });
+  },
   reset: () =>
     set({
       user: null,
@@ -62,6 +65,6 @@ export const useUserStore = create<UserState>((set) => ({
       status: "idle",
       error: null,
       initData: null,
-      viewAs: null,
+      selectedLocationId: null,
     }),
 }));

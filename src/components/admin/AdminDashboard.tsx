@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { getDashboardStats } from "@/actions/adminActions";
+import { getLocations } from "@/actions/locationActions";
 import { getActiveShift } from "@/actions/shiftActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
@@ -9,7 +10,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUserStore } from "@/store/userStore";
 import { useI18n } from "@/lib/i18n";
-import type { DashboardStats, Shift } from "@/types/database";
+import type { DashboardStats, Location, Shift } from "@/types/database";
 
 type AdminView = "live" | "forgotten" | "salary" | "schedule" | "settings" | "shifts";
 
@@ -21,15 +22,18 @@ const POLL_INTERVAL_MS = 15000;
 
 export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const user = useUserStore((s) => s.user);
+  const selectedLocationId = useUserStore((s) => s.selectedLocationId);
+  const setSelectedLocation = useUserStore((s) => s.setSelectedLocation);
   const { t } = useI18n();
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [myShift, setMyShift] = useState<Shift | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const loadStats = useCallback(async () => {
-    const result = await getDashboardStats();
+    const result = await getDashboardStats(selectedLocationId ?? undefined);
     if (result.success && result.data) {
       setStats(result.data);
       setError(null);
@@ -37,6 +41,11 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       setError(result.error ?? "Ошибка");
     }
     setLoading(false);
+  }, [selectedLocationId]);
+
+  const loadLocations = useCallback(async () => {
+    const result = await getLocations();
+    if (result.success && result.data) setLocations(result.data);
   }, []);
 
   const loadMyShift = useCallback(async () => {
@@ -49,12 +58,13 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadStats();
     void loadMyShift();
+    void loadLocations();
     const interval = setInterval(() => {
       void loadStats();
       void loadMyShift();
     }, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [loadStats, loadMyShift]);
+  }, [loadStats, loadMyShift, loadLocations]);
 
   const handleToggleShift = () => {
     if (!user) return;
@@ -192,6 +202,21 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </div>
         <div className="mt-1 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">{user?.full_name}</h1>
+
+          {locations.length > 0 && (
+            <select
+              value={selectedLocationId ?? ""}
+              onChange={(e) => {
+                setSelectedLocation(e.target.value || null);
+              }}
+              className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)]"
+            >
+              <option value="">Все локации</option>
+              {locations.map((loc) => (
+                <option key={loc.id} value={loc.id}>{loc.name}</option>
+              ))}
+            </select>
+          )}
 
           <button
             onClick={handleToggleShift}
