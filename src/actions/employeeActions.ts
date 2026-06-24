@@ -2,6 +2,7 @@
 
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { logAction } from "@/lib/audit";
+import { getAdminLocationId } from "@/lib/admin-location";
 import type { ActionResult, User } from "@/types/database";
 
 async function verifyAdmin(callerId: string): Promise<string | null> {
@@ -11,18 +12,25 @@ async function verifyAdmin(callerId: string): Promise<string | null> {
     .select("role")
     .eq("id", callerId)
     .single();
-  if (!caller || caller.role !== "admin") return "Нет доступа";
+  if (!caller || (caller.role !== "admin" && caller.role !== "superadmin")) return "Нет доступа";
   return null;
 }
 
-export async function getEmployees(): Promise<ActionResult<User[]>> {
+export async function getEmployees(callerId?: string): Promise<ActionResult<User[]>> {
   try {
     const supabase = getSupabaseAdmin();
+    const locationId = callerId ? await getAdminLocationId(callerId) : null;
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("users")
       .select("*")
       .order("full_name");
+
+    if (locationId) {
+      query = query.eq("location_id", locationId);
+    }
+
+    const { data, error } = await query;
 
     if (error) return { success: false, error: "Ошибка сервера" };
 

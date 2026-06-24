@@ -2,6 +2,7 @@
 
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { logAction } from "@/lib/audit";
+import { getAdminLocationId } from "@/lib/admin-location";
 import type {
   ActionResult,
   EmployeeStats,
@@ -10,13 +11,21 @@ import type {
   User,
 } from "@/types/database";
 
-export async function getEmployees(): Promise<ActionResult<User[]>> {
+export async function getEmployees(callerId?: string): Promise<ActionResult<User[]>> {
   try {
     const supabase = getSupabaseAdmin();
-    const { data, error } = await supabase
+    const locationId = callerId ? await getAdminLocationId(callerId) : null;
+
+    let query = supabase
       .from("users")
       .select("*")
       .order("full_name");
+
+    if (locationId) {
+      query = query.eq("location_id", locationId);
+    }
+
+    const { data, error } = await query;
     if (error) return { success: false, error: "Ошибка сервера" };
     return { success: true, data: (data ?? []) as User[] };
   } catch {
@@ -196,13 +205,21 @@ export async function deletePayment(
   }
 }
 
-export async function getAllPayments(): Promise<ActionResult<SalaryPaymentWithUser[]>> {
+export async function getAllPayments(callerId?: string): Promise<ActionResult<SalaryPaymentWithUser[]>> {
   try {
     const supabase = getSupabaseAdmin();
-    const { data, error } = await supabase
+    const locationId = callerId ? await getAdminLocationId(callerId) : null;
+
+    let query = supabase
       .from("salary_payments")
-      .select("*, users!inner(id, full_name, position)")
+      .select("*, users!inner(id, full_name, position, location_id)")
       .order("created_at", { ascending: false });
+
+    if (locationId) {
+      query = query.eq("users.location_id", locationId);
+    }
+
+    const { data, error } = await query;
     if (error) return { success: false, error: "Ошибка сервера" };
     return { success: true, data: (data ?? []) as SalaryPaymentWithUser[] };
   } catch {

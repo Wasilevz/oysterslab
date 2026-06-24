@@ -1,6 +1,7 @@
 "use server";
 
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { getAdminLocationId } from "@/lib/admin-location";
 import type {
   ActionResult,
   DashboardStats,
@@ -13,9 +14,10 @@ function getMonthLabel(date: Date): string {
   return date.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" });
 }
 
-export async function getDashboardStats(locationId?: string): Promise<ActionResult<DashboardStats>> {
+export async function getDashboardStats(callerId?: string): Promise<ActionResult<DashboardStats>> {
   try {
     const supabase = getSupabaseAdmin();
+    const locationId = callerId ? await getAdminLocationId(callerId) : null;
 
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();

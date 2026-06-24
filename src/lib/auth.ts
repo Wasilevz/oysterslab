@@ -33,7 +33,7 @@ export async function requireAdmin(
   if (!user) {
     return { error: "Не авторизован", status: 401 };
   }
-  if (user.role !== "admin") {
+  if (user.role !== "admin" && user.role !== "superadmin") {
     return { error: "Нет доступа", status: 403 };
   }
   return { user };

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import {
@@ -30,6 +30,9 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const { t, locale, setLocale } = useI18n();
   const user = useUserStore((s) => s.user);
   const isSuperAdmin = user?.role === "superadmin";
+
+export function SettingsPage({ onBack }: { onBack?: () => void }) {
+  const { t, locale, setLocale } = useI18n();
   const [employees, setEmployees] = useState<User[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -403,4 +406,5 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     </div>
   );
 }
+
 

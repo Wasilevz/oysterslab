@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
+import { useUserStore } from "@/store/userStore";
 import type { FineWithUser, SalaryPaymentWithUser, User, MonthlyReportEmployee } from "@/types/database";
 
 function formatMoney(amount: number): string {
@@ -52,9 +53,10 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
   const [reportMonth, setReportMonth] = useState(new Date().getMonth() + 1);
 
   const loadData = useCallback(async () => {
+    const callerId = useUserStore.getState().user?.id;
     const [empResult, payResult, finesResult] = await Promise.all([
-      getEmployees(),
-      getAllPayments(),
+      getEmployees(callerId),
+      getAllPayments(callerId),
       getFines(),
     ]);
     if (empResult.success && empResult.data) setEmployees(empResult.data);

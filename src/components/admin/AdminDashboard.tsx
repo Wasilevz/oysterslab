@@ -33,10 +33,9 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const [isPending, startTransition] = useTransition();
 
   const adminLocationId = user?.location_id;
-  const effectiveLocationId = adminLocationId || selectedLocationId || undefined;
 
   const loadStats = useCallback(async () => {
-    const result = await getDashboardStats(effectiveLocationId);
+    const result = await getDashboardStats(user?.id);
     if (result.success && result.data) {
       setStats(result.data);
       setError(null);
@@ -44,7 +43,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       setError(result.error ?? "Ошибка");
     }
     setLoading(false);
-  }, [effectiveLocationId]);
+  }, [user?.id]);
 
   const loadLocations = useCallback(async () => {
     const result = await getLocations();
@@ -206,24 +205,9 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         <div className="mt-1 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">{user?.full_name}</h1>
 
-          {locations.length > 0 && !adminLocationId && (
-            <select
-              value={selectedLocationId ?? ""}
-              onChange={(e) => {
-                setSelectedLocation(e.target.value || null);
-              }}
-              className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-xs font-semibold text-[var(--text-primary)]"
-            >
-              <option value="">Все локации</option>
-              {locations.map((loc) => (
-                <option key={loc.id} value={loc.id}>{loc.name}</option>
-              ))}
-            </select>
-          )}
-
-          {adminLocationId && locations.length > 0 && (
+          {!adminLocationId && locations.length > 0 && (
             <span className="rounded-xl border border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 px-3 py-2 text-xs font-semibold text-[var(--brand-primary)]">
-              📍 {locations.find((l) => l.id === adminLocationId)?.name || "Локация"}
+              Все локации
             </span>
           )}
 

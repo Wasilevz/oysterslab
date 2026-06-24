@@ -1,4 +1,4 @@
-export type UserRole = "employee" | "admin";
+export type UserRole = "employee" | "admin" | "superadmin";
 
 export type ShiftStatus = "ACTIVE" | "COMPLETED" | "AUTO_CLOSED" | "REVIEWED";
 
