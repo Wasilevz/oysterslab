@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getSchedule, setScheduleDay, getWorkingToday } from "@/actions/scheduleActions";
 import { getEmployees } from "@/actions/employeeActions";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,24 +37,25 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
   const month = currentDate.getMonth() + 1;
   const daysInMonth = new Date(year, month, 0).getDate();
 
-  async function loadData() {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const loadData = useCallback(async () => {
+    const callerId = useUserStore.getState().user?.id;
     const [schedResult, empResult, todayResult] = await Promise.all([
       getSchedule(year, month),
-      getEmployees(),
+      getEmployees(callerId),
       getWorkingToday(),
     ]);
     if (schedResult.success && schedResult.data) setSchedules(schedResult.data);
     if (empResult.success && empResult.data) setEmployees(empResult.data);
     if (todayResult.success && todayResult.data) setWorkingToday(todayResult.data);
     setLoading(false);
-  }
+  }, [year, month]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     void loadData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [year, month]);
+  }, [loadData]);
 
   const getScheduleType = (userId: string, day: number): ScheduleType => {
     const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;

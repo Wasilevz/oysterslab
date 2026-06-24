@@ -6,7 +6,6 @@ import { ru } from "date-fns/locale";
 import { getDashboardStats } from "@/actions/adminActions";
 import { reviewAutoClosedShift } from "@/actions/shiftActions";
 import { Button } from "@/components/ui/button";
-import { useI18n } from "@/lib/i18n";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +15,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useI18n } from "@/lib/i18n";
+import { useUserStore } from "@/store/userStore";
 import type { ShiftWithUser } from "@/types/database";
 
 interface ForgottenTabProps {
@@ -33,7 +34,8 @@ export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
   const [isPending, startTransition] = useTransition();
 
   const loadData = useCallback(async () => {
-    const result = await getDashboardStats();
+    const callerId = useUserStore.getState().user?.id;
+    const result = await getDashboardStats(callerId);
     if (result.success && result.data) {
       setShifts(result.data.autoClosedShifts);
     }
