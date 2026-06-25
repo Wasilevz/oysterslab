@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition } from "react";
 import { format } from "date-fns";
@@ -45,7 +45,7 @@ export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
       const result = await approvePayroll(payrollId);
 
       if (!result.success) {
-        setError(result.error ?? "Ошибка утверждения");
+        setError(result.error ?? "ÐžÑˆÐ¸Ð±ÐºÐ° ÑƒÑ‚Ð²ÐµÑ€Ð¶Ð´ÐµÐ½Ð¸Ñ");
         setProcessingId(null);
         return;
       }
@@ -57,12 +57,12 @@ export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
 
   const handleGenerate = () => {
     if (!periodStart || !periodEnd) {
-      setError("Укажите период");
+      setError("Ð£ÐºÐ°Ð¶Ð¸Ñ‚Ðµ Ð¿ÐµÑ€Ð¸Ð¾Ð´");
       return;
     }
 
     if (periodStart > periodEnd) {
-      setError("Дата начала позже даты окончания");
+      setError("Ð”Ð°Ñ‚Ð° Ð½Ð°Ñ‡Ð°Ð»Ð° Ð¿Ð¾Ð·Ð¶Ðµ Ð´Ð°Ñ‚Ñ‹ Ð¾ÐºÐ¾Ð½Ñ‡Ð°Ð½Ð¸Ñ");
       return;
     }
 
@@ -73,24 +73,24 @@ export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
       const result = await generatePayroll(periodStart, periodEnd);
 
       if (!result.success) {
-        setError(result.error ?? "Ошибка расчёта");
+        setError(result.error ?? "ÐžÑˆÐ¸Ð±ÐºÐ° Ñ€Ð°ÑÑ‡Ñ‘Ñ‚Ð°");
         return;
       }
 
-      setGenResult(`Создано ведомостей: ${result.data}`);
+      setGenResult(`Ð¡Ð¾Ð·Ð´Ð°Ð½Ð¾ Ð²ÐµÐ´Ð¾Ð¼Ð¾ÑÑ‚ÐµÐ¹: ${result.data}`);
       onApproved();
     });
   };
 
   return (
     <div className="px-4 pt-4">
-      <div className="mb-4 rounded-2xl border border-blue-500/10 bg-blue-500/5 p-4">
+      <div className="mb-4 rounded-[16px] border border-blue-500/10 bg-blue-500/5 p-4">
         <p className="mb-3 text-sm font-semibold text-blue-400">
-          Рассчитать зарплату
+          Ð Ð°ÑÑÑ‡Ð¸Ñ‚Ð°Ñ‚ÑŒ Ð·Ð°Ñ€Ð¿Ð»Ð°Ñ‚Ñƒ
         </p>
         <div className="mb-3 grid grid-cols-2 gap-2">
           <div>
-            <p className="mb-1 text-xs text-zinc-500">С</p>
+            <p className="mb-1 text-xs text-zinc-500">Ð¡</p>
             <Input
               type="date"
               value={periodStart}
@@ -98,7 +98,7 @@ export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
             />
           </div>
           <div>
-            <p className="mb-1 text-xs text-zinc-500">По</p>
+            <p className="mb-1 text-xs text-zinc-500">ÐŸÐ¾</p>
             <Input
               type="date"
               value={periodEnd}
@@ -112,7 +112,7 @@ export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
           disabled={isPending || !periodStart || !periodEnd}
           onClick={handleGenerate}
         >
-          {isPending ? "Расчёт..." : "Рассчитать"}
+          {isPending ? "Ð Ð°ÑÑ‡Ñ‘Ñ‚..." : "Ð Ð°ÑÑÑ‡Ð¸Ñ‚Ð°Ñ‚ÑŒ"}
         </Button>
         {genResult && (
           <p className="mt-2 text-sm text-blue-400">{genResult}</p>
@@ -120,23 +120,23 @@ export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
       </div>
 
       {error && (
-        <p className="mb-3 rounded-xl bg-rose-950/40 px-4 py-2 text-sm text-rose-400">
+        <p className="mb-3 rounded-[12px] bg-rose-950/40 px-4 py-2 text-sm text-rose-400">
           {error}
         </p>
       )}
 
       {payrolls.length === 0 ? (
         <div className="flex min-h-[30vh] items-center justify-center">
-          <p className="text-center text-zinc-500">Черновиков зарплат нет</p>
+          <p className="text-center text-zinc-500">Ð§ÐµÑ€Ð½Ð¾Ð²Ð¸ÐºÐ¾Ð² Ð·Ð°Ñ€Ð¿Ð»Ð°Ñ‚ Ð½ÐµÑ‚</p>
         </div>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Сотрудник</TableHead>
-              <TableHead>Период</TableHead>
-              <TableHead>Часы</TableHead>
-              <TableHead>Сумма</TableHead>
+              <TableHead>Ð¡Ð¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸Ðº</TableHead>
+              <TableHead>ÐŸÐµÑ€Ð¸Ð¾Ð´</TableHead>
+              <TableHead>Ð§Ð°ÑÑ‹</TableHead>
+              <TableHead>Ð¡ÑƒÐ¼Ð¼Ð°</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -150,12 +150,12 @@ export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
                   {format(new Date(payroll.period_start), "d MMM", {
                     locale: ru,
                   })}
-                  {" — "}
+                  {" â€” "}
                   {format(new Date(payroll.period_end), "d MMM", {
                     locale: ru,
                   })}
                 </TableCell>
-                <TableCell>{payroll.total_hours} ч</TableCell>
+                <TableCell>{payroll.total_hours} Ñ‡</TableCell>
                 <TableCell className="font-bold">
                   {formatMoney(payroll.total_amount)}
                 </TableCell>
@@ -168,7 +168,7 @@ export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
                   >
                     {isPending && processingId === payroll.id
                       ? "..."
-                      : "Утвердить"}
+                      : "Ð£Ñ‚Ð²ÐµÑ€Ð´Ð¸Ñ‚ÑŒ"}
                   </Button>
                 </TableCell>
               </TableRow>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameDay, isAfter, isBefore } from "date-fns";
@@ -12,7 +12,7 @@ interface DatePickerProps {
   maxDate?: string;
 }
 
-export function DatePicker({ value, onChange, placeholder = "Выбрать дату", minDate, maxDate }: DatePickerProps) {
+export function DatePicker({ value, onChange, placeholder = "Ð’Ñ‹Ð±Ñ€Ð°Ñ‚ÑŒ Ð´Ð°Ñ‚Ñƒ", minDate, maxDate }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(value ? new Date(value) : new Date());
 
@@ -44,7 +44,7 @@ export function DatePicker({ value, onChange, placeholder = "Выбрать да
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2.5 text-sm text-left"
+        className="flex w-full items-center justify-between rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2.5 text-sm text-left"
       >
         <span className={value ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}>
           {value ? format(new Date(value), "d MMMM yyyy", { locale: ru }) : placeholder}
@@ -57,7 +57,7 @@ export function DatePicker({ value, onChange, placeholder = "Выбрать да
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-2xl">
+          <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-2xl">
             <div className="mb-3 flex items-center justify-between">
               <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -75,7 +75,7 @@ export function DatePicker({ value, onChange, placeholder = "Выбрать да
             </div>
 
             <div className="mb-2 grid grid-cols-7 gap-1">
-              {["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map((day) => (
+              {["ÐŸÐ½", "Ð’Ñ‚", "Ð¡Ñ€", "Ð§Ñ‚", "ÐŸÑ‚", "Ð¡Ð±", "Ð’Ñ"].map((day) => (
                 <div key={day} className="py-1 text-center text-[10px] font-medium text-[var(--text-secondary)]">{day}</div>
               ))}
             </div>

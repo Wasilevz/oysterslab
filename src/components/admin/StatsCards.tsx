@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useI18n } from "@/lib/i18n";
 import type { DashboardStats } from "@/types/database";
@@ -22,7 +22,7 @@ export function StatsCards({ stats }: StatsCardsProps) {
       {cards.map((card) => (
         <div
           key={card.label}
-          className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 text-center"
+          className="rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 text-center"
         >
           <p className="text-3xl font-bold text-[var(--text-primary)]">{card.value}</p>
           <p className="mt-1 text-xs font-medium text-[var(--text-secondary)]">{card.label}</p>

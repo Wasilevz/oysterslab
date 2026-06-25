@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { format } from "date-fns";
@@ -83,7 +83,7 @@ export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
       <div className="px-4 pt-4 pb-8">
         <div className="mb-4 flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+            <button onClick={onBack} className="rounded-[12px] p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
@@ -105,7 +105,7 @@ export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
             </p>
             <div className="grid gap-3">
               {shifts.map((shift) => (
-                <article key={shift.id} className="rounded-2xl border border-amber-500/10 bg-amber-500/5 p-4">
+                <article key={shift.id} className="rounded-[16px] border border-amber-500/10 bg-amber-500/5 p-4">
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <div>
                       <p className="text-lg font-bold text-[var(--text-primary)]">{shift.users.full_name}</p>
@@ -136,14 +136,14 @@ export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
           <DialogHeader>
             <DialogTitle>{t("shift.confirmHours")}</DialogTitle>
             <DialogDescription>
-              {selected?.users.full_name} — смена от{" "}
+              {selected?.users.full_name} â€” ÑÐ¼ÐµÐ½Ð° Ð¾Ñ‚{" "}
               {selected && format(new Date(selected.clock_in), "d MMM yyyy", { locale: ru })}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
             <Input type="number" inputMode="decimal" step="0.5" min="0.5" max="24" placeholder="8" value={hours} onChange={(e) => setHours(e.target.value)} autoFocus />
             {selected?.hours_worked != null && (
-              <p className="text-xs text-[var(--text-secondary)]">{t("shift.systemCalculated")} {selected.hours_worked.toFixed(1)} ч</p>
+              <p className="text-xs text-[var(--text-secondary)]">{t("shift.systemCalculated")} {selected.hours_worked.toFixed(1)} Ñ‡</p>
             )}
           </div>
           {error && <p className="text-sm text-red-400">{error}</p>}

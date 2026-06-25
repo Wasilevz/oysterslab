@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { getMySchedule, getWorkingToday } from "@/actions/scheduleActions";
@@ -79,7 +79,7 @@ export function ScheduleEmployee() {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pb-24">
         <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-64 w-full rounded-2xl" />
+        <Skeleton className="h-64 w-full rounded-[16px]" />
       </div>
     );
   }
@@ -99,7 +99,7 @@ export function ScheduleEmployee() {
       </header>
 
       <div className="flex items-center justify-between mb-4">
-        <button onClick={prevMonth} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+        <button onClick={prevMonth} className="rounded-[12px] p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
@@ -112,14 +112,14 @@ export function ScheduleEmployee() {
               </span>
           ))}
         </div>
-        <button onClick={nextMonth} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+        <button onClick={nextMonth} className="rounded-[12px] p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </button>
       </div>
 
-      <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-3">
+      <div className="rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-surface)] p-3">
         <div className="grid grid-cols-7 gap-1 mb-2">
           {dayNames.map((d) => (
             <div key={d} className="py-1 text-center text-[10px] font-medium text-[var(--text-secondary)]">{d}</div>
@@ -160,7 +160,7 @@ export function ScheduleEmployee() {
             {workingToday.map((w) => (
               <div
                 key={w.id}
-                className="flex items-center justify-between rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-4 py-3"
+                className="flex items-center justify-between rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-surface)] px-4 py-3"
               >
                 <div>
                   <p className="text-sm font-medium text-[var(--text-primary)]">{w.full_name}</p>
