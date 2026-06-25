@@ -30,6 +30,7 @@ export function HoursChart({ data }: HoursChartProps) {
     );
   }
 
+  // TODO: Replace hardcoded colors with CSS vars or theme store values for full dynamic theming
   const gridColor = theme === "dark" ? "#334155" : "#E2E8F0";
   const tickColor = theme === "dark" ? "#94A3B8" : "#718096";
   const tooltipBg = theme === "dark" ? "#1E293B" : "#FFFFFF";

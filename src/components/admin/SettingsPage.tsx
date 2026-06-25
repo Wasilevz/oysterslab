@@ -154,7 +154,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     if (!editingId) return;
     const rate = Number(editRate);
     if (!Number.isFinite(rate) || rate < 0) { setError(t("settings.invalidRate")); return; }
-    const result = await updateEmployee(editingId, editName, editPosition, rate, useUserStore.getState().user?.id ?? "", editRole, editShiftStart, editLocationId);
+    const result = await updateEmployee(editingId, editName, editPosition, rate, useUserStore.getState().initData ?? "", editRole, editShiftStart, editLocationId);
     if (!result.success) { setError(result.error ?? t("common.error")); return; }
     cancelEdit();
     void loadSettings();
@@ -166,7 +166,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     if (!newName.trim()) { setError(t("settings.enterName")); return; }
     if (!Number.isFinite(tgId) || tgId <= 0) { setError(t("settings.enterTelegramId")); return; }
     if (!Number.isFinite(rate) || rate < 0) { setError(t("settings.invalidRate")); return; }
-    const result = await addEmployee(tgId, newName, newRole, newPosition, rate, useUserStore.getState().user?.id ?? "");
+    const result = await addEmployee(tgId, newName, newRole, newPosition, rate, useUserStore.getState().initData ?? "");
     if (!result.success) { setError(result.error ?? t("common.error")); return; }
     setNewName(""); setNewTelegramId(""); setNewPosition(""); setNewRate(""); setNewRole("employee");
     setShowAddForm(false);
@@ -175,7 +175,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
 
   const handleDeleteEmployee = async (userId: string) => {
     if (!window.confirm(t("settings.confirmDeleteEmployee"))) return;
-    const result = await deleteEmployee(userId, useUserStore.getState().user?.id ?? "");
+    const result = await deleteEmployee(userId, useUserStore.getState().initData ?? "");
     if (!result.success) { setError(result.error ?? t("common.error")); return; }
     void loadSettings();
   };

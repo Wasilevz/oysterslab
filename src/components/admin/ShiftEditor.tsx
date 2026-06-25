@@ -84,7 +84,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
         editingId,
         editClockIn,
         editClockOut || null,
-        useUserStore.getState().user?.id ?? "",
+        useUserStore.getState().initData ?? "",
       );
       if (!result.success) {
         setError(result.error ?? t("common.error"));

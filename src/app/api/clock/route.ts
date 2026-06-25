@@ -2,22 +2,8 @@ import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { isIPAllowed } from "@/lib/location-auth";
 import { verifyRequestAuth } from "@/lib/auth";
+import { roundTo30 } from "@/lib/utils";
 import { checkRateLimit } from "@/lib/rate-limit";
-
-function roundTo30(date: Date): Date {
-  const rounded = new Date(date);
-  const m = rounded.getMinutes();
-  if (m >= 0 && m <= 15) {
-    rounded.setMinutes(0, 0, 0);
-  } else if (m >= 16 && m <= 30) {
-    rounded.setMinutes(30, 0, 0);
-  } else if (m >= 31 && m <= 45) {
-    rounded.setMinutes(30, 0, 0);
-  } else {
-    rounded.setHours(rounded.getHours() + 1, 0, 0, 0);
-  }
-  return rounded;
-}
 
 function getClientIP(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");

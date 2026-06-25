@@ -6,17 +6,6 @@ import { getAdminLocationId } from "@/lib/admin-location";
 import { requireAdmin } from "@/lib/auth";
 import type { ActionResult, User } from "@/types/database";
 
-async function verifyAdmin(callerId: string): Promise<string | null> {
-  const supabase = getSupabaseAdmin();
-  const { data: caller } = await supabase
-    .from("users")
-    .select("role")
-    .eq("id", callerId)
-    .single();
-  if (!caller || (caller.role !== "admin" && caller.role !== "superadmin")) return "Нет доступа";
-  return null;
-}
-
 export async function getEmployees(initData?: string): Promise<ActionResult<User[]>> {
   try {
     const authResult = await requireAdmin(initData ?? "");
@@ -52,10 +41,11 @@ export async function addEmployee(
   role: "employee" | "admin",
   position: string,
   hourlyRate: number,
-  callerId: string,
+  initData: string,
 ): Promise<ActionResult<User>> {
-  const adminError = await verifyAdmin(callerId);
-  if (adminError) return { success: false, error: adminError };
+  const authResult = await requireAdmin(initData);
+  if ("error" in authResult) return { success: false, error: authResult.error };
+  const callerId = authResult.user.id;
 
   if (!fullName.trim()) {
     return { success: false, error: "Введите имя сотрудника" };
@@ -108,13 +98,14 @@ export async function updateEmployee(
   fullName: string,
   position: string,
   hourlyRate: number,
-  callerId: string,
+  initData: string,
   role?: "employee" | "admin",
   shiftStartTime?: string,
   locationId?: string,
 ): Promise<ActionResult<void>> {
-  const adminError = await verifyAdmin(callerId);
-  if (adminError) return { success: false, error: adminError };
+  const authResult = await requireAdmin(initData);
+  if ("error" in authResult) return { success: false, error: authResult.error };
+  const callerId = authResult.user.id;
 
   if (!Number.isFinite(hourlyRate) || hourlyRate < 0) {
     return { success: false, error: "Укажите корректную ставку" };
@@ -162,9 +153,10 @@ export async function updateEmployee(
   }
 }
 
-export async function deleteEmployee(userId: string, callerId: string): Promise<ActionResult<void>> {
-  const adminError = await verifyAdmin(callerId);
-  if (adminError) return { success: false, error: adminError };
+export async function deleteEmployee(userId: string, initData: string): Promise<ActionResult<void>> {
+  const authResult = await requireAdmin(initData);
+  if ("error" in authResult) return { success: false, error: authResult.error };
+  const callerId = authResult.user.id;
 
   try {
     const supabase = getSupabaseAdmin();

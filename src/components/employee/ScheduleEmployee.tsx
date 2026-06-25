@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { format } from "date-fns";
-import { ru } from "date-fns/locale";
+import { ro, ru } from "date-fns/locale";
 import { getSchedule, getWorkingToday, getColleagues } from "@/actions/scheduleActions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
@@ -32,7 +32,8 @@ function toDateStr(d: Date): string {
 }
 
 export function ScheduleEmployee() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const dateLocale = locale === "ro" ? ro : ru;
   const user = useUserStore((s) => s.user);
   const [teamSchedules, setTeamSchedules] = useState<Schedule[]>([]);
   const [employees, setEmployees] = useState<Pick<User, "id" | "full_name" | "position">[]>([]);
@@ -119,7 +120,7 @@ export function ScheduleEmployee() {
         </button>
         <div className="text-center">
           <p className="text-lg font-bold text-[var(--text-primary)]">
-            {format(weekDays[0], "d MMM", { locale: ru })} – {format(weekDays[6], "d MMM", { locale: ru })}
+            {format(weekDays[0], "d MMM", { locale: dateLocale })} – {format(weekDays[6], "d MMM", { locale: dateLocale })}
           </p>
           {!isCurrentWeek && (
             <button onClick={goToThisWeek} className="mt-1.5 rounded-full border border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 px-4 py-1.5 text-xs font-bold text-[var(--brand-primary)] transition-all active:scale-95 hover:bg-[var(--brand-primary)]/20">

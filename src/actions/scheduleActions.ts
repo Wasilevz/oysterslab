@@ -10,8 +10,8 @@ export async function getSchedule(
   initData?: string,
 ): Promise<ActionResult<Schedule[]>> {
   try {
-    const auth = await verifyRequestAuth(initData ?? "");
-    if (!auth) return { success: false, error: "Не авторизован" };
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
 
     const supabase = getSupabaseAdmin();
 
@@ -45,6 +45,7 @@ export async function getMySchedule(
   try {
     const auth = await verifyRequestAuth(initData ?? "");
     if (!auth) return { success: false, error: "Не авторизован" };
+    if (auth.id !== userId) return { success: false, error: "Нет доступа" };
 
     const supabase = getSupabaseAdmin();
 

@@ -43,7 +43,7 @@ export const useUserStore = create<UserState>((set) => ({
       user: null,
       telegramId,
       status: "denied",
-      error: message ?? "Доступ закрыт",
+      error: message ?? "Access denied",
     }),
   setError: (message) =>
     set({

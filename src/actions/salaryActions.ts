@@ -15,43 +15,52 @@ export async function getShiftsForPeriod(
   userId: string,
   dateFrom: string,
   dateTo: string,
-  initData?: string,
+  initData: string,
 ): Promise<ActionResult<{ hours: number; amount: number; rate: number; shiftCount: number }>> {
   try {
     const auth = await verifyRequestAuth(initData ?? "");
     if (!auth) return { success: false, error: "Не авторизован" };
+    if (auth.id !== userId) return { success: false, error: "Нет доступа" };
 
-    const supabase = getSupabaseAdmin();
-
-    const { data: user } = await supabase
-      .from("users")
-      .select("hourly_rate")
-      .eq("id", userId)
-      .single();
-
-    const rate = user?.hourly_rate ?? 0;
-
-    const { data: shifts } = await supabase
-      .from("shifts")
-      .select("hours_worked")
-      .eq("user_id", userId)
-      .in("status", ["COMPLETED", "REVIEWED", "AUTO_CLOSED"])
-      .gte("clock_in", dateFrom + "T00:00:00Z")
-      .lte("clock_in", dateTo + "T23:59:59Z");
-
-    const list = shifts ?? [];
-    const totalHours = list.reduce((s, sh) => s + (sh.hours_worked ?? 0), 0);
-    const rounded = Math.round(totalHours * 100) / 100;
-    const amount = Math.round(rounded * rate * 100) / 100;
-
-    return {
-      success: true,
-      data: { hours: rounded, amount, rate, shiftCount: list.length },
-    };
+    return await calcShiftsForPeriod(userId, dateFrom, dateTo);
   } catch (err) {
     console.error("[SALARY] getEmployees error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
+}
+
+async function calcShiftsForPeriod(
+  userId: string,
+  dateFrom: string,
+  dateTo: string,
+): Promise<{ success: true; data: { hours: number; amount: number; rate: number; shiftCount: number } } | ActionResult<never>> {
+  const supabase = getSupabaseAdmin();
+
+  const { data: user } = await supabase
+    .from("users")
+    .select("hourly_rate")
+    .eq("id", userId)
+    .single();
+
+  const rate = user?.hourly_rate ?? 0;
+
+  const { data: shifts } = await supabase
+    .from("shifts")
+    .select("hours_worked")
+    .eq("user_id", userId)
+    .in("status", ["COMPLETED", "REVIEWED", "AUTO_CLOSED"])
+    .gte("clock_in", dateFrom + "T00:00:00Z")
+    .lte("clock_in", dateTo + "T23:59:59Z");
+
+  const list = shifts ?? [];
+  const totalHours = list.reduce((s, sh) => s + (sh.hours_worked ?? 0), 0);
+  const rounded = Math.round(totalHours * 100) / 100;
+  const amount = Math.round(rounded * rate * 100) / 100;
+
+  return {
+    success: true,
+    data: { hours: rounded, amount, rate, shiftCount: list.length },
+  };
 }
 
 export async function createPayment(
@@ -78,7 +87,7 @@ export async function createPayment(
       return { success: false, error: "Выплата за этот период уже создана" };
     }
 
-    const calc = await getShiftsForPeriod(userId, dateFrom, dateTo);
+    const calc = await calcShiftsForPeriod(userId, dateFrom, dateTo);
     if (!calc.success || !calc.data) {
       return { success: false, error: calc.error ?? "Ошибка расчёта" };
     }
@@ -122,11 +131,12 @@ export async function createPayment(
 
 export async function approvePayment(
   paymentId: string,
-  callerId: string,
+  initData: string,
 ): Promise<ActionResult<void>> {
   try {
-    const adminError = await verifyAdmin(callerId);
-    if (adminError) return { success: false, error: adminError };
+    const authResult = await requireAdmin(initData);
+    if ("error" in authResult) return { success: false, error: authResult.error };
+    const callerId = authResult.user.id;
 
     const supabase = getSupabaseAdmin();
     const { error } = await supabase
@@ -145,13 +155,6 @@ export async function approvePayment(
     console.error("[SALARY] getEmployees error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
-}
-
-async function verifyAdmin(callerId: string): Promise<string | null> {
-  const supabase = getSupabaseAdmin();
-  const { data: caller } = await supabase.from("users").select("role").eq("id", callerId).single();
-  if (!caller || (caller.role !== "admin" && caller.role !== "superadmin")) return "Нет доступа";
-  return null;
 }
 
 export async function confirmPayment(
@@ -194,11 +197,11 @@ export async function confirmPayment(
 
 export async function deletePayment(
   paymentId: string,
-  callerId: string,
+  initData: string,
 ): Promise<ActionResult<void>> {
   try {
-    const adminError = await verifyAdmin(callerId);
-    if (adminError) return { success: false, error: adminError };
+    const authResult = await requireAdmin(initData);
+    if ("error" in authResult) return { success: false, error: authResult.error };
 
     const supabase = getSupabaseAdmin();
     const { error } = await supabase
@@ -319,11 +322,12 @@ export async function getMonthlyReport(
 
 export async function getEmployeeStats(
   userId: string,
-  initData?: string,
+  initData: string,
 ): Promise<ActionResult<EmployeeStats>> {
   try {
     const auth = await verifyRequestAuth(initData ?? "");
     if (!auth) return { success: false, error: "Не авторизован" };
+    if (auth.id !== userId) return { success: false, error: "Нет доступа" };
 
     const supabase = getSupabaseAdmin();
 
@@ -408,11 +412,12 @@ export async function getEmployeeStats(
 
 export async function getMyPayments(
   userId: string,
-  initData?: string,
+  initData: string,
 ): Promise<ActionResult<SalaryPaymentWithUser[]>> {
   try {
     const auth = await verifyRequestAuth(initData ?? "");
     if (!auth) return { success: false, error: "Не авторизован" };
+    if (auth.id !== userId) return { success: false, error: "Нет доступа" };
 
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase

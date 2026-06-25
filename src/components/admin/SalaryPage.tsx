@@ -89,7 +89,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
     }
     let cancelled = false;
     startTransition(async () => {
-      const calc = await getShiftsForPeriod(selectedEmp, dateFrom, dateTo);
+      const calc = await getShiftsForPeriod(selectedEmp, dateFrom, dateTo, useUserStore.getState().initData ?? "");
       if (cancelled) return;
       if (calc.success && calc.data) {
         const empFines = fines.filter(
@@ -128,7 +128,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
   const handleApprove = (id: string) => {
     startTransition(async () => {
-      const result = await approvePayment(id, useUserStore.getState().user?.id ?? "");
+      const result = await approvePayment(id, useUserStore.getState().initData ?? "");
       if (!result.success) {
         setError(result.error ?? t("common.error"));
         return;
@@ -139,7 +139,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
   const handleDelete = (id: string) => {
     startTransition(async () => {
-      const result = await deletePayment(id, useUserStore.getState().user?.id ?? "");
+      const result = await deletePayment(id, useUserStore.getState().initData ?? "");
       if (!result.success) {
         setError(result.error ?? t("common.error"));
         return;

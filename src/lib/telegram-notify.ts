@@ -93,13 +93,17 @@ export async function notifyNewSchedule(userId: string, startDate: string, endDa
   );
 }
 
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 export async function notifyFineAdded(userId: string, amount: number, reason: string): Promise<void> {
   const chatId = await getUserTelegramId(userId);
   if (!chatId) return;
 
   await sendTelegramMessage(
     chatId,
-    `⚠️ Вам начислен штраф: <b>${amount} MDL</b>\n\nПричина: ${reason}`,
+    `⚠️ Вам начислен штраф: <b>${amount} MDL</b>\n\nПричина: ${escapeHtml(reason)}`,
   );
 }
 

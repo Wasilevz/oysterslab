@@ -1,7 +1,7 @@
 "use server";
 
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { requireAdmin, verifyRequestAuth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth";
 import type { ActionResult, Location } from "@/types/database";
 
 // === Multi-location management ===
@@ -10,8 +10,8 @@ export async function getLocations(
   initData?: string,
 ): Promise<ActionResult<Location[]>> {
   try {
-    const auth = await verifyRequestAuth(initData ?? "");
-    if (!auth) return { success: false, error: "Не авторизован" };
+    const auth = await requireAdmin(initData ?? "");
+    if ("error" in auth) return { success: false, error: auth.error };
 
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
@@ -112,8 +112,8 @@ export async function getLocationSettings(
   ActionResult<{ allowedIPs: string[]; authMode: string }>
 > {
   try {
-    const auth = await verifyRequestAuth(initData ?? "");
-    if (!auth) return { success: false, error: "Не авторизован" };
+    const auth = await requireAdmin(initData ?? "");
+    if ("error" in auth) return { success: false, error: auth.error };
 
     const supabase = getSupabaseAdmin();
 
