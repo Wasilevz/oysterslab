@@ -19,9 +19,6 @@ import { getEmployeeStats } from "@/actions/salaryActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
 import { ScheduleEmployee } from "@/components/employee/ScheduleEmployee";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { PullToRefresh } from "@/components/shared/PullToRefresh";
-import { Onboarding } from "@/components/employee/Onboarding";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import { formatHours, getElapsedSeconds } from "@/lib/utils";
@@ -55,7 +52,6 @@ export function EmployeeScreen() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -77,12 +73,6 @@ export function EmployeeScreen() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadData();
   }, [loadData]);
-
-  useEffect(() => {
-    if (!localStorage.getItem("onboarded")) {
-      setShowOnboarding(true);
-    }
-  }, []);
 
   const handleToggleShift = () => {
     if (!user) return;
@@ -127,29 +117,21 @@ export function EmployeeScreen() {
     );
   }
 
-  if (showOnboarding) {
-    return <Onboarding onComplete={() => setShowOnboarding(false)} />;
-  }
-
   const isOnShift = Boolean(activeShift);
 
   return (
-    <PullToRefresh onRefresh={loadData}>
-      <div className="flex min-h-full flex-1 flex-col p-4 pb-8">
+    <div className="flex min-h-full flex-1 flex-col p-4 pb-8">
       {/* Header */}
-      <header className="mb-5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--brand-primary)] to-teal-700 text-sm font-bold text-white shadow-lg shadow-[var(--brand-primary)]/20">
-            {user?.full_name ? getInitials(user.full_name) : "—"}
-          </div>
-          <div>
-            <p className="text-[10px] font-medium uppercase tracking-widest text-[var(--text-secondary)]">
-              {t("employee.hello")}
-            </p>
-            <h1 className="text-lg font-bold text-[var(--text-primary)]">{user?.full_name}</h1>
-          </div>
+      <header className="mb-5 flex items-center gap-3">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--brand-primary)] to-teal-700 text-sm font-bold text-white shadow-lg shadow-[var(--brand-primary)]/20">
+          {user?.full_name ? getInitials(user.full_name) : "—"}
         </div>
-        <ThemeToggle />
+        <div>
+          <p className="text-[10px] font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
+            {t("employee.hello")}
+          </p>
+          <h1 className="text-lg font-bold dark:text-white text-zinc-900">{user?.full_name}</h1>
+        </div>
       </header>
 
       {/* Карточка смены — главный элемент */}
@@ -277,7 +259,6 @@ export function EmployeeScreen() {
       <EmployeeSalary />
 
       <ScheduleEmployee />
-      </div>
-    </PullToRefresh>
+    </div>
   );
 }

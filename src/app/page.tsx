@@ -5,8 +5,9 @@ import { verifyTelegramAuth } from "@/actions/authActions";
 import { AdminScreen } from "@/components/admin/AdminScreen";
 import { EmployeeScreen } from "@/components/employee/EmployeeScreen";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
+import { useThemeStore } from "@/store/themeStore";
+import { useI18n } from "@/lib/i18n";
 
 function LoadingSkeleton() {
   return (
@@ -62,6 +63,9 @@ export default function Home() {
         WebApp.expand();
         WebApp.setHeaderColor("#09090b");
         WebApp.setBackgroundColor("#09090b");
+
+        // Auto-detect theme from Telegram
+        useThemeStore.getState().initFromTelegram();
 
         const initData = WebApp.initData;
         initDataRef.current = initData || null;

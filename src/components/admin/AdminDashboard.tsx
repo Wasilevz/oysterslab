@@ -6,8 +6,6 @@ import { getLocations } from "@/actions/locationActions";
 import { getActiveShift } from "@/actions/shiftActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
-import { StatsCards } from "@/components/admin/StatsCards";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUserStore } from "@/store/userStore";
 import { useI18n } from "@/lib/i18n";
@@ -173,7 +171,6 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
       <header className="mb-5">
         <div className="flex items-center justify-between">
-          <ThemeToggle />
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--text-secondary)]">
             {t("nav.dashboard")}
           </p>
@@ -212,12 +209,10 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       </header>
 
       {error && (
-        <div className="mb-4 rounded-xl border border-[var(--color-error)]/20 bg-[var(--color-error)]/10 px-4 py-3">
+        <div className="mb-4 rounded-[12px] border border-[var(--color-error)]/20 bg-[var(--color-error)]/10 px-4 py-3">
           <p className="text-sm text-[var(--color-error)]">{error}</p>
         </div>
       )}
-
-      {stats && <StatsCards stats={stats} />}
 
       <div className="mt-6 px-4">
         <div className="grid grid-cols-2 gap-3">
