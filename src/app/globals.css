@@ -20,28 +20,28 @@
 
 @layer base {
   :root, [data-theme="light"] {
-    --bg-app: #FAFAFA;
-    --bg-surface: #FFFFFF;
-    --text-primary: #08080A;
-    --text-secondary: #5e616e;
-    --border-color: #e2e3e9;
-    --brand-primary: #cc9166;
-    --brand-primary-hover: #ae9357;
-    --accent-money: #cc9166;
+    --bg-app: #f8f9fb;
+    --bg-surface: #ffffff;
+    --text-primary: #0a0a0a;
+    --text-secondary: #476788;
+    --border-color: #d4e0ed;
+    --brand-primary: #006bff;
+    --brand-primary-hover: #0052cc;
+    --accent-money: #004eba;
     --color-success: #10B981;
     --color-warning: #F59E0B;
     --color-error: #EF4444;
   }
 
   [data-theme="dark"] {
-    --bg-app: #000000;
-    --bg-surface: #1c1d22;
-    --text-primary: #e2e3e9;
-    --text-secondary: #777a88;
-    --border-color: #2e3038;
-    --brand-primary: #cc9166;
-    --brand-primary-hover: #ae9357;
-    --accent-money: #cc9166;
+    --bg-app: #f8f9fb;
+    --bg-surface: #ffffff;
+    --text-primary: #0a0a0a;
+    --text-secondary: #476788;
+    --border-color: #d4e0ed;
+    --brand-primary: #006bff;
+    --brand-primary-hover: #0052cc;
+    --accent-money: #004eba;
     --color-success: #10B981;
     --color-warning: #F59E0B;
     --color-error: #EF4444;
