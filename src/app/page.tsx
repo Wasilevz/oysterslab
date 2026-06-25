@@ -89,10 +89,8 @@ export default function Home() {
         }
 
         setUser(result.data, initData);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : t("auth.appInitError"),
-        );
+      } catch {
+        setError(t("auth.appInitError"));
       }
     }
 

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { getEmployees } from "@/actions/salaryActions";
 
 export async function GET(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -25,13 +24,17 @@ export async function GET(request: Request) {
     const periodEnd = lastWeekEnd.toISOString().split("T")[0];
 
     const supabase = getSupabaseAdmin();
-    const empResult = await getEmployees();
-    if (!empResult.success || !empResult.data) {
+    const { data: employees, error: empError } = await supabase
+      .from("users")
+      .select("id, hourly_rate, full_name")
+      .in("role", ["employee", "admin"]);
+
+    if (empError || !employees || employees.length === 0) {
       return NextResponse.json({ ok: false, error: "No employees" });
     }
 
     let created = 0;
-    for (const emp of empResult.data) {
+    for (const emp of employees) {
       if (emp.hourly_rate <= 0) continue;
 
       const { data: existing } = await supabase

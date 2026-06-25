@@ -3,6 +3,7 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { logAction } from "@/lib/audit";
 import { getAdminLocationId } from "@/lib/admin-location";
+import { requireAdmin, verifyRequestAuth } from "@/lib/auth";
 import type {
   ActionResult,
   EmployeeStats,
@@ -11,10 +12,13 @@ import type {
   User,
 } from "@/types/database";
 
-export async function getEmployees(callerId?: string): Promise<ActionResult<User[]>> {
+export async function getEmployees(initData?: string): Promise<ActionResult<User[]>> {
   try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
     const supabase = getSupabaseAdmin();
-    const locationId = callerId ? await getAdminLocationId(callerId) : null;
+    const locationId = await getAdminLocationId(authResult.user.id);
 
     let query = supabase
       .from("users")
@@ -37,8 +41,12 @@ export async function getShiftsForPeriod(
   userId: string,
   dateFrom: string,
   dateTo: string,
+  initData?: string,
 ): Promise<ActionResult<{ hours: number; amount: number; rate: number; shiftCount: number }>> {
   try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
     const supabase = getSupabaseAdmin();
 
     const { data: user } = await supabase
@@ -75,8 +83,12 @@ export async function createPayment(
   userId: string,
   dateFrom: string,
   dateTo: string,
+  initData?: string,
 ): Promise<ActionResult<SalaryPayment>> {
   try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
     const supabase = getSupabaseAdmin();
 
     const { data: existing } = await supabase
@@ -134,14 +146,12 @@ export async function createPayment(
 
 export async function approvePayment(
   paymentId: string,
-  callerId?: string,
+  callerId: string,
 ): Promise<ActionResult<void>> {
   try {
-    if (callerId) {
-      const supabase = getSupabaseAdmin();
-      const { data: caller } = await supabase.from("users").select("role").eq("id", callerId).single();
-      if (!caller || caller.role !== "admin") return { success: false, error: "Нет доступа" };
-    }
+    const adminError = await verifyAdmin(callerId);
+    if (adminError) return { success: false, error: adminError };
+
     const supabase = getSupabaseAdmin();
     const { error } = await supabase
       .from("salary_payments")
@@ -152,7 +162,7 @@ export async function approvePayment(
 
     const { notifyShiftApproved } = await import("@/lib/telegram-notify");
     void notifyShiftApproved(paymentId);
-    if (callerId) void logAction(callerId, "approve_payment", "salary_payment", paymentId);
+    void logAction(callerId, "approve_payment", "salary_payment", paymentId);
 
     return { success: true };
   } catch {
@@ -160,10 +170,21 @@ export async function approvePayment(
   }
 }
 
+async function verifyAdmin(callerId: string): Promise<string | null> {
+  const supabase = getSupabaseAdmin();
+  const { data: caller } = await supabase.from("users").select("role").eq("id", callerId).single();
+  if (!caller || (caller.role !== "admin" && caller.role !== "superadmin")) return "Нет доступа";
+  return null;
+}
+
 export async function confirmPayment(
   paymentId: string,
+  initData?: string,
 ): Promise<ActionResult<void>> {
   try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
     const supabase = getSupabaseAdmin();
     const { error } = await supabase
       .from("salary_payments")
@@ -184,14 +205,12 @@ export async function confirmPayment(
 
 export async function deletePayment(
   paymentId: string,
-  callerId?: string,
+  callerId: string,
 ): Promise<ActionResult<void>> {
   try {
-    if (callerId) {
-      const supabase = getSupabaseAdmin();
-      const { data: caller } = await supabase.from("users").select("role").eq("id", callerId).single();
-      if (!caller || caller.role !== "admin") return { success: false, error: "Нет доступа" };
-    }
+    const adminError = await verifyAdmin(callerId);
+    if (adminError) return { success: false, error: adminError };
+
     const supabase = getSupabaseAdmin();
     const { error } = await supabase
       .from("salary_payments")
@@ -205,10 +224,13 @@ export async function deletePayment(
   }
 }
 
-export async function getAllPayments(callerId?: string): Promise<ActionResult<SalaryPaymentWithUser[]>> {
+export async function getAllPayments(initData?: string): Promise<ActionResult<SalaryPaymentWithUser[]>> {
   try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
     const supabase = getSupabaseAdmin();
-    const locationId = callerId ? await getAdminLocationId(callerId) : null;
+    const locationId = await getAdminLocationId(authResult.user.id);
 
     let query = supabase
       .from("salary_payments")
@@ -230,6 +252,7 @@ export async function getAllPayments(callerId?: string): Promise<ActionResult<Sa
 export async function getMonthlyReport(
   year: number,
   month: number,
+  initData?: string,
 ): Promise<ActionResult<{
   employees: {
     id: string;
@@ -242,6 +265,9 @@ export async function getMonthlyReport(
   grandTotal: number;
 }>> {
   try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
     const supabase = getSupabaseAdmin();
 
     const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
@@ -301,8 +327,12 @@ export async function getMonthlyReport(
 
 export async function getEmployeeStats(
   userId: string,
+  initData?: string,
 ): Promise<ActionResult<EmployeeStats>> {
   try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
     const supabase = getSupabaseAdmin();
 
     const now = new Date();
@@ -378,6 +408,28 @@ export async function getEmployeeStats(
         weeklyHours,
       },
     };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
+  }
+}
+
+export async function getMyPayments(
+  userId: string,
+  initData?: string,
+): Promise<ActionResult<SalaryPaymentWithUser[]>> {
+  try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("salary_payments")
+      .select("*, users!inner(id, full_name, position)")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) return { success: false, error: "Ошибка сервера" };
+    return { success: true, data: (data ?? []) as SalaryPaymentWithUser[] };
   } catch {
     return { success: false, error: "Ошибка сервера" };
   }

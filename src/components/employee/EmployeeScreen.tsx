@@ -56,10 +56,11 @@ export function EmployeeScreen() {
   const loadData = useCallback(async () => {
     if (!user) return;
 
+    const initData = useUserStore.getState().initData;
     const [activeResult, shiftsResult, statsResult] = await Promise.all([
-      getActiveShift(user.id),
-      getMyShifts(user.id),
-      getEmployeeStats(user.id),
+      getActiveShift(user.id, initData ?? ""),
+      getMyShifts(user.id, undefined, initData ?? ""),
+      getEmployeeStats(user.id, initData ?? ""),
     ]);
 
     if (activeResult.success) setActiveShift(activeResult.data ?? null);

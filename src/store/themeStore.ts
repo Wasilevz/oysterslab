@@ -8,45 +8,39 @@ interface ThemeState {
   initFromTelegram: () => void;
 }
 
+let themeListenerRegistered = false;
+
 export const useThemeStore = create<ThemeState>((set) => ({
   theme: "dark",
 
   setTheme: (theme: Theme) => {
     if (typeof window !== "undefined") {
       localStorage.setItem("theme", theme);
-      const root = document.documentElement;
-      root.classList.remove("dark", "light");
-      root.classList.add(theme);
-      root.setAttribute("data-theme", theme);
+      applyTheme(theme);
     }
     set({ theme });
   },
 
   initFromTelegram: () => {
     try {
-      // @ts-ignore
+      // @ts-expect-error Telegram WebApp SDK
       const WebApp = window?.Telegram?.WebApp;
       if (WebApp?.colorScheme) {
         const tgTheme: Theme = WebApp.colorScheme === "dark" ? "dark" : "light";
         localStorage.setItem("theme", tgTheme);
-        const root = document.documentElement;
-        root.classList.remove("dark", "light");
-        root.classList.add(tgTheme);
-        root.setAttribute("data-theme", tgTheme);
+        applyTheme(tgTheme);
         set({ theme: tgTheme });
 
-        WebApp.onEvent("themeChanged", () => {
-          // @ts-ignore
-          const newTheme: Theme = WebApp.colorScheme === "dark" ? "dark" : "light";
-          localStorage.setItem("theme", newTheme);
-          const r = document.documentElement;
-          r.classList.remove("dark", "light");
-          r.classList.add(newTheme);
-          r.setAttribute("data-theme", newTheme);
-          set({ theme: newTheme });
-        });
+        if (!themeListenerRegistered) {
+          themeListenerRegistered = true;
+          WebApp.onEvent("themeChanged", () => {
+            const newTheme: Theme = WebApp.colorScheme === "dark" ? "dark" : "light";
+            localStorage.setItem("theme", newTheme);
+            applyTheme(newTheme);
+            set({ theme: newTheme });
+          });
+        }
       } else {
-        // Fallback to localStorage
         const stored = localStorage.getItem("theme") as Theme | null;
         const initial = stored ?? "dark";
         applyTheme(initial);

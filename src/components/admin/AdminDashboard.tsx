@@ -21,6 +21,7 @@ const POLL_INTERVAL_MS = 15000;
 
 export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const user = useUserStore((s) => s.user);
+  const initData = useUserStore((s) => s.initData);
   const { t } = useI18n();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -32,7 +33,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const adminLocationId = user?.location_id;
 
   const loadStats = useCallback(async () => {
-    const result = await getDashboardStats(user?.id);
+    const result = await getDashboardStats(initData ?? "");
     if (result.success && result.data) {
       setStats(result.data);
       setError(null);
@@ -43,13 +44,13 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   }, [user?.id]);
 
   const loadLocations = useCallback(async () => {
-    const result = await getLocations();
+    const result = await getLocations(initData ?? "");
     if (result.success && result.data) setLocations(result.data);
-  }, []);
+  }, [initData]);
 
   const loadMyShift = useCallback(async () => {
     if (!user) return;
-    const result = await getActiveShift(user.id);
+    const result = await getActiveShift(user.id, initData ?? "");
     if (result.success) setMyShift(result.data ?? null);
   }, [user]);
 

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getDashboardStats } from "@/actions/adminActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { useI18n } from "@/lib/i18n";
+import { useUserStore } from "@/store/userStore";
 import { getElapsedSeconds } from "@/lib/utils";
 import type { ActiveShiftCard } from "@/types/database";
 
@@ -17,7 +18,7 @@ export function LiveTab({ onBack }: LiveTabProps) {
   const [loading, setLoading] = useState(true);
 
   const loadData = useCallback(async () => {
-    const result = await getDashboardStats();
+    const result = await getDashboardStats(useUserStore.getState().initData ?? "");
     if (result.success && result.data) {
       setActiveShifts(result.data.activeShifts);
     }

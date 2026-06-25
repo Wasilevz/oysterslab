@@ -1,12 +1,18 @@
 "use server";
 
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { requireAdmin, verifyRequestAuth } from "@/lib/auth";
 import type { ActionResult, Location } from "@/types/database";
 
 // === Multi-location management ===
 
-export async function getLocations(): Promise<ActionResult<Location[]>> {
+export async function getLocations(
+  initData?: string,
+): Promise<ActionResult<Location[]>> {
   try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from("locations")
@@ -23,19 +29,15 @@ export async function getLocations(): Promise<ActionResult<Location[]>> {
 export async function addLocation(
   name: string,
   address: string,
-  callerId: string,
+  initData: string,
 ): Promise<ActionResult<Location>> {
   if (!name.trim()) return { success: false, error: "Введите название" };
 
   try {
-    const supabase = getSupabaseAdmin();
+    const authResult = await requireAdmin(initData);
+    if ("error" in authResult) return { success: false, error: authResult.error };
 
-    const { data: caller } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", callerId)
-      .single();
-    if (!caller || caller.role !== "admin") return { success: false, error: "Нет доступа" };
+    const supabase = getSupabaseAdmin();
 
     const { data, error } = await supabase
       .from("locations")
@@ -52,17 +54,13 @@ export async function addLocation(
 
 export async function deleteLocation(
   locationId: string,
-  callerId: string,
+  initData: string,
 ): Promise<ActionResult<void>> {
   try {
-    const supabase = getSupabaseAdmin();
+    const authResult = await requireAdmin(initData);
+    if ("error" in authResult) return { success: false, error: authResult.error };
 
-    const { data: caller } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", callerId)
-      .single();
-    if (!caller || caller.role !== "admin") return { success: false, error: "Нет доступа" };
+    const supabase = getSupabaseAdmin();
 
     const { error } = await supabase
       .from("locations")
@@ -80,19 +78,15 @@ export async function updateLocation(
   locationId: string,
   name: string,
   address: string,
-  callerId: string,
+  initData: string,
 ): Promise<ActionResult<void>> {
   if (!name.trim()) return { success: false, error: "Введите название" };
 
   try {
-    const supabase = getSupabaseAdmin();
+    const authResult = await requireAdmin(initData);
+    if ("error" in authResult) return { success: false, error: authResult.error };
 
-    const { data: caller } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", callerId)
-      .single();
-    if (!caller || caller.role !== "admin") return { success: false, error: "Нет доступа" };
+    const supabase = getSupabaseAdmin();
 
     const { error } = await supabase
       .from("locations")
@@ -108,10 +102,15 @@ export async function updateLocation(
 
 // === IP location settings ===
 
-export async function getLocationSettings(): Promise<
+export async function getLocationSettings(
+  initData?: string,
+): Promise<
   ActionResult<{ allowedIPs: string[]; authMode: string }>
 > {
   try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
     const supabase = getSupabaseAdmin();
 
     const { data, error } = await supabase
@@ -141,8 +140,12 @@ export async function getLocationSettings(): Promise<
 export async function saveLocationSettings(
   allowedIPs: string[],
   authMode: string,
+  initData?: string,
 ): Promise<ActionResult<void>> {
   try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
     const supabase = getSupabaseAdmin();
 
     const { error } = await supabase

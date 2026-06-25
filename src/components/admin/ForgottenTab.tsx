@@ -34,8 +34,8 @@ export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
   const [isPending, startTransition] = useTransition();
 
   const loadData = useCallback(async () => {
-    const callerId = useUserStore.getState().user?.id;
-    const result = await getDashboardStats(callerId);
+    const initData = useUserStore.getState().initData ?? "";
+    const result = await getDashboardStats(initData);
     if (result.success && result.data) {
       setShifts(result.data.autoClosedShifts);
     }
@@ -67,7 +67,7 @@ export function ForgottenTab({ onReviewed, onBack }: ForgottenTabProps) {
       return;
     }
     startTransition(async () => {
-      const result = await reviewAutoClosedShift(selected.id, parsed);
+      const result = await reviewAutoClosedShift(selected.id, parsed, useUserStore.getState().initData ?? "");
       if (!result.success) {
         setError(result.error ?? t("common.error"));
         return;

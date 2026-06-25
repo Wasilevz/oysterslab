@@ -27,6 +27,7 @@ const TYPE_ORDER: ScheduleType[] = ["work", "off", "vacation", "sick"];
 export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
   const { t } = useI18n();
   const currentUser = useUserStore((s) => s.user);
+  const initData = useUserStore((s) => s.initData);
   const [employees, setEmployees] = useState<User[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [workingToday, setWorkingToday] = useState<{ id: string; full_name: string; position: string | null; clock_in: string | null }[]>([]);
@@ -39,17 +40,16 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadData = useCallback(async () => {
-    const callerId = useUserStore.getState().user?.id;
     const [schedResult, empResult, todayResult] = await Promise.all([
-      getSchedule(year, month),
-      getEmployees(callerId),
-      getWorkingToday(),
+      getSchedule(year, month, initData ?? ""),
+      getEmployees(initData ?? ""),
+      getWorkingToday(initData ?? ""),
     ]);
     if (schedResult.success && schedResult.data) setSchedules(schedResult.data);
     if (empResult.success && empResult.data) setEmployees(empResult.data);
     if (todayResult.success && todayResult.data) setWorkingToday(todayResult.data);
     setLoading(false);
-  }, [year, month]);
+  }, [year, month, initData]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -74,7 +74,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
       return [...filtered, { id: "temp", user_id: userId, date: dateStr, type: next, created_at: "" }];
     });
 
-    void setScheduleDay(userId, dateStr, next);
+    void setScheduleDay(userId, dateStr, next, initData ?? "");
   };
 
   const prevMonth = () => {

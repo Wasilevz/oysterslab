@@ -35,9 +35,10 @@ export function ScheduleEmployee() {
 
   async function loadData() {
     if (!user) return;
+    const initData = useUserStore.getState().initData;
     const [schedResult, todayResult] = await Promise.all([
-      getMySchedule(user.id, year, month),
-      getWorkingToday(),
+      getMySchedule(user.id, year, month, initData ?? ""),
+      getWorkingToday(initData ?? ""),
     ]);
     if (schedResult.success && schedResult.data) setSchedules(schedResult.data);
     if (todayResult.success && todayResult.data) setWorkingToday(todayResult.data);

@@ -53,11 +53,11 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
   const [reportMonth, setReportMonth] = useState(new Date().getMonth() + 1);
 
   const loadData = useCallback(async () => {
-    const callerId = useUserStore.getState().user?.id;
+    const initData = useUserStore.getState().initData ?? "";
     const [empResult, payResult, finesResult] = await Promise.all([
-      getEmployees(callerId),
-      getAllPayments(callerId),
-      getFines(),
+      getEmployees(initData),
+      getAllPayments(initData),
+      getFines(undefined, undefined, initData),
     ]);
     if (empResult.success && empResult.data) setEmployees(empResult.data);
     if (payResult.success && payResult.data) setPayments(payResult.data);
@@ -66,7 +66,8 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
   }, []);
 
   const loadReport = useCallback(async () => {
-    const result = await getMonthlyReport(reportYear, reportMonth);
+    const initData = useUserStore.getState().initData ?? "";
+    const result = await getMonthlyReport(reportYear, reportMonth, initData);
     if (result.success && result.data) setMonthlyReport(result.data);
   }, [reportYear, reportMonth]);
 
@@ -108,7 +109,8 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
     setSuccess(null);
 
     startTransition(async () => {
-      const result = await createPayment(selectedEmp, dateFrom, dateTo);
+      const initData = useUserStore.getState().initData ?? "";
+      const result = await createPayment(selectedEmp, dateFrom, dateTo, initData);
       if (!result.success) {
         setError(result.error ?? t("common.error"));
         return;
@@ -124,7 +126,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
   const handleApprove = (id: string) => {
     startTransition(async () => {
-      const result = await approvePayment(id);
+      const result = await approvePayment(id, useUserStore.getState().user?.id ?? "");
       if (!result.success) {
         setError(result.error ?? t("common.error"));
         return;
@@ -135,7 +137,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
 
   const handleDelete = (id: string) => {
     startTransition(async () => {
-      const result = await deletePayment(id);
+      const result = await deletePayment(id, useUserStore.getState().user?.id ?? "");
       if (!result.success) {
         setError(result.error ?? t("common.error"));
         return;

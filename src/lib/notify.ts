@@ -4,7 +4,7 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
 function escapeHtml(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
 async function sendMessage(chatId: number, text: string): Promise<boolean> {
@@ -69,7 +69,7 @@ export async function sendShiftReminders(): Promise<{ sent: number; errors: numb
     const reminder15H = startH;
     const reminder15M = startM - 15;
     const adjustedReminder = reminder15M < 0
-      ? { hour: reminder15H - 1, minute: reminder15M + 60 }
+      ? { hour: (reminder15H - 1 + 24) % 24, minute: reminder15M + 60 }
       : { hour: reminder15H, minute: reminder15M };
 
     if (nowHour === adjustedReminder.hour && nowMin === adjustedReminder.minute && !isOnShift) {

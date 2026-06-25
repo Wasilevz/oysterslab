@@ -3,6 +3,7 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { logAction } from "@/lib/audit";
 import { getAdminLocationId } from "@/lib/admin-location";
+import { requireAdmin } from "@/lib/auth";
 import type { ActionResult, User } from "@/types/database";
 
 async function verifyAdmin(callerId: string): Promise<string | null> {
@@ -16,10 +17,13 @@ async function verifyAdmin(callerId: string): Promise<string | null> {
   return null;
 }
 
-export async function getEmployees(callerId?: string): Promise<ActionResult<User[]>> {
+export async function getEmployees(initData?: string): Promise<ActionResult<User[]>> {
   try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
     const supabase = getSupabaseAdmin();
-    const locationId = callerId ? await getAdminLocationId(callerId) : null;
+    const locationId = await getAdminLocationId(authResult.user.id);
 
     let query = supabase
       .from("users")
@@ -101,15 +105,13 @@ export async function updateEmployee(
   fullName: string,
   position: string,
   hourlyRate: number,
+  callerId: string,
   role?: "employee" | "admin",
   shiftStartTime?: string,
-  callerId?: string,
   locationId?: string,
 ): Promise<ActionResult<void>> {
-  if (callerId) {
-    const adminError = await verifyAdmin(callerId);
-    if (adminError) return { success: false, error: adminError };
-  }
+  const adminError = await verifyAdmin(callerId);
+  if (adminError) return { success: false, error: adminError };
 
   if (!Number.isFinite(hourlyRate) || hourlyRate < 0) {
     return { success: false, error: "Укажите корректную ставку" };
@@ -127,7 +129,17 @@ export async function updateEmployee(
       hourly_rate: hourlyRate,
     };
 
-    if (role) updateData.role = role;
+    if (role) {
+      const { data: caller } = await supabase
+        .from("users")
+        .select("role")
+        .eq("id", callerId)
+        .single();
+      if (caller?.role !== "superadmin") {
+        return { success: false, error: "Только суперадмин может менять роли" };
+      }
+      updateData.role = role;
+    }
     if (shiftStartTime !== undefined) updateData.shift_start_time = shiftStartTime;
     if (locationId !== undefined) updateData.location_id = locationId || null;
 
@@ -138,7 +150,7 @@ export async function updateEmployee(
 
     if (error) return { success: false, error: "Ошибка сервера" };
 
-    if (callerId) void logAction(callerId, "update_employee", "user", userId);
+    void logAction(callerId, "update_employee", "user", userId);
 
     return { success: true };
   } catch {

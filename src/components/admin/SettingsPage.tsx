@@ -56,11 +56,11 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const [isPending, startTransition] = useTransition();
 
   const loadSettings = useCallback(async () => {
-    const callerId = useUserStore.getState().user?.id;
+    const initData = useUserStore.getState().initData ?? "";
     const [settingsResult, employeesResult, locationsResult] = await Promise.all([
-      getLocationSettings(),
-      getEmployees(callerId),
-      getLocations(),
+      getLocationSettings(initData),
+      getEmployees(initData),
+      getLocations(initData),
     ]);
     if (settingsResult.success && settingsResult.data) {
       setAllowedIPs(settingsResult.data.allowedIPs.length > 0 ? settingsResult.data.allowedIPs : [""]);
@@ -80,7 +80,10 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
 
   const loadLogs = useCallback(async () => {
     try {
-      const res = await fetch("/api/audit?limit=30");
+      const initData = useUserStore.getState().initData ?? "";
+      const res = await fetch("/api/audit?limit=30", {
+        headers: { "x-telegram-initdata": initData },
+      });
       const data = await res.json();
       if (data.ok) setAuditLogs(data.logs);
     } catch {}
@@ -91,9 +94,10 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
     setError(null);
     setSuccess(null);
     startTransition(async () => {
-      const result = await saveLocationSettings(validIPs, "ip");
+      const initData = useUserStore.getState().initData ?? "";
+      const result = await saveLocationSettings(validIPs, "ip", initData);
       if (!result.success) {
-        setError(result.error ?? "ÐžÑˆÐ¸Ð±ÐºÐ° ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ð¸Ñ");
+        setError(result.error ?? "Ошибка сохранения");
         return;
       }
       setSuccess(t("settings.saved"));
@@ -119,7 +123,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
         setTimeout(() => setSuccess(null), 3000);
       }
     } catch {
-      setError("ÐÐµ ÑƒÐ´Ð°Ð»Ð¾ÑÑŒ Ð¾Ð¿Ñ€ÐµÐ´ÐµÐ»Ð¸Ñ‚ÑŒ IP");
+      setError("Не удалось определить IP");
     }
   };
 
@@ -146,9 +150,9 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const handleSaveEmployee = async () => {
     if (!editingId) return;
     const rate = Number(editRate);
-    if (!Number.isFinite(rate) || rate < 0) { setError("Ð£ÐºÐ°Ð¶Ð¸Ñ‚Ðµ ÐºÐ¾Ñ€Ñ€ÐµÐºÑ‚Ð½ÑƒÑŽ ÑÑ‚Ð°Ð²ÐºÑƒ"); return; }
-    const result = await updateEmployee(editingId, editName, editPosition, rate, editRole, editShiftStart, useUserStore.getState().user?.id ?? "", editLocationId);
-    if (!result.success) { setError(result.error ?? "ÐžÑˆÐ¸Ð±ÐºÐ°"); return; }
+    if (!Number.isFinite(rate) || rate < 0) { setError("Укажите корректную ставку"); return; }
+    const result = await updateEmployee(editingId, editName, editPosition, rate, useUserStore.getState().user?.id ?? "", editRole, editShiftStart, editLocationId);
+    if (!result.success) { setError(result.error ?? "Ошибка"); return; }
     cancelEdit();
     void loadSettings();
   };
@@ -156,11 +160,11 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   const handleAddEmployee = async () => {
     const tgId = Number(newTelegramId);
     const rate = Number(newRate);
-    if (!newName.trim()) { setError("Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð¸Ð¼Ñ"); return; }
-    if (!Number.isFinite(tgId) || tgId <= 0) { setError("Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Telegram ID"); return; }
-    if (!Number.isFinite(rate) || rate < 0) { setError("Ð£ÐºÐ°Ð¶Ð¸Ñ‚Ðµ ÑÑ‚Ð°Ð²ÐºÑƒ"); return; }
+    if (!newName.trim()) { setError("Введите имя"); return; }
+    if (!Number.isFinite(tgId) || tgId <= 0) { setError("Введите Telegram ID"); return; }
+    if (!Number.isFinite(rate) || rate < 0) { setError("Укажите ставку"); return; }
     const result = await addEmployee(tgId, newName, newRole, newPosition, rate, useUserStore.getState().user?.id ?? "");
-    if (!result.success) { setError(result.error ?? "ÐžÑˆÐ¸Ð±ÐºÐ°"); return; }
+    if (!result.success) { setError(result.error ?? "Ошибка"); return; }
     setNewName(""); setNewTelegramId(""); setNewPosition(""); setNewRate(""); setNewRole("employee");
     setShowAddForm(false);
     void loadSettings();
@@ -168,21 +172,21 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
 
   const handleDeleteEmployee = async (userId: string) => {
     const result = await deleteEmployee(userId, useUserStore.getState().user?.id ?? "");
-    if (!result.success) { setError(result.error ?? "ÐžÑˆÐ¸Ð±ÐºÐ°"); return; }
+    if (!result.success) { setError(result.error ?? "Ошибка"); return; }
     void loadSettings();
   };
 
   const handleAddLocation = async () => {
-    if (!newLocationName.trim()) { setError("Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð½Ð°Ð·Ð²Ð°Ð½Ð¸Ðµ"); return; }
-    const result = await addLocation(newLocationName, newLocationAddress, useUserStore.getState().user?.id ?? "");
-    if (!result.success) { setError(result.error ?? "ÐžÑˆÐ¸Ð±ÐºÐ°"); return; }
+    if (!newLocationName.trim()) { setError("Введите название"); return; }
+    const result = await addLocation(newLocationName, newLocationAddress, useUserStore.getState().initData ?? "");
+    if (!result.success) { setError(result.error ?? "Ошибка"); return; }
     setNewLocationName(""); setNewLocationAddress("");
     void loadSettings();
   };
 
   const handleDeleteLocation = async (id: string) => {
-    const result = await deleteLocation(id, useUserStore.getState().user?.id ?? "");
-    if (!result.success) { setError(result.error ?? "ÐžÑˆÐ¸Ð±ÐºÐ°"); return; }
+    const result = await deleteLocation(id, useUserStore.getState().initData ?? "");
+    if (!result.success) { setError(result.error ?? "Ошибка"); return; }
     void loadSettings();
   };
 
@@ -221,10 +225,10 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
           <p className="mb-3 text-sm font-semibold text-[var(--text-primary)]">{t("settings.language")}</p>
           <div className="grid grid-cols-2 gap-2">
             <button onClick={() => setLocale("ru")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
-              Ð ÑƒÑÑÐºÐ¸Ð¹
+              Русский
             </button>
             <button onClick={() => setLocale("ro")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ro" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
-              RomÃ¢nÄƒ
+              Română
             </button>
           </div>
         </div>
@@ -240,7 +244,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
               <div key={i} className="flex gap-2">
                 <Input type="text" placeholder={t("settings.ipPlaceholder")} value={ip} onChange={(e) => updateIP(i, e.target.value)} />
                 {allowedIPs.length > 1 && (
-                  <button onClick={() => removeIP(i)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border-color)] text-[var(--text-secondary)] hover:border-rose-500/50 hover:text-rose-400">Ã—</button>
+                  <button onClick={() => removeIP(i)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border-color)] text-[var(--text-secondary)] hover:border-rose-500/50 hover:text-rose-400">×</button>
                 )}
               </div>
             ))}
@@ -266,7 +270,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
       {isSuperAdmin && (
       <div className="px-4 mt-6">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Ð›Ð¾ÐºÐ°Ñ†Ð¸Ð¸</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">Локации</p>
         </div>
         <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 space-y-3">
           {locations.map((loc) => (
@@ -275,12 +279,12 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                 <p className="text-sm font-bold text-[var(--text-primary)]">{loc.name}</p>
                 {loc.address && <p className="text-[10px] text-[var(--text-secondary)]">{loc.address}</p>}
               </div>
-              <button onClick={() => void handleDeleteLocation(loc.id)} className="rounded-lg px-2 py-1 text-[10px] text-[var(--color-error)] hover:bg-[var(--color-error)]/10">Ð£Ð´Ð°Ð»Ð¸Ñ‚ÑŒ</button>
+              <button onClick={() => void handleDeleteLocation(loc.id)} className="rounded-lg px-2 py-1 text-[10px] text-[var(--color-error)] hover:bg-[var(--color-error)]/10">Удалить</button>
             </div>
           ))}
           <div className="flex gap-2">
-            <Input placeholder="ÐÐ°Ð·Ð²Ð°Ð½Ð¸Ðµ" value={newLocationName} onChange={(e) => setNewLocationName(e.target.value)} className="flex-1" />
-            <Input placeholder="ÐÐ´Ñ€ÐµÑ" value={newLocationAddress} onChange={(e) => setNewLocationAddress(e.target.value)} className="flex-1" />
+            <Input placeholder="Название" value={newLocationName} onChange={(e) => setNewLocationName(e.target.value)} className="flex-1" />
+            <Input placeholder="Адрес" value={newLocationAddress} onChange={(e) => setNewLocationAddress(e.target.value)} className="flex-1" />
             <Button variant="blue" onClick={() => void handleAddLocation()}>+</Button>
           </div>
         </div>
@@ -320,13 +324,13 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                   <Input type="text" placeholder={t("settings.positionPlaceholder")} value={editPosition} onChange={(e) => setEditPosition(e.target.value)} />
                   <Input type="number" inputMode="decimal" step="0.5" min="0" placeholder={t("settings.ratePlaceholder")} value={editRate} onChange={(e) => setEditRate(e.target.value)} />
                   <div>
-                    <label className="mb-1 block text-[10px] text-[var(--text-secondary)]">ÐÐ°Ñ‡Ð°Ð»Ð¾ ÑÐ¼ÐµÐ½Ñ‹</label>
+                    <label className="mb-1 block text-[10px] text-[var(--text-secondary)]">Начало смены</label>
                     <input type="time" value={editShiftStart} onChange={(e) => setEditShiftStart(e.target.value)} className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm font-medium text-[var(--text-primary)]" />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[10px] text-[var(--text-secondary)]">Ð›Ð¾ÐºÐ°Ñ†Ð¸Ñ</label>
+                    <label className="mb-1 block text-[10px] text-[var(--text-secondary)]">Локация</label>
                     <select value={editLocationId} onChange={(e) => setEditLocationId(e.target.value)} className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm font-medium text-[var(--text-primary)]">
-                      <option value="">Ð‘ÐµÐ· Ð»Ð¾ÐºÐ°Ñ†Ð¸Ð¸</option>
+                      <option value="">Без локации</option>
                       {locations.map((loc) => (
                         <option key={loc.id} value={loc.id}>{loc.name}</option>
                       ))}
@@ -347,7 +351,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                     <p className="text-sm font-bold text-[var(--text-primary)]">{emp.full_name}</p>
                     {emp.position && <p className="text-xs text-[var(--text-secondary)]">{emp.position}</p>}
                     <p className="text-[10px] text-[var(--text-secondary)]">
-                      {emp.role === "admin" ? t("settings.adminRole") : t("settings.employeeRole")} Â· {emp.hourly_rate} Ð»/Ñ‡ Â· TG: {emp.telegram_id}
+                      {emp.role === "admin" ? t("settings.adminRole") : t("settings.employeeRole")} · {emp.hourly_rate} л/ч · TG: {emp.telegram_id}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -367,7 +371,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
           onClick={() => { setShowLogs(!showLogs); if (!showLogs) void loadLogs(); }}
           className="flex w-full items-center justify-between rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4"
         >
-          <span className="text-sm font-semibold text-[var(--text-primary)]">Ð–ÑƒÑ€Ð½Ð°Ð» Ð´ÐµÐ¹ÑÑ‚Ð²Ð¸Ð¹</span>
+          <span className="text-sm font-semibold text-[var(--text-primary)]">Журнал действий</span>
           <svg className={`h-4 w-4 text-[var(--text-secondary)] transition-transform ${showLogs ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
@@ -375,14 +379,14 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
         {showLogs && (
           <div className="mt-2 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
             {auditLogs.length === 0 ? (
-              <p className="text-center text-sm text-[var(--text-secondary)]">ÐÐµÑ‚ Ð·Ð°Ð¿Ð¸ÑÐµÐ¹</p>
+              <p className="text-center text-sm text-[var(--text-secondary)]">Нет записей</p>
             ) : (
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {auditLogs.map((log) => (
                   <div key={log.id} className="flex items-start justify-between rounded-xl border border-[var(--border-color)] px-3 py-2">
                     <div>
                       <p className="text-xs font-medium text-[var(--text-primary)]">
-                        {log.users?.full_name || "System"} â€” {log.action}
+                        {log.users?.full_name || "System"} — {log.action}
                       </p>
                       <p className="text-[10px] text-[var(--text-secondary)]">
                         {log.entity_type}{log.details ? `: ${log.details}` : ""}

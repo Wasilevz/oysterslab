@@ -45,7 +45,7 @@ export async function verifyTelegramAuth(
       return {
         success: false,
         telegramId,
-        error: `Ошибка базы данных: ${error.message}`,
+        error: "Ошибка сервера",
       };
     }
 
@@ -62,14 +62,11 @@ export async function verifyTelegramAuth(
       data: user as User,
       telegramId,
     };
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Неизвестная ошибка авторизации";
-
+  } catch {
     return {
       success: false,
       telegramId,
-      error: message,
+      error: "Ошибка авторизации",
     };
   }
 }

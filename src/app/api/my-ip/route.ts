@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { requireAdmin } from "@/lib/auth";
 
 function getClientIP(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -18,6 +19,12 @@ function getClientIP(request: Request): string {
 }
 
 export async function GET(request: Request) {
+  const initData = request.headers.get("x-telegram-initdata") || "";
+  const authResult = await requireAdmin(initData);
+  if ("error" in authResult) {
+    return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+  }
+
   const ip = getClientIP(request);
   const { allowed } = checkRateLimit(`myip:${ip}`, 5, 60000);
   if (!allowed) {

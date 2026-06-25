@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { getAllPayments, confirmPayment } from "@/actions/salaryActions";
+import { getMyPayments, confirmPayment } from "@/actions/salaryActions";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
@@ -28,7 +28,8 @@ export function EmployeeSalary() {
 
   const loadData = useCallback(async () => {
     if (!user) return;
-    const result = await getAllPayments();
+    const initData = useUserStore.getState().initData;
+    const result = await getMyPayments(user.id, initData ?? "");
     if (result.success && result.data) {
       setPayments(result.data.filter((p) => p.user_id === user.id));
     } else {

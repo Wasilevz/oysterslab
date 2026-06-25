@@ -1,13 +1,18 @@
 "use server";
 
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { requireAdmin, verifyRequestAuth } from "@/lib/auth";
 import type { ActionResult, Schedule, ScheduleType } from "@/types/database";
 
 export async function getSchedule(
   year: number,
   month: number,
+  initData?: string,
 ): Promise<ActionResult<Schedule[]>> {
   try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
     const supabase = getSupabaseAdmin();
 
     const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
@@ -34,8 +39,12 @@ export async function getMySchedule(
   userId: string,
   year: number,
   month: number,
+  initData?: string,
 ): Promise<ActionResult<Schedule[]>> {
   try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
     const supabase = getSupabaseAdmin();
 
     const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
@@ -63,8 +72,12 @@ export async function setScheduleDay(
   userId: string,
   date: string,
   type: ScheduleType,
+  initData?: string,
 ): Promise<ActionResult<void>> {
   try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
     const supabase = getSupabaseAdmin();
 
     const { error } = await supabase
@@ -86,8 +99,12 @@ export async function setBulkWeekends(
   year: number,
   month: number,
   type: ScheduleType,
+  initData?: string,
 ): Promise<ActionResult<number>> {
   try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
     const supabase = getSupabaseAdmin();
 
     const { data: employees } = await supabase
@@ -132,10 +149,15 @@ export async function setBulkWeekends(
   }
 }
 
-export async function getWorkingToday(): Promise<
+export async function getWorkingToday(
+  initData?: string,
+): Promise<
   ActionResult<{ id: string; full_name: string; position: string | null; clock_in: string | null }[]>
 > {
   try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
     const supabase = getSupabaseAdmin();
 
     const today = new Date().toISOString().split("T")[0];

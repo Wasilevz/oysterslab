@@ -23,9 +23,11 @@ export const viewport: Viewport = {
 
 const themeScript = `
 (function() {
-  var t = localStorage.getItem('theme') || 'dark';
+  var t = localStorage.getItem('theme');
+  if (t !== 'dark' && t !== 'light') t = 'dark';
   document.documentElement.classList.add(t);
-  var l = localStorage.getItem('locale') || 'ru';
+  var l = localStorage.getItem('locale');
+  if (l !== 'ru' && l !== 'ro') l = 'ru';
   document.documentElement.setAttribute('lang', l);
 })()
 `;

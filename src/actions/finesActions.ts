@@ -1,13 +1,18 @@
 "use server";
 
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { requireAdmin } from "@/lib/auth";
 import type { ActionResult, Fine, FineWithUser } from "@/types/database";
 
 export async function getFines(
   periodStart?: string,
   periodEnd?: string,
+  initData?: string,
 ): Promise<ActionResult<FineWithUser[]>> {
   try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
     const supabase = getSupabaseAdmin();
 
     let query = supabase
@@ -20,13 +25,13 @@ export async function getFines(
 
     const { data, error } = await query;
 
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true, data: (data ?? []) as FineWithUser[] };
-  } catch (err) {
+  } catch {
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Не удалось загрузить штрафы",
+      error: "Не удалось загрузить штрафы",
     };
   }
 }
@@ -34,8 +39,9 @@ export async function getFines(
 export async function getFinesForPeriod(
   periodStart: string,
   periodEnd: string,
+  initData?: string,
 ): Promise<ActionResult<FineWithUser[]>> {
-  return getFines(periodStart, periodEnd);
+  return getFines(periodStart, periodEnd, initData);
 }
 
 export async function addFine(
@@ -44,7 +50,11 @@ export async function addFine(
   reason: string,
   periodStart: string,
   periodEnd: string,
+  initData?: string,
 ): Promise<ActionResult<Fine>> {
+  const authResult = await requireAdmin(initData ?? "");
+  if ("error" in authResult) return { success: false, error: authResult.error };
+
   if (!Number.isFinite(amount) || amount <= 0) {
     return { success: false, error: "Укажите корректную сумму штрафа" };
   }
@@ -67,30 +77,33 @@ export async function addFine(
       .select("*")
       .single();
 
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true, data: data as Fine };
-  } catch (err) {
+  } catch {
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Не удалось добавить штраф",
+      error: "Не удалось добавить штраф",
     };
   }
 }
 
-export async function deleteFine(fineId: string): Promise<ActionResult<void>> {
+export async function deleteFine(fineId: string, initData?: string): Promise<ActionResult<void>> {
+  const authResult = await requireAdmin(initData ?? "");
+  if ("error" in authResult) return { success: false, error: authResult.error };
+
   try {
     const supabase = getSupabaseAdmin();
 
     const { error } = await supabase.from("fines").delete().eq("id", fineId);
 
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true };
-  } catch (err) {
+  } catch {
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Не удалось удалить штраф",
+      error: "Не удалось удалить штраф",
     };
   }
 }
@@ -98,7 +111,11 @@ export async function deleteFine(fineId: string): Promise<ActionResult<void>> {
 export async function getTotalFinesForPeriod(
   periodStart: string,
   periodEnd: string,
+  initData?: string,
 ): Promise<ActionResult<number>> {
+  const authResult = await requireAdmin(initData ?? "");
+  if ("error" in authResult) return { success: false, error: authResult.error };
+
   try {
     const supabase = getSupabaseAdmin();
 
@@ -108,14 +125,14 @@ export async function getTotalFinesForPeriod(
       .gte("period_start", periodStart)
       .lte("period_end", periodEnd);
 
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: "Ошибка сервера" };
 
     const total = (data ?? []).reduce((sum, f) => sum + Number(f.amount), 0);
     return { success: true, data: Math.round(total * 100) / 100 };
-  } catch (err) {
+  } catch {
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Не удалось посчитать штрафы",
+      error: "Не удалось посчитать штрафы",
     };
   }
 }

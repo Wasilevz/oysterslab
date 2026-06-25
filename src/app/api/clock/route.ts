@@ -54,6 +54,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing userId or action" }, { status: 400 });
     }
 
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(userId)) {
+      return NextResponse.json({ error: "Некорректный userId" }, { status: 400 });
+    }
+
     if (!initData) {
       return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
     }

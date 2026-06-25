@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import { generateSalaryCSV } from "@/lib/export-csv";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { requireAdmin } from "@/lib/auth";
 
 export async function GET(request: Request) {
+  const initData = request.headers.get("x-telegram-initdata") || "";
+  const authResult = await requireAdmin(initData);
+  if ("error" in authResult) {
+    return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+  }
+
   const url = new URL(request.url);
   const year = parseInt(url.searchParams.get("year") || String(new Date().getFullYear()));
   const month = parseInt(url.searchParams.get("month") || String(new Date().getMonth() + 1));
@@ -27,9 +34,9 @@ export async function GET(request: Request) {
         "Content-Disposition": `attachment; filename="${filename}"`,
       },
     });
-  } catch (err) {
+  } catch {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Export error" },
+      { error: "Ошибка экспорта" },
       { status: 500 },
     );
   }

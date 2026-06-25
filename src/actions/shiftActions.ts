@@ -2,6 +2,8 @@
 
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { logAction } from "@/lib/audit";
+import { isIPAllowed } from "@/lib/location-auth";
+import { verifyRequestAuth, requireAdmin } from "@/lib/auth";
 import type { ActionResult, Shift } from "@/types/database";
 
 function roundTo30(date: Date): Date {
@@ -21,8 +23,13 @@ function roundTo30(date: Date): Date {
 
 export async function clockIn(
   userId: string,
+  initData?: string,
+  clientIP?: string,
 ): Promise<ActionResult<Shift>> {
   try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
     const supabase = getSupabaseAdmin();
 
     const { data: activeShift, error: activeError } = await supabase
@@ -33,7 +40,7 @@ export async function clockIn(
       .maybeSingle();
 
     if (activeError) {
-      return { success: false, error: activeError.message };
+      return { success: false, error: "Ошибка сервера" };
     }
 
     if (activeShift) {
@@ -48,8 +55,10 @@ export async function clockIn(
     const authMode = settings?.auth_mode ?? "ip";
     const allowedIPs = settings?.allowed_ips ?? [];
 
-    if (authMode === "ip" && allowedIPs.length > 0) {
-      return { success: false, error: "Подключитесь к WiFi заведения" };
+    if (authMode === "ip" && allowedIPs.length > 0 && clientIP) {
+      if (!isIPAllowed(clientIP, allowedIPs)) {
+        return { success: false, error: "Подключитесь к WiFi заведения" };
+      }
     }
 
     const clockInTime = roundTo30(new Date());
@@ -64,22 +73,27 @@ export async function clockIn(
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: "Ошибка сервера" };
     }
 
     return { success: true, data: shift as Shift };
-  } catch (err) {
+  } catch {
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Не удалось начать смену",
+      error: "Не удалось начать смену",
     };
   }
 }
 
 export async function clockOut(
   userId: string,
+  initData?: string,
+  clientIP?: string,
 ): Promise<ActionResult<Shift>> {
   try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
     const supabase = getSupabaseAdmin();
 
     const { data: activeShift, error: findError } = await supabase
@@ -90,7 +104,7 @@ export async function clockOut(
       .maybeSingle();
 
     if (findError) {
-      return { success: false, error: findError.message };
+      return { success: false, error: "Ошибка сервера" };
     }
 
     if (!activeShift) {
@@ -105,8 +119,10 @@ export async function clockOut(
     const authMode = settings?.auth_mode ?? "ip";
     const allowedIPs = settings?.allowed_ips ?? [];
 
-    if (authMode === "ip" && allowedIPs.length > 0) {
-      return { success: false, error: "Подключитесь к WiFi заведения" };
+    if (authMode === "ip" && allowedIPs.length > 0 && clientIP) {
+      if (!isIPAllowed(clientIP, allowedIPs)) {
+        return { success: false, error: "Подключитесь к WiFi заведения" };
+      }
     }
 
     const clockOutTime = roundTo30(new Date());
@@ -127,14 +143,14 @@ export async function clockOut(
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: "Ошибка сервера" };
     }
 
     return { success: true, data: shift as Shift };
-  } catch (err) {
+  } catch {
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Не удалось завершить смену",
+      error: "Не удалось завершить смену",
     };
   }
 }
@@ -142,8 +158,12 @@ export async function clockOut(
 export async function getMyShifts(
   userId: string,
   limit = 5,
+  initData?: string,
 ): Promise<ActionResult<Shift[]>> {
   try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
     const supabase = getSupabaseAdmin();
 
     const { data, error } = await supabase
@@ -155,22 +175,26 @@ export async function getMyShifts(
       .limit(limit);
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: "Ошибка сервера" };
     }
 
     return { success: true, data: (data ?? []) as Shift[] };
-  } catch (err) {
+  } catch {
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Не удалось загрузить смены",
+      error: "Не удалось загрузить смены",
     };
   }
 }
 
 export async function getActiveShift(
   userId: string,
+  initData?: string,
 ): Promise<ActionResult<Shift | null>> {
   try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
     const supabase = getSupabaseAdmin();
 
     const { data, error } = await supabase
@@ -181,15 +205,14 @@ export async function getActiveShift(
       .maybeSingle();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: "Ошибка сервера" };
     }
 
     return { success: true, data: (data as Shift | null) ?? null };
-  } catch (err) {
+  } catch {
     return {
       success: false,
-      error:
-        err instanceof Error ? err.message : "Не удалось загрузить активную смену",
+      error: "Не удалось загрузить активную смену",
     };
   }
 }
@@ -197,7 +220,11 @@ export async function getActiveShift(
 export async function reviewAutoClosedShift(
   shiftId: string,
   hoursWorked: number,
+  initData?: string,
 ): Promise<ActionResult<Shift>> {
+  const authResult = await requireAdmin(initData ?? "");
+  if ("error" in authResult) return { success: false, error: authResult.error };
+
   if (!Number.isFinite(hoursWorked) || hoursWorked <= 0 || hoursWorked > 24) {
     return {
       success: false,
@@ -216,7 +243,7 @@ export async function reviewAutoClosedShift(
       .maybeSingle();
 
     if (findError) {
-      return { success: false, error: findError.message };
+      return { success: false, error: "Ошибка сервера" };
     }
 
     if (!shift) {
@@ -234,15 +261,14 @@ export async function reviewAutoClosedShift(
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: "Ошибка сервера" };
     }
 
     return { success: true, data: updated as Shift };
-  } catch (err) {
+  } catch {
     return {
       success: false,
-      error:
-        err instanceof Error ? err.message : "Не удалось сохранить смену",
+      error: "Не удалось сохранить смену",
     };
   }
 }
@@ -251,14 +277,11 @@ export async function editShift(
   shiftId: string,
   clockIn: string,
   clockOut: string | null,
-  callerId?: string,
+  callerId: string,
 ): Promise<ActionResult<Shift>> {
   try {
-    if (callerId) {
-      const supabase = getSupabaseAdmin();
-      const { data: caller } = await supabase.from("users").select("role").eq("id", callerId).single();
-      if (!caller || caller.role !== "admin") return { success: false, error: "Нет доступа" };
-    }
+    const adminError = await verifyAdmin(callerId);
+    if (adminError) return { success: false, error: adminError };
 
     const supabase = getSupabaseAdmin();
 
@@ -298,7 +321,7 @@ export async function editShift(
 
     if (error) return { success: false, error: "Ошибка сервера" };
 
-    if (callerId) void logAction(callerId, "edit_shift", "shift", shiftId, `clock_in: ${clockIn}, clock_out: ${clockOut}`);
+    void logAction(callerId, "edit_shift", "shift", shiftId, `clock_in: ${clockIn}, clock_out: ${clockOut}`);
 
     return { success: true, data: updated as Shift };
   } catch {
@@ -306,11 +329,26 @@ export async function editShift(
   }
 }
 
+async function verifyAdmin(callerId: string): Promise<string | null> {
+  const supabase = getSupabaseAdmin();
+  const { data: caller } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", callerId)
+    .single();
+  if (!caller || (caller.role !== "admin" && caller.role !== "superadmin")) return "Нет доступа";
+  return null;
+}
+
 export async function getAllShifts(
   dateFrom?: string,
   dateTo?: string,
+  initData?: string,
 ): Promise<ActionResult<(Shift & { users: { full_name: string; position: string | null } })[]>> {
   try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
     const supabase = getSupabaseAdmin();
 
     let query = supabase

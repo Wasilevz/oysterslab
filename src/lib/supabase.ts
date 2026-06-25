@@ -8,7 +8,7 @@ export function getSupabaseAdmin() {
     throw new Error("КРИТИЧЕСКАЯ ОШИБКА: NEXT_PUBLIC_SUPABASE_URL пустой!");
   }
 
-  if (!supabaseUrl.startsWith("http")) {
+  if (!supabaseUrl.startsWith("https://")) {
     throw new Error("КРИТИЧЕСКАЯ ОШИБКА: URL БД должен начинаться с https://");
   }
 

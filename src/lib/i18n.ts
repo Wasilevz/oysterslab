@@ -29,7 +29,7 @@ export const useI18n = create<I18nState>((set, get) => ({
     let text = translations[locale][key] ?? translations.ru[key] ?? key;
     if (params) {
       Object.entries(params).forEach(([k, v]) => {
-        text = text.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
+        text = text.split(`{${k}}`).join(String(v));
       });
     }
     return text;

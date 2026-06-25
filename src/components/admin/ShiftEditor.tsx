@@ -7,6 +7,7 @@ import { getAllShifts, editShift } from "@/actions/shiftActions";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
+import { useUserStore } from "@/store/userStore";
 import type { Shift } from "@/types/database";
 
 type ShiftWithUser = Shift & { users: { full_name: string; position: string | null } };
@@ -43,7 +44,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
   const [dateTo, setDateTo] = useState(() => new Date().toISOString().split("T")[0]);
 
   const loadData = useCallback(async () => {
-    const result = await getAllShifts(dateFrom, dateTo);
+    const result = await getAllShifts(dateFrom, dateTo, useUserStore.getState().initData ?? "");
     if (result.success && result.data) setShifts(result.data);
     setLoading(false);
   }, [dateFrom, dateTo]);
@@ -80,6 +81,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
         editingId,
         editClockIn,
         editClockOut || null,
+        useUserStore.getState().user?.id ?? "",
       );
       if (!result.success) {
         setError(result.error ?? t("common.error"));

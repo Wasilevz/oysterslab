@@ -19,9 +19,9 @@ export async function GET(request: Request) {
       reminders,
       autoClose,
     });
-  } catch (err) {
+  } catch {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unknown error" },
+      { error: "Ошибка сервера" },
       { status: 500 },
     );
   }
@@ -82,9 +82,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
-  } catch (err) {
+  } catch {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unknown error" },
+      { error: "Ошибка сервера" },
       { status: 500 },
     );
   }

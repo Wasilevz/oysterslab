@@ -36,8 +36,11 @@ export function PullToRefresh({ onRefresh, children }: PullToRefreshProps) {
 
     if (pullDistance >= THRESHOLD) {
       setIsRefreshing(true);
-      await onRefresh();
-      setIsRefreshing(false);
+      try {
+        await onRefresh();
+      } finally {
+        setIsRefreshing(false);
+      }
     }
     setPullDistance(0);
   }, [pullDistance, onRefresh]);

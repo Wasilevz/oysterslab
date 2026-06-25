@@ -6,6 +6,7 @@ import { ru } from "date-fns/locale";
 import { approvePayroll, generatePayroll } from "@/actions/adminActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useUserStore } from "@/store/userStore";
 import {
   Table,
   TableBody,
@@ -42,7 +43,7 @@ export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
     setError(null);
 
     startTransition(async () => {
-      const result = await approvePayroll(payrollId);
+      const result = await approvePayroll(payrollId, useUserStore.getState().initData ?? "");
 
       if (!result.success) {
         setError(result.error ?? "Ошибка утверждения");
@@ -70,7 +71,7 @@ export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
     setGenResult(null);
 
     startTransition(async () => {
-      const result = await generatePayroll(periodStart, periodEnd);
+      const result = await generatePayroll(periodStart, periodEnd, useUserStore.getState().initData ?? "");
 
       if (!result.success) {
         setError(result.error ?? "Ошибка расчёта");

@@ -2,6 +2,7 @@
 
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { getAdminLocationId } from "@/lib/admin-location";
+import { requireAdmin } from "@/lib/auth";
 import type {
   ActionResult,
   DashboardStats,
@@ -14,10 +15,13 @@ function getMonthLabel(date: Date): string {
   return date.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" });
 }
 
-export async function getDashboardStats(callerId?: string): Promise<ActionResult<DashboardStats>> {
+export async function getDashboardStats(initData?: string): Promise<ActionResult<DashboardStats>> {
   try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
     const supabase = getSupabaseAdmin();
-    const locationId = callerId ? await getAdminLocationId(callerId) : null;
+    const locationId = await getAdminLocationId(authResult.user.id);
 
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
@@ -134,8 +138,12 @@ export async function getDashboardStats(callerId?: string): Promise<ActionResult
 
 export async function approvePayroll(
   payrollId: string,
+  initData?: string,
 ): Promise<ActionResult<Payroll>> {
   try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
     const supabase = getSupabaseAdmin();
 
     const { data: payroll, error: findError } = await supabase
@@ -168,8 +176,12 @@ export async function approvePayroll(
 export async function generatePayroll(
   periodStart: string,
   periodEnd: string,
+  initData?: string,
 ): Promise<ActionResult<number>> {
   try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
     const supabase = getSupabaseAdmin();
 
     const { data: employees, error: empError } = await supabase

@@ -1,7 +1,14 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 function toCSVRow(values: (string | number)[]): string {
-  return values.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",");
+  return values.map((v) => {
+    const str = String(v);
+    const sanitized = str.replace(/"/g, '""');
+    if (/^[=+\-@\t\r]/.test(sanitized)) {
+      return `"'${sanitized}"`;
+    }
+    return `"${sanitized}"`;
+  }).join(",");
 }
 
 export async function generateSalaryCSV(
