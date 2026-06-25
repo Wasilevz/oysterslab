@@ -112,7 +112,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
       <header className="border-b border-[var(--border-color)] px-4 py-5">
         <div className="flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+            <button onClick={onBack} aria-label="Назад" className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
@@ -133,7 +133,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
             <p className="text-sm font-semibold text-[var(--text-primary)]">{t("schedule.myMonth")}</p>
             <div className="flex items-center gap-2">
               {(["work", "off", "vacation", "sick"] as const).map((type) => (
-                <span key={type} className="flex items-center gap-1 text-[10px]">
+                <span key={type} className="flex items-center gap-1 text-[11px]">
                   <span className={`h-2.5 w-2.5 rounded-full ${TYPE_COLORS[type].dot}`} />
                   <span className={TYPE_COLORS[type].text}>{t(TYPE_LABELS[type])}</span>
                 </span>
@@ -143,7 +143,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
 
           <div className="grid grid-cols-7 gap-1 mb-2">
             {dayLabels.map((d) => (
-              <div key={d} className="py-1 text-center text-[10px] font-medium text-[var(--text-secondary)]">{d}</div>
+              <div key={d} className="py-1 text-center text-[11px] font-medium text-[var(--text-secondary)]">{d}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1">
@@ -232,7 +232,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
                         onClick={() => cycleType(emp.id, day)}
                         className={`h-9 w-9 rounded-xl text-[11px] font-bold transition-all active:scale-95 ${colors.bg} ${colors.text}`}
                       >
-                        {type === "work" ? "Р" : type === "off" ? "—" : type === "vacation" ? "О" : "Б"}
+                        {type === "work" ? t("schedule.abbrWork") : type === "off" ? t("schedule.abbrOff") : type === "vacation" ? t("schedule.abbrVacation") : t("schedule.abbrSick")}
                       </button>
                     </td>
                   );
@@ -245,7 +245,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
 
       {workingToday.length > 0 && (
         <div className="border-t border-[var(--border-color)] px-4 pt-4 pb-24">
-          <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
+          <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
             {t("schedule.todayOnShift")}
           </h2>
           <div className="space-y-2">
@@ -257,7 +257,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
                 <div>
                   <p className="text-sm font-medium text-[var(--text-primary)]">{w.full_name}</p>
                   {w.position && (
-                    <p className="text-[10px] text-[var(--text-secondary)]">{w.position}</p>
+                    <p className="text-[11px] text-[var(--text-secondary)]">{w.position}</p>
                   )}
                 </div>
                 {w.clock_in ? (
@@ -266,10 +266,10 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--brand-primary)] opacity-75" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--brand-primary)]" />
                     </span>
-                    <span className="text-[10px] text-[var(--brand-primary)]">{t("shift.onShift")}</span>
+                    <span className="text-[11px] text-[var(--brand-primary)]">{t("shift.onShift")}</span>
                   </span>
                 ) : (
-                  <span className="text-[10px] text-[var(--text-secondary)]">{t("schedule.notArrived")}</span>
+                  <span className="text-[11px] text-[var(--text-secondary)]">{t("schedule.notArrived")}</span>
                 )}
               </div>
             ))}

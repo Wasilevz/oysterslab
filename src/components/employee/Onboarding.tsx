@@ -10,13 +10,6 @@ const STEPS = [
   { icon: "📅", key: "schedule" },
 ];
 
-const STEPS_RO = [
-  { icon: "👋", key: "welcome" },
-  { icon: "⏰", key: "shift" },
-  { icon: "💰", key: "salary" },
-  { icon: "📅", key: "schedule" },
-];
-
 export function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState(0);
   const { locale } = useI18n();

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameDay, isAfter, isBefore } from "date-fns";
 import { ru } from "date-fns/locale";
+import { useI18n } from "@/lib/i18n";
 
 interface DatePickerProps {
   value: string;
@@ -12,7 +13,8 @@ interface DatePickerProps {
   maxDate?: string;
 }
 
-export function DatePicker({ value, onChange, placeholder = "Выбрать дату", minDate, maxDate }: DatePickerProps) {
+export function DatePicker({ value, onChange, placeholder, minDate, maxDate }: DatePickerProps) {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(value ? new Date(value) : new Date());
 
@@ -44,10 +46,10 @@ export function DatePicker({ value, onChange, placeholder = "Выбрать да
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2.5 text-sm text-left"
+        className="flex w-full items-center justify-between rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 h-12 text-sm text-left"
       >
         <span className={value ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}>
-          {value ? format(new Date(value), "d MMMM yyyy", { locale: ru }) : placeholder}
+          {value ? format(new Date(value), "d MMMM yyyy", { locale: ru }) : (placeholder ?? t("datePicker.placeholder"))}
         </span>
         <svg className="h-4 w-4 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -75,7 +77,7 @@ export function DatePicker({ value, onChange, placeholder = "Выбрать да
             </div>
 
             <div className="mb-2 grid grid-cols-7 gap-1">
-              {["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map((day) => (
+              {[t("day.mon"), t("day.tue"), t("day.wed"), t("day.thu"), t("day.fri"), t("day.sat"), t("day.sun")].map((day) => (
                 <div key={day} className="py-1 text-center text-[10px] font-medium text-[var(--text-secondary)]">{day}</div>
               ))}
             </div>

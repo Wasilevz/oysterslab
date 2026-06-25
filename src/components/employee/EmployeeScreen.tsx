@@ -4,14 +4,6 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
-import {
   getActiveShift,
   getMyShifts,
 } from "@/actions/shiftActions";
@@ -21,7 +13,6 @@ import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
 import { ScheduleEmployee } from "@/components/employee/ScheduleEmployee";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
-import { formatHours, getElapsedSeconds } from "@/lib/utils";
 import { useUserStore } from "@/store/userStore";
 import type { EmployeeStats, Shift } from "@/types/database";
 
@@ -46,7 +37,6 @@ export function EmployeeScreen() {
   const { t, locale, setLocale } = useI18n();
   const user = useUserStore((s) => s.user);
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
-  const [recentShifts, setRecentShifts] = useState<Shift[]>([]);
   const [stats, setStats] = useState<EmployeeStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -57,14 +47,13 @@ export function EmployeeScreen() {
     if (!user) return;
 
     const initData = useUserStore.getState().initData;
-    const [activeResult, shiftsResult, statsResult] = await Promise.all([
+    const [activeResult, , statsResult] = await Promise.all([
       getActiveShift(user.id, initData ?? ""),
       getMyShifts(user.id, undefined, initData ?? ""),
       getEmployeeStats(user.id, initData ?? ""),
     ]);
 
     if (activeResult.success) setActiveShift(activeResult.data ?? null);
-    if (shiftsResult.success) setRecentShifts(shiftsResult.data ?? []);
     if (statsResult.success && statsResult.data) setStats(statsResult.data);
 
     setLoading(false);
@@ -121,7 +110,7 @@ export function EmployeeScreen() {
   const isOnShift = Boolean(activeShift);
 
   return (
-    <div className="flex min-h-full flex-1 flex-col p-4 pb-8">
+    <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
       {/* Header */}
       <header className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -129,7 +118,7 @@ export function EmployeeScreen() {
             {user?.full_name ? getInitials(user.full_name) : "—"}
           </div>
           <div>
-            <p className="text-[10px] font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
+            <p className="text-[11px] font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
               {t("employee.hello")}
             </p>
             <h1 className="text-lg font-bold dark:text-white text-zinc-900">{user?.full_name}</h1>
@@ -203,7 +192,7 @@ export function EmployeeScreen() {
       {stats && (
         <div className="mb-5 grid grid-cols-2 gap-3">
           <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
               {t("employee.thisWeek")}
             </p>
             <p className="mt-1 font-mono text-2xl font-bold text-[var(--text-primary)]">
@@ -214,7 +203,7 @@ export function EmployeeScreen() {
             </p>
           </div>
           <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
               {t("employee.thisMonth")}
             </p>
             <p className="mt-1 font-mono text-2xl font-bold text-[var(--text-primary)]">
@@ -225,13 +214,13 @@ export function EmployeeScreen() {
             </p>
           </div>
           <div className="col-span-2 rounded-2xl border border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5 p-4">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
               {t("employee.expectedSalary")}
             </p>
             <p className="mt-1 font-mono text-2xl font-bold text-[var(--brand-primary)]">
               {formatMoney(stats.expectedSalary)}
             </p>
-            <p className="mt-0.5 text-[10px] text-[var(--text-secondary)]">
+            <p className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
               {stats.hourlyRate} л/ч · {stats.totalShifts} смен
             </p>
           </div>
@@ -242,14 +231,14 @@ export function EmployeeScreen() {
 
       <ScheduleEmployee />
 
-      <div className="mt-6 px-4">
+      <div className="mt-6">
         <div className="rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
-          <p className="mb-3 text-sm font-semibold dark:text-white text-zinc-900">{t("settings.language")}</p>
+          <p className="mb-3 text-sm font-semibold text-[var(--text-primary)]">{t("settings.language")}</p>
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => setLocale("ru")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] dark:text-[var(--text-secondary)] text-zinc-500"}`}>
+            <button onClick={() => setLocale("ru")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
               🇷🇺 Русский
             </button>
-            <button onClick={() => setLocale("ro")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ro" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] dark:text-[var(--text-secondary)] text-zinc-500"}`}>
+            <button onClick={() => setLocale("ro")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ro" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
               🇲🇩 Română
             </button>
           </div>

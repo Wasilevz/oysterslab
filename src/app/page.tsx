@@ -11,7 +11,7 @@ import { useI18n } from "@/lib/i18n";
 
 function LoadingSkeleton() {
   return (
-    <div className="flex min-h-screen flex-col dark:bg-zinc-950 bg-white p-4">
+    <div className="flex min-h-screen flex-col bg-[var(--bg-app)] p-4">
       <Skeleton className="mb-6 h-10 w-48" />
       <Skeleton className="mb-6 min-h-[40vh] w-full rounded-2xl" />
       <Skeleton className="h-32 w-full rounded-2xl" />
@@ -28,12 +28,12 @@ function AccessDenied({
 }) {
   const { t } = useI18n();
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center dark:bg-zinc-950 bg-white px-6 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--bg-app)] px-6 text-center">
       <div className="max-w-sm space-y-4">
-        <h1 className="text-2xl font-bold dark:text-white text-zinc-900">{t("auth.accessDenied")}</h1>
-        <p className="dark:text-zinc-400 text-zinc-600">{message}</p>
+        <h1 className="text-2xl font-bold text-[var(--text-primary)]">{t("auth.accessDenied")}</h1>
+        <p className="text-[var(--text-secondary)]">{message}</p>
         {telegramId !== null && (
-          <p className="rounded-xl border dark:border-zinc-800 border-zinc-200 dark:bg-zinc-900 bg-zinc-50 px-4 py-3 font-mono text-lg dark:text-zinc-200 text-zinc-800">
+          <p className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-4 py-3 font-mono text-lg text-[var(--text-primary)]">
             {t("auth.yourId")} {telegramId}
           </p>
         )}
@@ -61,8 +61,11 @@ export default function Home() {
 
         WebApp.ready();
         WebApp.expand();
-        WebApp.setHeaderColor("#09090b");
-        WebApp.setBackgroundColor("#09090b");
+
+        const theme = useThemeStore.getState().theme;
+        const headerBg = theme === "dark" ? "#0F1011" : "#F5F5F7";
+        WebApp.setHeaderColor(headerBg);
+        WebApp.setBackgroundColor(headerBg);
 
         // Auto-detect theme from Telegram
         useThemeStore.getState().initFromTelegram();
@@ -123,7 +126,7 @@ export default function Home() {
   const effectiveRole = user?.role;
 
   return (
-    <main className="min-h-screen dark:bg-zinc-950 dark:text-zinc-100 bg-white text-zinc-900">
+    <main className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)]">
       {effectiveRole === "admin" ? <AdminScreen /> : <EmployeeScreen />}
     </main>
   );

@@ -11,6 +11,7 @@ import {
   Cell,
 } from "recharts";
 import { useThemeStore } from "@/store/themeStore";
+import { useI18n } from "@/lib/i18n";
 import type { EmployeeHours } from "@/types/database";
 
 interface HoursChartProps {
@@ -19,11 +20,12 @@ interface HoursChartProps {
 
 export function HoursChart({ data }: HoursChartProps) {
   const theme = useThemeStore((s) => s.theme);
+  const { t } = useI18n();
 
   if (data.length === 0) {
     return (
       <div className="flex h-[250px] items-center justify-center rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-white px-4">
-        <p className="text-sm dark:text-[#64748B] text-[#718096]">Нет данных за этот месяц</p>
+        <p className="text-sm dark:text-[#64748B] text-[#718096]">{t("charts.noDataMonth")}</p>
       </div>
     );
   }
@@ -38,7 +40,7 @@ export function HoursChart({ data }: HoursChartProps) {
   return (
     <div className="rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-white p-4">
       <p className="mb-4 text-sm font-semibold dark:text-[#94A3B8] text-[#718096]">
-        Часы по сотрудникам
+        {t("charts.hoursTitle")}
       </p>
       <ResponsiveContainer width="100%" height={250}>
         <BarChart data={data} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
@@ -48,7 +50,7 @@ export function HoursChart({ data }: HoursChartProps) {
           <Tooltip
             contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: "12px", color: tooltipText, fontSize: 13 }}
             labelStyle={{ color: tooltipLabel }}
-            formatter={(value) => [`${value} ч`, "Часы"]}
+            formatter={(value) => [`${value} ч`, t("charts.hoursLabel")]}
           />
           <Bar dataKey="hours" radius={[6, 6, 0, 0]} maxBarSize={40}>
             {data.map((_, index) => (

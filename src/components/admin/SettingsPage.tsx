@@ -171,6 +171,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   };
 
   const handleDeleteEmployee = async (userId: string) => {
+    if (!window.confirm("Удалить сотрудника?")) return;
     const result = await deleteEmployee(userId, useUserStore.getState().user?.id ?? "");
     if (!result.success) { setError(result.error ?? "Ошибка"); return; }
     void loadSettings();
@@ -185,6 +186,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   };
 
   const handleDeleteLocation = async (id: string) => {
+    if (!window.confirm("Удалить локацию?")) return;
     const result = await deleteLocation(id, useUserStore.getState().initData ?? "");
     if (!result.success) { setError(result.error ?? "Ошибка"); return; }
     void loadSettings();
@@ -204,7 +206,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
       <header className="border-b border-[var(--border-color)] px-4 py-5">
         <div className="flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+            <button onClick={onBack} aria-label="Назад" className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
@@ -238,7 +240,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
       <div className="mt-4 px-4">
         <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
           <p className="mb-1 text-sm font-semibold text-[var(--text-primary)]">{t("settings.location")}</p>
-          <p className="mb-3 text-[10px] text-[var(--text-secondary)]">{t("settings.locationDesc")}</p>
+          <p className="mb-3 text-[11px] text-[var(--text-secondary)]">{t("settings.locationDesc")}</p>
           <div className="space-y-2">
             {allowedIPs.map((ip, i) => (
               <div key={i} className="flex gap-2">
@@ -253,14 +255,14 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
             <Button variant="blue" className="flex-1" onClick={() => void detectMyIP()}>{t("settings.detectIP")}</Button>
             <button onClick={addIPField} className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">+</button>
           </div>
-          <p className="mt-3 text-[10px] text-[var(--text-secondary)]">{t("settings.detectIPDesc")}</p>
+          <p className="mt-3 text-[11px] text-[var(--text-secondary)]">{t("settings.detectIPDesc")}</p>
         </div>
       </div>
 
       {/* Messages */}
       <div className="px-4 mt-4">
-        {error && <div className="mb-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3"><p className="text-sm text-red-500">{error}</p></div>}
-        {success && <div className="mb-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3"><p className="text-sm text-emerald-600">{success}</p></div>}
+        {error && <div className="mb-3 rounded-xl border border-[var(--color-error)]/20 bg-[var(--color-error)]/10 px-4 py-3"><p className="text-sm text-[var(--color-error)]">{error}</p></div>}
+        {success && <div className="mb-3 rounded-xl border border-[var(--color-success)]/20 bg-[var(--color-success)]/10 px-4 py-3"><p className="text-sm text-[var(--color-success)]">{success}</p></div>}
         <Button variant="blue" className="w-full" disabled={isPending} onClick={handleSave}>
           {isPending ? t("common.processing") : t("settings.save")}
         </Button>
@@ -277,9 +279,9 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
             <div key={loc.id} className="flex items-center justify-between rounded-xl border border-[var(--border-color)] px-3 py-2">
               <div>
                 <p className="text-sm font-bold text-[var(--text-primary)]">{loc.name}</p>
-                {loc.address && <p className="text-[10px] text-[var(--text-secondary)]">{loc.address}</p>}
+                {loc.address && <p className="text-[11px] text-[var(--text-secondary)]">{loc.address}</p>}
               </div>
-              <button onClick={() => void handleDeleteLocation(loc.id)} className="rounded-lg px-2 py-1 text-[10px] text-[var(--color-error)] hover:bg-[var(--color-error)]/10">Удалить</button>
+              <button onClick={() => void handleDeleteLocation(loc.id)} className="rounded-lg px-2 py-1 text-[11px] text-[var(--color-error)] hover:bg-[var(--color-error)]/10">Удалить</button>
             </div>
           ))}
           <div className="flex gap-2">
@@ -324,11 +326,11 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                   <Input type="text" placeholder={t("settings.positionPlaceholder")} value={editPosition} onChange={(e) => setEditPosition(e.target.value)} />
                   <Input type="number" inputMode="decimal" step="0.5" min="0" placeholder={t("settings.ratePlaceholder")} value={editRate} onChange={(e) => setEditRate(e.target.value)} />
                   <div>
-                    <label className="mb-1 block text-[10px] text-[var(--text-secondary)]">Начало смены</label>
+                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">Начало смены</label>
                     <input type="time" value={editShiftStart} onChange={(e) => setEditShiftStart(e.target.value)} className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm font-medium text-[var(--text-primary)]" />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[10px] text-[var(--text-secondary)]">Локация</label>
+                    <label className="mb-1 block text-[11px] text-[var(--text-secondary)]">Локация</label>
                     <select value={editLocationId} onChange={(e) => setEditLocationId(e.target.value)} className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm font-medium text-[var(--text-primary)]">
                       <option value="">Без локации</option>
                       {locations.map((loc) => (
@@ -350,7 +352,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                   <div>
                     <p className="text-sm font-bold text-[var(--text-primary)]">{emp.full_name}</p>
                     {emp.position && <p className="text-xs text-[var(--text-secondary)]">{emp.position}</p>}
-                    <p className="text-[10px] text-[var(--text-secondary)]">
+                    <p className="text-[11px] text-[var(--text-secondary)]">
                       {emp.role === "admin" ? t("settings.adminRole") : t("settings.employeeRole")} · {emp.hourly_rate} л/ч · TG: {emp.telegram_id}
                     </p>
                   </div>
@@ -388,11 +390,11 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                       <p className="text-xs font-medium text-[var(--text-primary)]">
                         {log.users?.full_name || "System"} — {log.action}
                       </p>
-                      <p className="text-[10px] text-[var(--text-secondary)]">
+                      <p className="text-[11px] text-[var(--text-secondary)]">
                         {log.entity_type}{log.details ? `: ${log.details}` : ""}
                       </p>
                     </div>
-                    <p className="text-[10px] text-[var(--text-secondary)] whitespace-nowrap">
+                    <p className="text-[11px] text-[var(--text-secondary)] whitespace-nowrap">
                       {new Date(log.created_at).toLocaleString("ru-RU")}
                     </p>
                   </div>

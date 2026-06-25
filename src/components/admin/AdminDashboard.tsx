@@ -182,7 +182,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <button
             onClick={handleToggleShift}
             disabled={isPending}
-            className={`rounded-2xl px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
+            className={`rounded-[1440px] px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
               myShift
                 ? "bg-[var(--color-error)]/15 text-[var(--color-error)] hover:bg-[var(--color-error)]/25"
                 : "bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/25"
@@ -215,7 +215,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </div>
       )}
 
-      <div className="mt-6 px-4">
+      <div className="mt-6">
         <div className="grid grid-cols-2 gap-3">
           {menuItems.map((item) => (
             <button
@@ -226,7 +226,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <div className={`${item.color}`}>{item.icon}</div>
               <p className="text-sm font-bold text-[var(--text-primary)]">{item.title}</p>
               {item.badge != null && item.badge > 0 && (
-                <span className="absolute right-3 top-3 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--color-warning)]/20 px-1 text-[10px] font-bold text-[var(--color-warning)]">
+                <span className="absolute right-3 top-3 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--color-warning)]/20 px-1 text-[11px] font-bold text-[var(--color-warning)]">
                   {item.badge}
                 </span>
               )}
@@ -235,7 +235,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </div>
       </div>
 
-      <div className="px-4 mt-4">
+      <div className="mt-4">
         <EmployeeSalary />
       </div>
     </div>

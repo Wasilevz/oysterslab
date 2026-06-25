@@ -72,7 +72,7 @@ export function EmployeeSalary() {
         {t("employee.salary")}
       </h2>
 
-      {error && <p className="mb-2 text-sm text-red-400">{error}</p>}
+      {error && <p className="mb-2 text-sm text-[var(--color-error)]">{error}</p>}
 
       <ul className="space-y-2">
         {myPayments.map((p) => (
@@ -92,11 +92,11 @@ export function EmployeeSalary() {
                 {format(new Date(p.period_end), "d MMM", { locale: ru })}
               </p>
               {p.status === "paid" ? (
-                <span className="rounded-lg bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">{t("salary.received")}</span>
+                <span className="rounded-lg bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-400">{t("salary.received")}</span>
               ) : p.status === "approved" ? (
-                <span className="rounded-lg bg-[var(--accent-money)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--brand-primary)]">{t("salary.approvedStatus")}</span>
+                <span className="rounded-lg bg-[var(--accent-money)]/10 px-2 py-0.5 text-[11px] font-bold text-[var(--brand-primary)]">{t("salary.approvedStatus")}</span>
               ) : (
-                <span className="rounded-lg bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">{t("salary.waiting")}</span>
+                <span className="rounded-lg bg-amber-500/10 px-2 py-0.5 text-[11px] font-bold text-amber-400">{t("salary.waiting")}</span>
               )}
             </div>
 
@@ -106,7 +106,7 @@ export function EmployeeSalary() {
             </div>
 
             {p.paid_at && (
-              <p className="mt-1.5 text-[10px] text-emerald-400">
+              <p className="mt-1.5 text-[11px] text-emerald-400">
                 {t("salary.received")}: {format(new Date(p.paid_at), "d MMM, HH:mm", { locale: ru })}
               </p>
             )}

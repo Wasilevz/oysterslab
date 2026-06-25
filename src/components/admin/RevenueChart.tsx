@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useThemeStore } from "@/store/themeStore";
+import { useI18n } from "@/lib/i18n";
 import type { MonthRevenue } from "@/types/database";
 
 interface RevenueChartProps {
@@ -26,11 +27,12 @@ function formatMoney(value: number): string {
 
 export function RevenueChart({ data }: RevenueChartProps) {
   const theme = useThemeStore((s) => s.theme);
+  const { t } = useI18n();
 
   if (data.length === 0) {
     return (
       <div className="flex h-[250px] items-center justify-center rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-white px-4">
-        <p className="text-sm dark:text-[#64748B] text-[#718096]">Пока нет данных</p>
+        <p className="text-sm dark:text-[#64748B] text-[#718096]">{t("charts.noData")}</p>
       </div>
     );
   }
@@ -47,7 +49,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
   return (
     <div className="rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-white p-4">
       <p className="mb-4 text-sm font-semibold dark:text-[#94A3B8] text-[#718096]">
-        Зарплаты по месяцам
+        {t("charts.revenueTitle")}
       </p>
       <ResponsiveContainer width="100%" height={250}>
         <AreaChart data={data} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
@@ -63,7 +65,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
           <Tooltip
             contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: "12px", color: tooltipText, fontSize: 13 }}
             labelStyle={{ color: tooltipLabel }}
-            formatter={(value) => [formatMoney(Number(value)), "Сумма"]}
+            formatter={(value) => [formatMoney(Number(value)), t("charts.amount")]}
           />
           <Area type="monotone" dataKey="amount" stroke={strokeColor} strokeWidth={2} fillOpacity={1} fill={`url(#${gradientId})`} />
         </AreaChart>

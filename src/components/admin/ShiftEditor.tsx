@@ -23,7 +23,7 @@ const STATUS_COLORS: Record<string, string> = {
   ACTIVE: "text-[var(--brand-primary)]",
   COMPLETED: "text-[var(--color-success)]",
   AUTO_CLOSED: "text-[var(--color-warning)]",
-  REVIEWED: "text-violet-400",
+  REVIEWED: "text-[var(--accent-money)]",
 };
 
 export function ShiftEditor({ onBack }: { onBack?: () => void }) {
@@ -96,7 +96,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
     <div className="px-4 pt-4 pb-24">
       <div className="mb-4 flex items-center gap-3">
         {onBack && (
-          <button onClick={onBack} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+          <button onClick={onBack} aria-label="Назад" className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
@@ -127,8 +127,8 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
       </div>
 
       {error && (
-        <div className="mb-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
-          <p className="text-sm text-red-400">{error}</p>
+        <div className="mb-3 rounded-xl border border-[var(--color-error)]/20 bg-[var(--color-error)]/10 px-4 py-3">
+          <p className="text-sm text-[var(--color-error)]">{error}</p>
         </div>
       )}
 
@@ -154,7 +154,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                   <div>
                     <p className="font-bold text-[var(--text-primary)]">{shift.users.full_name}</p>
                     {shift.users.position && (
-                      <p className="text-[10px] text-[var(--text-secondary)]">{shift.users.position}</p>
+                      <p className="text-[11px] text-[var(--text-secondary)]">{shift.users.position}</p>
                     )}
                     <p className="mt-1 text-xs text-[var(--text-secondary)]">
                       {format(new Date(shift.clock_in), "d MMM, HH:mm", { locale: ru })}
@@ -163,21 +163,24 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                       )}
                     </p>
                     {shift.hours_worked != null && (
-                      <p className="text-[10px] text-[var(--text-secondary)]">
+                      <p className="text-[11px] text-[var(--text-secondary)]">
                         {shift.hours_worked.toFixed(1)} ч
                       </p>
                     )}
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`text-[10px] font-semibold ${statusColor}`}>
+                    <span className={`text-[11px] font-semibold ${statusColor}`}>
                       {statusKey ? t(statusKey) : shift.status}
                     </span>
                     {!isEditing && (
                       <button
                         onClick={() => startEdit(shift)}
-                        className="rounded-lg border border-[var(--border-color)] px-2 py-1 text-[10px] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]"
+                        aria-label={t("settings.edit")}
+                        className="rounded-lg border border-[var(--border-color)] px-2 py-1 text-[11px] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]"
                       >
-                        ✎
+                        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                        </svg>
                       </button>
                     )}
                   </div>
@@ -186,7 +189,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                 {isEditing && (
                   <div className="mt-3 space-y-2 border-t border-[var(--border-color)] pt-3">
                     <div>
-                      <p className="mb-1 text-[10px] text-[var(--text-secondary)]">{t("shiftEditor.clockIn")}</p>
+                      <p className="mb-1 text-[11px] text-[var(--text-secondary)]">{t("shiftEditor.clockIn")}</p>
                       <input
                         type="datetime-local"
                         value={editClockIn}
@@ -195,14 +198,14 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                       />
                     </div>
                     <div>
-                      <p className="mb-1 text-[10px] text-[var(--text-secondary)]">{t("shiftEditor.clockOut")}</p>
+                      <p className="mb-1 text-[11px] text-[var(--text-secondary)]">{t("shiftEditor.clockOut")}</p>
                       <input
                         type="datetime-local"
                         value={editClockOut}
                         onChange={(e) => setEditClockOut(e.target.value)}
                         className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)]"
                       />
-                      <p className="mt-0.5 text-[10px] text-[var(--text-secondary)]">
+                      <p className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
                         {t("shiftEditor.clockOutHint")}
                       </p>
                     </div>

@@ -89,7 +89,7 @@ export function ScheduleEmployee() {
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   return (
-    <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
+    <div className="flex flex-col">
       <header className="mb-5">
         <p className="text-xs font-medium uppercase tracking-widest text-[var(--text-secondary)]">
           {t("schedule.mySchedule")}
@@ -107,7 +107,7 @@ export function ScheduleEmployee() {
         </button>
         <div className="flex gap-2">
           {(["work", "off", "vacation", "sick"] as const).map((type) => (
-              <span key={type} className={`flex items-center gap-1.5 text-[10px] font-medium ${TYPE_COLORS[type].text}`}>
+              <span key={type} className={`flex items-center gap-1.5 text-[11px] font-medium ${TYPE_COLORS[type].text}`}>
                 <span className={`h-2.5 w-2.5 rounded-full ${TYPE_COLORS[type].dot}`} />
                 {t(TYPE_LABELS[type])}
               </span>
@@ -123,7 +123,7 @@ export function ScheduleEmployee() {
       <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-3">
         <div className="grid grid-cols-7 gap-1 mb-2">
           {dayNames.map((d) => (
-            <div key={d} className="py-1 text-center text-[10px] font-medium text-[var(--text-secondary)]">{d}</div>
+            <div key={d} className="py-1 text-center text-[11px] font-medium text-[var(--text-secondary)]">{d}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1">
@@ -154,7 +154,7 @@ export function ScheduleEmployee() {
 
       {workingToday.length > 0 && (
         <div className="mt-5">
-          <h2 className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
+          <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
             {t("schedule.todayOnShift")}
           </h2>
           <div className="space-y-2">
@@ -166,7 +166,7 @@ export function ScheduleEmployee() {
                 <div>
                   <p className="text-sm font-medium text-[var(--text-primary)]">{w.full_name}</p>
                   {w.position && (
-                    <p className="text-[10px] text-[var(--text-secondary)]">{w.position}</p>
+                    <p className="text-[11px] text-[var(--text-secondary)]">{w.position}</p>
                   )}
                 </div>
                 {w.clock_in ? (
@@ -175,10 +175,10 @@ export function ScheduleEmployee() {
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--brand-primary)] opacity-75" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--brand-primary)]" />
                     </span>
-                    <span className="text-[10px] text-[var(--brand-primary)]">{t("shift.onShift")}</span>
+                    <span className="text-[11px] text-[var(--brand-primary)]">{t("shift.onShift")}</span>
                   </span>
                 ) : (
-                  <span className="text-[10px] text-[var(--text-secondary)]">{t("schedule.notArrived")}</span>
+                  <span className="text-[11px] text-[var(--text-secondary)]">{t("schedule.notArrived")}</span>
                 )}
               </div>
             ))}
