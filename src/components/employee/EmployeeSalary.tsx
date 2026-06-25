@@ -11,8 +11,8 @@ import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
 import type { SalaryPayment } from "@/types/database";
 
-function formatMoney(amount: number): string {
-  return new Intl.NumberFormat("ru-RU", {
+function formatMoney(amount: number, locale: string): string {
+  return new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "ru-RU", {
     style: "currency",
     currency: "MDL",
     maximumFractionDigits: 0,
@@ -104,7 +104,7 @@ export function EmployeeSalary() {
 
             <div className="mt-2 flex items-center justify-between">
               <span className="text-xs text-[var(--text-secondary)]">{t("salary.hoursXrate", { hours: Number(p.hours_worked).toFixed(1), rate: Number(p.hourly_rate) })}</span>
-              <p className="font-mono text-lg font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</p>
+              <p className="font-mono text-lg font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount), locale)}</p>
             </div>
 
             {p.paid_at && (

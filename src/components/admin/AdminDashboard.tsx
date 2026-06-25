@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { getDashboardStats } from "@/actions/adminActions";
-import { getLocations } from "@/actions/locationActions";
 import { getActiveShift } from "@/actions/shiftActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
@@ -12,7 +11,7 @@ import { useI18n } from "@/lib/i18n";
 import { hapticImpact, hapticNotification } from "@/lib/haptic";
 import { useToast } from "@/store/toastStore";
 import { POLL_INTERVAL_MS } from "@/lib/constants";
-import type { DashboardStats, Location, Shift } from "@/types/database";
+import type { DashboardStats, Shift } from "@/types/database";
 
 type AdminView = "live" | "forgotten" | "salary" | "schedule" | "settings" | "shifts";
 
@@ -26,30 +25,17 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const { t } = useI18n();
   const show = useToast((s) => s.show);
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [myShift, setMyShift] = useState<Shift | null>(null);
   const [isPending, startTransition] = useTransition();
-
-  const adminLocationId = user?.location_id;
 
   const loadStats = useCallback(async (signal?: AbortSignal) => {
     const result = await getDashboardStats(initData ?? "");
     if (signal?.aborted) return;
     if (result.success && result.data) {
       setStats(result.data);
-      setError(null);
-    } else {
-      setError(result.error ?? t("common.error"));
     }
     setLoading(false);
-  }, [user?.id]);
-
-  const loadLocations = useCallback(async (signal?: AbortSignal) => {
-    const result = await getLocations(initData ?? "");
-    if (signal?.aborted) return;
-    if (result.success && result.data) setLocations(result.data);
   }, [initData]);
 
   const loadMyShift = useCallback(async (signal?: AbortSignal) => {
@@ -57,13 +43,13 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     const result = await getActiveShift(user.id, initData ?? "");
     if (signal?.aborted) return;
     if (result.success) setMyShift(result.data ?? null);
-  }, [user]);
+  }, [user, initData]);
 
   useEffect(() => {
     const controller = new AbortController();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadStats(controller.signal);
     void loadMyShift(controller.signal);
-    void loadLocations(controller.signal);
     const interval = setInterval(() => {
       void loadStats();
       void loadMyShift();
@@ -72,7 +58,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       controller.abort();
       clearInterval(interval);
     };
-  }, [loadStats, loadMyShift, loadLocations]);
+  }, [loadStats, loadMyShift]);
 
   const handleToggleShift = () => {
     if (!user) return;

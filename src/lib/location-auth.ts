@@ -1,7 +1,7 @@
 export function getClientIP(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
-    let ip = forwarded.split(",")[0].trim();
+    let ip = forwarded.split(",")[0]!.trim();
     if (ip.startsWith("::ffff:")) ip = ip.slice(7);
     return ip;
   }
@@ -16,15 +16,15 @@ export function getClientIP(request: Request): string {
 
 function ipToNumber(ip: string): number {
   const parts = ip.split(".").map(Number);
-  return ((parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3]) >>> 0;
+  return ((parts[0]! << 24) | (parts[1]! << 16) | (parts[2]! << 8) | parts[3]!) >>> 0;
 }
 
 function isInCIDR(ip: string, cidr: string): boolean {
   const [network, prefixStr] = cidr.split("/");
-  const prefix = parseInt(prefixStr, 10);
+  const prefix = parseInt(prefixStr!, 10);
 
   const ipNum = ipToNumber(ip);
-  const networkNum = ipToNumber(network);
+  const networkNum = ipToNumber(network!);
 
   const mask = prefix === 0 ? 0 : (~0 << (32 - prefix)) >>> 0;
 

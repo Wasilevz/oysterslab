@@ -59,13 +59,13 @@ describe("Schedule calculations", () => {
     it("starts on Monday", () => {
       const weekStart = new Date("2026-06-22");
       const days = getWeekDays(weekStart);
-      expect(days[0].getDay()).toBe(1);
+      expect(days[0]!.getDay()).toBe(1);
     });
 
     it("ends on Sunday", () => {
       const weekStart = new Date("2026-06-22");
       const days = getWeekDays(weekStart);
-      expect(days[6].getDay()).toBe(0);
+      expect(days[6]!.getDay()).toBe(0);
     });
   });
 

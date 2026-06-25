@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/ui/providers";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import ru from "@/i18n/ru.json";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -11,8 +12,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Учёт смен",
-  description: "Telegram Mini App для учёта рабочего времени",
+  title: ru["app.title"],
+  description: ru["app.description"],
 };
 
 export const viewport: Viewport = {

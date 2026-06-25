@@ -30,6 +30,7 @@ export function LiveTab({ onBack }: LiveTabProps) {
 
   useEffect(() => {
     const controller = new AbortController();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadData(controller.signal);
     const interval = setInterval(() => void loadData(), POLL_INTERVAL_MS);
     return () => {

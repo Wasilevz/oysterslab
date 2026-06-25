@@ -8,7 +8,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 function getClientIP(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
-    let ip = forwarded.split(",")[0].trim();
+    let ip = forwarded.split(",")[0]!.trim();
     if (ip.startsWith("::ffff:")) ip = ip.slice(7);
     return ip;
   }

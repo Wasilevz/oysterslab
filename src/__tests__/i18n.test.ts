@@ -51,7 +51,7 @@ describe("i18n translations", () => {
     });
 
     it("has no empty values", () => {
-      for (const [key, value] of Object.entries(ru)) {
+      for (const [, value] of Object.entries(ru)) {
         expect(typeof value).toBe("string");
         expect((value as string).length).toBeGreaterThan(0);
       }
@@ -64,7 +64,7 @@ describe("i18n translations", () => {
     });
 
     it("has no empty values", () => {
-      for (const [key, value] of Object.entries(ro)) {
+      for (const [, value] of Object.entries(ro)) {
         expect(typeof value).toBe("string");
         expect((value as string).length).toBeGreaterThan(0);
       }

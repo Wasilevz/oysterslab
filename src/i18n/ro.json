@@ -268,5 +268,17 @@
   "nav.nextMonth": "Luna următoare",
   "nav.close": "Închide",
   "nav.remove": "Elimină",
-  "nav.add": "Adaugă"
+  "nav.add": "Adaugă",
+
+  "onboarding.welcome.title": "Bine ați venit!",
+  "onboarding.welcome.desc": "Această aplicație este pentru evidența timpului de muncă. Aici poți marca turele și vedea salariul.",
+  "onboarding.shift.title": "Începutul turei",
+  "onboarding.shift.desc": "Apasă butonul «Începe tura» când ajungi la muncă. Nu uita să închei tura la sfârșitul zilei!",
+  "onboarding.salary.title": "Salariul",
+  "onboarding.salary.desc": "În partea de jos a ecranului principal vezi plățile. După aprobarea administratorului, confirmă primirea.",
+  "onboarding.schedule.title": "Programul",
+  "onboarding.schedule.desc": "Vezi programul pe lună. Punctele verzi — zile de lucru, gri — libere.",
+
+  "lang.ru": "Русский",
+  "lang.ro": "Română"
 }

@@ -30,7 +30,7 @@ function getLocalTime(): { hour: number; minute: number } {
 
 function parseTime(timeStr: string): { hour: number; minute: number } {
   const [h, m] = timeStr.split(":").map(Number);
-  return { hour: h, minute: m };
+  return { hour: h!, minute: m! };
 }
 
 export async function sendShiftReminders(): Promise<{ sent: number; errors: number }> {

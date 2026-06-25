@@ -76,6 +76,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadSettings();
   }, [loadSettings]);
 
@@ -230,10 +231,10 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
           <p className="mb-3 text-sm font-semibold text-[var(--text-primary)]">{t("settings.language")}</p>
           <div className="grid grid-cols-2 gap-2">
             <button onClick={() => setLocale("ru")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
-              Русский
+              {t("lang.ru")}
             </button>
             <button onClick={() => setLocale("ro")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ro" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
-              Română
+              {t("lang.ro")}
             </button>
           </div>
         </div>

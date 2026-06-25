@@ -24,8 +24,8 @@ interface PayrollTabProps {
   onApproved: () => void;
 }
 
-function formatMoney(amount: number): string {
-  return new Intl.NumberFormat("ru-RU", {
+function formatMoney(amount: number, locale: string): string {
+  return new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "ru-RU", {
     style: "currency",
     currency: "MDL",
     maximumFractionDigits: 0,
@@ -165,7 +165,7 @@ export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
                 </TableCell>
                 <TableCell>{payroll.total_hours} {t("common.hoursAbbrev")}</TableCell>
                 <TableCell className="font-bold">
-                  {formatMoney(payroll.total_amount)}
+                  {formatMoney(payroll.total_amount, locale)}
                 </TableCell>
                 <TableCell>
                   <Button

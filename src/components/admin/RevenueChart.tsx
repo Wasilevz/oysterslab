@@ -17,8 +17,8 @@ interface RevenueChartProps {
   data: MonthRevenue[];
 }
 
-function formatMoney(value: number): string {
-  return new Intl.NumberFormat("ru-RU", {
+function formatMoney(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "ru-RU", {
     style: "currency",
     currency: "MDL",
     maximumFractionDigits: 0,
@@ -27,7 +27,7 @@ function formatMoney(value: number): string {
 
 export function RevenueChart({ data }: RevenueChartProps) {
   const theme = useThemeStore((s) => s.theme);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   if (data.length === 0) {
     return (
@@ -69,7 +69,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
           <Tooltip
             contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: "12px", color: tooltipText, fontSize: 13 }}
             labelStyle={{ color: tooltipLabel }}
-            formatter={(value) => [formatMoney(Number(value)), t("charts.amount")]}
+            formatter={(value) => [formatMoney(Number(value), locale), t("charts.amount")]}
           />
           <Area type="monotone" dataKey="amount" stroke={strokeColor} strokeWidth={2} fillOpacity={1} fill={`url(#${gradientId})`} />
         </AreaChart>

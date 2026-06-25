@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
-import { ru } from "date-fns/locale";
+import { ro, ru } from "date-fns/locale";
 import { getSchedule, setScheduleDay, getWorkingToday } from "@/actions/scheduleActions";
 import { getEmployees } from "@/actions/employeeActions";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,33 +10,15 @@ import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
 import { hapticImpact } from "@/lib/haptic";
 import { TYPE_COLORS } from "@/lib/schedule-constants";
-import type { Schedule, ScheduleType, User } from "@/types/database";
+import { getWeekStart, getWeekDays, toDateStr, getScheduleTypeForDay } from "@/lib/schedule-helpers";
+import type { ScheduleType, User } from "@/types/database";
+import type { Schedule } from "@/types/database";
 
 const TYPE_ORDER: ScheduleType[] = ["work", "off", "vacation", "sick"];
 
-function getWeekStart(date: Date): Date {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  d.setDate(diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function getWeekDays(weekStart: Date): Date[] {
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(weekStart);
-    d.setDate(weekStart.getDate() + i);
-    return d;
-  });
-}
-
-function toDateStr(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
 export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const dateLocale = locale === "ro" ? ro : ru;
   const initData = useUserStore((s) => s.initData);
   const [employees, setEmployees] = useState<User[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -48,20 +30,14 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
   const touchStartX = useRef(0);
 
   const loadScheduleForWeek = useCallback(async (ws: Date) => {
-    const endOfMonth = new Date(ws.getFullYear(), ws.getMonth() + 1, 0);
-    const startOfMonth = new Date(ws.getFullYear(), ws.getMonth(), 1);
-    const fetchStart = ws < startOfMonth ? startOfMonth : ws;
-    const fetchEnd = new Date(ws);
-    fetchEnd.setDate(fetchEnd.getDate() + 6);
-    const actualEnd = fetchEnd > endOfMonth ? endOfMonth : fetchEnd;
-
     const schedResult = await getSchedule(
-      fetchStart.getFullYear(),
-      fetchStart.getMonth() + 1,
+      ws.getFullYear(),
+      ws.getMonth() + 1,
       initData ?? "",
     );
     if (schedResult.success && schedResult.data) {
-      const weekDates = weekDays.map(toDateStr);
+      const localWeekDays = getWeekDays(ws);
+      const weekDates = localWeekDays.map(toDateStr);
       setSchedules(schedResult.data.filter((s) => weekDates.includes(s.date)));
     }
   }, [initData]);
@@ -79,24 +55,19 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
   }, [weekStart, initData, loadScheduleForWeek]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     const controller = new AbortController();
     void loadData(controller.signal);
     return () => controller.abort();
   }, [loadData]);
 
-  const getScheduleType = (userId: string, date: Date): ScheduleType => {
-    const dateStr = toDateStr(date);
-    const entry = schedules.find((s) => s.user_id === userId && s.date === dateStr);
-    return entry?.type ?? "work";
-  };
-
   const cycleType = (userId: string, date: Date) => {
     hapticImpact("light");
-    const current = getScheduleType(userId, date);
-    const idx = TYPE_ORDER.indexOf(current);
-    const next = TYPE_ORDER[(idx + 1) % TYPE_ORDER.length];
     const dateStr = toDateStr(date);
+    const current = getScheduleTypeForDay(schedules, userId, dateStr);
+    const idx = TYPE_ORDER.indexOf(current);
+    const next = TYPE_ORDER[(idx + 1) % TYPE_ORDER.length]!;
 
     setSchedules((prev) => {
       const filtered = prev.filter((s) => !(s.user_id === userId && s.date === dateStr));
@@ -132,11 +103,11 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
   const todayStr = toDateStr(today);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
+    touchStartX.current = e.touches[0]!.clientX;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    const diff = e.changedTouches[0].clientX - touchStartX.current;
+    const diff = e.changedTouches[0]!.clientX - touchStartX.current;
     if (Math.abs(diff) > 80) {
       if (diff > 0) prevWeek();
       else nextWeek();
@@ -181,7 +152,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
           </button>
           <div className="text-center">
             <p className="text-lg font-bold text-[var(--text-primary)]">
-              {format(weekDays[0], "d MMM", { locale: ru })} – {format(weekDays[6], "d MMM", { locale: ru })}
+              {format(weekDays[0]!, "d MMM", { locale: dateLocale })} – {format(weekDays[6]!, "d MMM", { locale: dateLocale })}
             </p>
             {!isCurrentWeek && (
               <button onClick={goToThisWeek} aria-label={t("schedule.thisWeek")} className="mt-1.5 rounded-full border border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 px-4 py-2.5 text-xs font-bold text-[var(--brand-primary)] transition-all active:scale-95 hover:bg-[var(--brand-primary)]/20">
@@ -243,7 +214,8 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
                     )}
                   </td>
                   {weekDays.map((day, i) => {
-                    const type = getScheduleType(emp.id, day);
+                    const dateStr = toDateStr(day);
+                    const type = getScheduleTypeForDay(schedules, emp.id, dateStr);
                     const colors = TYPE_COLORS[type];
                     const isToday = toDateStr(day) === todayStr;
                     return (

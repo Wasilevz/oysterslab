@@ -21,8 +21,8 @@ import { useUserStore } from "@/store/userStore";
 import { SHIFT_HISTORY_LIMIT } from "@/lib/constants";
 import type { EmployeeStats, Shift } from "@/types/database";
 
-function formatMoney(amount: number): string {
-  return new Intl.NumberFormat("ru-RU", {
+function formatMoney(amount: number, locale: string): string {
+  return new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "ru-RU", {
     style: "currency",
     currency: "MDL",
     maximumFractionDigits: 0,
@@ -86,6 +86,7 @@ export function EmployeeScreen() {
 
   useEffect(() => {
     const controller = new AbortController();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadData(controller.signal);
     return () => controller.abort();
   }, [loadData]);
@@ -134,13 +135,13 @@ export function EmployeeScreen() {
     if (period === "week") {
       const ws = startOfWeek(now, { weekStartsOn: 1 });
       const we = endOfWeek(now, { weekStartsOn: 1 });
-      from = ws.toISOString().split("T")[0];
-      to = we.toISOString().split("T")[0];
+      from = ws.toISOString().split("T")[0]!;
+      to = we.toISOString().split("T")[0]!;
     } else {
       const ms = startOfMonth(now);
       const me = endOfMonth(now);
-      from = ms.toISOString().split("T")[0];
-      to = me.toISOString().split("T")[0];
+      from = ms.toISOString().split("T")[0]!;
+      to = me.toISOString().split("T")[0]!;
     }
 
     const initData = useUserStore.getState().initData;
@@ -148,7 +149,7 @@ export function EmployeeScreen() {
 
     if (result.success && result.data) {
       const filtered = result.data.filter((s) => {
-        const d = s.clock_in.split("T")[0];
+        const d = s.clock_in.split("T")[0]!;
         return d >= from && d <= to;
       });
       setShiftHistory(filtered);
@@ -293,7 +294,7 @@ export function EmployeeScreen() {
               {t("employee.expectedSalary")}
             </p>
             <p className="mt-1 font-mono text-2xl font-bold text-[var(--brand-primary)]">
-              {formatMoney(stats.expectedSalary)}
+              {formatMoney(stats.expectedSalary, locale)}
             </p>
             <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
               {stats.hourlyRate} {t("common.ratePerHour")} · {t("common.shiftsCount", { count: stats.totalShifts })}
@@ -311,10 +312,10 @@ export function EmployeeScreen() {
           <p className="mb-3 text-sm font-semibold text-[var(--text-primary)]">{t("settings.language")}</p>
           <div className="grid grid-cols-2 gap-2">
             <button onClick={() => setLocale("ru")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
-              Русский
+              {t("lang.ru")}
             </button>
             <button onClick={() => setLocale("ro")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ro" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
-              Română
+              {t("lang.ro")}
             </button>
           </div>
         </div>

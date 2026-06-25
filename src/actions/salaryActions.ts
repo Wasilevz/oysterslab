@@ -370,7 +370,7 @@ export async function getEmployeeStats(
       }
 
       const dayNames = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-      const dayKey = dayNames[shiftDate.getDay()];
+      const dayKey = dayNames[shiftDate.getDay()]!;
       dailyHours.set(dayKey, (dailyHours.get(dayKey) ?? 0) + h);
     }
 

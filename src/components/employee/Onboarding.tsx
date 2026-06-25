@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 
 const STEPS = [
@@ -12,30 +12,22 @@ const STEPS = [
 
 export function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState(0);
-  const { t: tFn, locale } = useI18n();
+  const { t: tFn } = useI18n();
 
-  const texts: Record<string, Record<string, { title: string; desc: string }>> = {
-    ru: {
-      welcome: { title: "Добро пожаловать!", desc: "Это приложение для учёта рабочего времени. Здесь ты можешь отмечать смены и видеть свою зарплату." },
-      shift: { title: "Начало смены", desc: "Нажми кнопку «Начать смену» когда пришёл на работу. Не забудь закрыть смену в конце дня!" },
-      salary: { title: "Зарплата", desc: "Внизу главного экрана ты увидишь свои выплаты. После одобрения админом подтверди получение." },
-      schedule: { title: "График", desc: "Посмотри расписание на месяц. Зелёные точки — рабочие дни, серые — выходные." },
-    },
-    ro: {
-      welcome: { title: "Bine ați venit!", desc: "Această aplicație este pentru evidența timpului de muncă. Aici poți marca turele și vedea salariul." },
-      shift: { title: "Începutul turei", desc: "Apasă butonul «Începe tura» când ajungi la muncă. Nu uita să închei tura la sfârșitul zilei!" },
-      salary: { title: "Salariul", desc: "În partea de jos a ecranului principal vezi plățile. După aprobarea administratorului, confirmă primirea." },
-      schedule: { title: "Programul", desc: "Vezi programul pe lună. Punctele verzi — zile de lucru, gri — libere." },
-    },
+  const stepTexts: Record<string, { title: string; desc: string }> = {
+    welcome: { title: tFn("onboarding.welcome.title"), desc: tFn("onboarding.welcome.desc") },
+    shift: { title: tFn("onboarding.shift.title"), desc: tFn("onboarding.shift.desc") },
+    salary: { title: tFn("onboarding.salary.title"), desc: tFn("onboarding.salary.desc") },
+    schedule: { title: tFn("onboarding.schedule.title"), desc: tFn("onboarding.schedule.desc") },
   };
 
-  const stepTexts = texts[locale] ?? texts.ru;
-  const current = stepTexts[STEPS[step].key];
+  const stepDef = STEPS[step]!;
+  const current = stepTexts[stepDef.key]!;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-app)]">
       <div className="w-full max-w-sm px-8 text-center">
-        <div className="mb-8 text-7xl">{STEPS[step].icon}</div>
+        <div className="mb-8 text-7xl">{stepDef.icon}</div>
 
         <h2 className="mb-3 text-2xl font-bold text-[var(--text-primary)]">
           {current.title}

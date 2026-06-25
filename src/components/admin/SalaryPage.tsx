@@ -21,8 +21,8 @@ import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
 import type { FineWithUser, SalaryPaymentWithUser, User, MonthlyReportEmployee } from "@/types/database";
 
-function formatMoney(amount: number): string {
-  return new Intl.NumberFormat("ru-RU", {
+function formatMoney(amount: number, locale: string): string {
+  return new Intl.NumberFormat(locale === "ro" ? "ro-RO" : "ru-RU", {
     style: "currency",
     currency: "MDL",
     maximumFractionDigits: 0,
@@ -272,12 +272,12 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               {preview.fines > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-[var(--text-secondary)]">{t("salary.fines")}</span>
-                  <span className="font-mono text-rose-400">-{formatMoney(preview.fines)}</span>
+                  <span className="font-mono text-rose-400">-{formatMoney(preview.fines, locale)}</span>
                 </div>
               )}
               <div className="border-t border-[var(--brand-primary)]/20 pt-2 flex justify-between">
                 <span className="text-sm font-semibold text-[var(--text-primary)]">{t("salary.total")}</span>
-                <span className="font-mono text-lg font-bold text-[var(--brand-primary)]">{formatMoney(preview.amount)}</span>
+                <span className="font-mono text-lg font-bold text-[var(--brand-primary)]">{formatMoney(preview.amount, locale)}</span>
               </div>
             </div>
           )}
@@ -308,7 +308,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
                     </div>
                     <div className="mt-2 flex justify-between text-sm">
                       <span className="text-[var(--text-secondary)]">{t("salary.hoursXrate", { hours: Number(p.hours_worked).toFixed(1), rate: Number(p.hourly_rate) })}</span>
-                      <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</span>
+                      <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount), locale)}</span>
                     </div>
                     <div className="mt-3 flex gap-2">
                       <Button variant="blue" className="flex-1" disabled={isPending} onClick={() => handleApprove(p.id)}>{t("salary.approve")}</Button>
@@ -337,7 +337,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
                     </div>
                     <div className="mt-2 flex justify-between">
                       <span className="text-sm text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} {t("common.hoursAbbrev")}</span>
-                      <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</span>
+                      <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount), locale)}</span>
                     </div>
                   </div>
                 ))}
@@ -362,7 +362,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
                     </div>
                     <div className="mt-2 flex justify-between">
                       <span className="text-sm text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} {t("common.hoursAbbrev")}</span>
-                      <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</span>
+                      <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount), locale)}</span>
                     </div>
                     {p.paid_at && (
                       <p className="mt-1 text-[10px] text-emerald-400">
@@ -431,7 +431,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
                     <p className="font-mono text-sm font-bold text-[var(--text-primary)]">{emp.totalShifts}</p>
                   </div>
                   <div className="bg-[var(--bg-surface)] px-3 py-3 text-right">
-                    <p className="font-mono text-sm font-bold text-[var(--brand-primary)]">{formatMoney(emp.totalAmount)}</p>
+                    <p className="font-mono text-sm font-bold text-[var(--brand-primary)]">{formatMoney(emp.totalAmount, locale)}</p>
                   </div>
                 </div>
               ))}
@@ -440,7 +440,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
                   <p className="text-sm font-bold text-[var(--text-primary)]">{t("salary.total")}</p>
                 </div>
                 <div className="bg-[var(--accent-money)]/10 px-3 py-3 text-right">
-                  <p className="font-mono text-lg font-bold text-[var(--brand-primary)]">{formatMoney(monthlyReport.grandTotal)}</p>
+                  <p className="font-mono text-lg font-bold text-[var(--brand-primary)]">{formatMoney(monthlyReport.grandTotal, locale)}</p>
                 </div>
               </div>
             </div>

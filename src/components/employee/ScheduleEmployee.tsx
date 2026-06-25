@@ -8,34 +8,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
 import { TYPE_COLORS } from "@/lib/schedule-constants";
-import type { Schedule, ScheduleType, User } from "@/types/database";
-
-function getWeekStart(date: Date): Date {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  d.setDate(diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function getWeekDays(ws: Date): Date[] {
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(ws);
-    d.setDate(ws.getDate() + i);
-    return d;
-  });
-}
-
-function toDateStr(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
+import { getWeekStart, getWeekDays, toDateStr, getScheduleTypeForDay } from "@/lib/schedule-helpers";
+import type { ScheduleType, User } from "@/types/database";
 
 export function ScheduleEmployee() {
   const { t, locale } = useI18n();
   const dateLocale = locale === "ro" ? ro : ru;
   const user = useUserStore((s) => s.user);
-  const [teamSchedules, setTeamSchedules] = useState<Schedule[]>([]);
+  const [teamSchedules, setTeamSchedules] = useState<import("@/types/database").Schedule[]>([]);
   const [employees, setEmployees] = useState<Pick<User, "id" | "full_name" | "position">[]>([]);
   const [workingToday, setWorkingToday] = useState<{ id: string; full_name: string; position: string | null; clock_in: string | null }[]>([]);
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
@@ -45,6 +25,7 @@ export function ScheduleEmployee() {
 
   const loadData = useCallback(async (signal?: AbortSignal) => {
     const initData = useUserStore.getState().initData;
+    const localWeekDays = getWeekDays(weekStart);
     const [todayResult, empResult, teamSchedResult] = await Promise.all([
       getWorkingToday(initData ?? ""),
       getColleagues(initData ?? ""),
@@ -54,7 +35,7 @@ export function ScheduleEmployee() {
     if (todayResult.success && todayResult.data) setWorkingToday(todayResult.data);
     if (empResult.success && empResult.data) setEmployees(empResult.data);
     if (teamSchedResult.success && teamSchedResult.data) {
-      const weekDates = weekDays.map(toDateStr);
+      const weekDates = localWeekDays.map(toDateStr);
       setTeamSchedules(teamSchedResult.data.filter((s) => weekDates.includes(s.date)));
     }
     setLoading(false);
@@ -62,14 +43,14 @@ export function ScheduleEmployee() {
 
   useEffect(() => {
     const controller = new AbortController();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadData(controller.signal);
     return () => controller.abort();
   }, [loadData]);
 
   const getTeamType = (userId: string, date: Date): ScheduleType => {
     const dateStr = toDateStr(date);
-    const entry = teamSchedules.find((s) => s.user_id === userId && s.date === dateStr);
-    return entry?.type ?? "work";
+    return getScheduleTypeForDay(teamSchedules, userId, dateStr);
   };
 
   const prevWeek = () => {
@@ -120,7 +101,7 @@ export function ScheduleEmployee() {
         </button>
         <div className="text-center">
           <p className="text-lg font-bold text-[var(--text-primary)]">
-            {format(weekDays[0], "d MMM", { locale: dateLocale })} – {format(weekDays[6], "d MMM", { locale: dateLocale })}
+            {format(weekDays[0]!, "d MMM", { locale: dateLocale })} – {format(weekDays[6]!, "d MMM", { locale: dateLocale })}
           </p>
           {!isCurrentWeek && (
             <button onClick={goToThisWeek} aria-label={t("schedule.thisWeek")} className="mt-1.5 rounded-full border border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 px-4 py-2.5 text-xs font-bold text-[var(--brand-primary)] transition-all active:scale-95 hover:bg-[var(--brand-primary)]/20">
