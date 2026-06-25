@@ -175,6 +175,8 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     );
   }
 
+  const isSuperAdmin = user?.role === "superadmin";
+
   return (
     <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
       <header className="mb-5">
@@ -186,20 +188,22 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         <div className="mt-1 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">{user?.full_name}</h1>
 
-          <button
-            onClick={handleToggleShift}
-            disabled={isPending}
-            className={`rounded-[1440px] px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
-              myShift
-                ? "bg-[var(--color-error)]/15 text-[var(--color-error)] hover:bg-[var(--color-error)]/25"
-                : "bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/25"
-            }`}
-          >
-            {isPending ? "..." : myShift ? t("shift.end") : t("shift.start")}
-          </button>
+          {!isSuperAdmin && (
+            <button
+              onClick={handleToggleShift}
+              disabled={isPending}
+              className={`rounded-[1440px] px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
+                myShift
+                  ? "bg-[var(--color-error)]/15 text-[var(--color-error)] hover:bg-[var(--color-error)]/25"
+                  : "bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/25"
+              }`}
+            >
+              {isPending ? "..." : myShift ? t("shift.end") : t("shift.start")}
+            </button>
+          )}
         </div>
 
-        {myShift && (
+        {!isSuperAdmin && myShift && (
           <div className="mt-3 flex items-center justify-between rounded-2xl border border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5 px-4 py-3">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">

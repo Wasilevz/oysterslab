@@ -28,6 +28,7 @@ export async function getEmployees(initData?: string): Promise<ActionResult<User
     let query = supabase
       .from("users")
       .select("*")
+      .in("role", ["employee", "admin"])
       .order("full_name");
 
     if (locationId) {
