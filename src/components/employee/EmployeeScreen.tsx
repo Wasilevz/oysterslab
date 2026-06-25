@@ -122,16 +122,29 @@ export function EmployeeScreen() {
   return (
     <div className="flex min-h-full flex-1 flex-col p-4 pb-8">
       {/* Header */}
-      <header className="mb-5 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--brand-primary)] to-teal-700 text-sm font-bold text-white shadow-lg shadow-[var(--brand-primary)]/20">
-          {user?.full_name ? getInitials(user.full_name) : "—"}
+      <header className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--brand-primary)] to-teal-700 text-sm font-bold text-white shadow-lg shadow-[var(--brand-primary)]/20">
+            {user?.full_name ? getInitials(user.full_name) : "—"}
+          </div>
+          <div>
+            <p className="text-[10px] font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
+              {t("employee.hello")}
+            </p>
+            <h1 className="text-lg font-bold dark:text-white text-zinc-900">{user?.full_name}</h1>
+          </div>
         </div>
-        <div>
-          <p className="text-[10px] font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
-            {t("employee.hello")}
-          </p>
-          <h1 className="text-lg font-bold dark:text-white text-zinc-900">{user?.full_name}</h1>
-        </div>
+        <button
+          onClick={handleToggleShift}
+          disabled={isPending}
+          className={`rounded-[1440px] px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
+            isOnShift
+              ? "bg-[var(--color-error)]/15 text-[var(--color-error)] hover:bg-[var(--color-error)]/25"
+              : "bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/25"
+          }`}
+        >
+          {isPending ? "..." : isOnShift ? t("shift.end") : t("shift.start")}
+        </button>
       </header>
 
       {/* Карточка смены — главный элемент */}
@@ -189,20 +202,6 @@ export function EmployeeScreen() {
               </p>
             </div>
           )}
-        </div>
-
-        <div className="flex justify-center">
-        <button
-          onClick={handleToggleShift}
-          disabled={isPending}
-          className={`w-auto px-8 rounded-2xl py-4 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
-            isOnShift
-              ? "bg-[var(--color-error)]/15 text-[var(--color-error)] hover:bg-[var(--color-error)]/25"
-              : "bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/25"
-          }`}
-        >
-          {isPending ? "..." : isOnShift ? t("shift.end") : t("shift.start")}
-          </button>
         </div>
 
         {actionError && (
