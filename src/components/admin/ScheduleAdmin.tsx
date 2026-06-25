@@ -187,8 +187,8 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
               {format(weekDays[0], "d MMM", { locale: ru })} – {format(weekDays[6], "d MMM", { locale: ru })}
             </p>
             {!isCurrentWeek && (
-              <button onClick={goToThisWeek} className="mt-0.5 text-[11px] font-semibold text-[var(--brand-primary)]">
-                {t("schedule.thisWeek")}
+              <button onClick={goToThisWeek} className="mt-1.5 rounded-full border border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 px-4 py-1.5 text-xs font-bold text-[var(--brand-primary)] transition-all active:scale-95 hover:bg-[var(--brand-primary)]/20">
+                ← {t("schedule.thisWeek")}
               </button>
             )}
           </div>
