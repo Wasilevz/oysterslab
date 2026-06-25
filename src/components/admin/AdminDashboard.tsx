@@ -173,10 +173,10 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
       <header className="mb-5">
         <div className="flex items-center justify-between">
+          <ThemeToggle />
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--text-secondary)]">
             {t("nav.dashboard")}
           </p>
-          <ThemeToggle />
         </div>
         <div className="mt-1 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">{user?.full_name}</h1>
