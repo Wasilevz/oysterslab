@@ -55,7 +55,8 @@ function verifyHash(
     }
 
     return timingSafeEqual(received, calculated);
-  } catch {
+  } catch (err) {
+    console.error("[TELEGRAM-AUTH] verifyHash error:", err);
     return false;
   }
 }
@@ -108,7 +109,8 @@ export function validateTelegramInitData(
       authDate,
       queryId: params.get("query_id") ?? undefined,
     };
-  } catch {
+  } catch (err) {
+    console.error("[TELEGRAM-AUTH] validateTelegramInitData error:", err);
     return null;
   }
 }
@@ -128,7 +130,8 @@ export function extractTelegramIdFromInitData(
   try {
     const user = JSON.parse(userRaw) as TelegramWebAppUser;
     return user?.id ?? null;
-  } catch {
+  } catch (err) {
+    console.error("[TELEGRAM-AUTH] extractTelegramIdFromInitData error:", err);
     return null;
   }
 }

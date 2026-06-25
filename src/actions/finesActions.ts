@@ -28,7 +28,8 @@ export async function getFines(
     if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true, data: (data ?? []) as FineWithUser[] };
-  } catch {
+  } catch (err) {
+    console.error("[FINES] error:", err);
     return {
       success: false,
       error: "Не удалось загрузить штрафы",
@@ -80,7 +81,8 @@ export async function addFine(
     if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true, data: data as Fine };
-  } catch {
+  } catch (err) {
+    console.error("[FINES] error:", err);
     return {
       success: false,
       error: "Не удалось добавить штраф",
@@ -100,7 +102,8 @@ export async function deleteFine(fineId: string, initData?: string): Promise<Act
     if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true };
-  } catch {
+  } catch (err) {
+    console.error("[FINES] error:", err);
     return {
       success: false,
       error: "Не удалось удалить штраф",
@@ -129,7 +132,8 @@ export async function getTotalFinesForPeriod(
 
     const total = (data ?? []).reduce((sum, f) => sum + Number(f.amount), 0);
     return { success: true, data: Math.round(total * 100) / 100 };
-  } catch {
+  } catch (err) {
+    console.error("[FINES] error:", err);
     return {
       success: false,
       error: "Не удалось посчитать штрафы",

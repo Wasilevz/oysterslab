@@ -3,25 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { getMySchedule, getSchedule, getWorkingToday, getColleagues } from "@/actions/scheduleActions";
+import { getSchedule, getWorkingToday, getColleagues } from "@/actions/scheduleActions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
+import { TYPE_COLORS } from "@/lib/schedule-constants";
 import type { Schedule, ScheduleType, User } from "@/types/database";
-
-const TYPE_COLORS: Record<ScheduleType, { dot: string; text: string; bg: string }> = {
-  work: { dot: "bg-[var(--text-secondary)]", text: "text-[var(--text-secondary)]", bg: "bg-[var(--text-secondary)]/20" },
-  off: { dot: "bg-emerald-500", text: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-500/20" },
-  vacation: { dot: "bg-[var(--color-warning)]", text: "text-[var(--color-warning)]", bg: "bg-[var(--color-warning)]/20" },
-  sick: { dot: "bg-[var(--color-error)]", text: "text-[var(--color-error)]", bg: "bg-[var(--color-error)]/20" },
-};
-
-const TYPE_LABELS: Record<ScheduleType, string> = {
-  work: "schedule.work",
-  off: "schedule.off",
-  vacation: "schedule.vacation",
-  sick: "schedule.sick",
-};
 
 function getWeekStart(date: Date): Date {
   const d = new Date(date);
@@ -55,13 +42,14 @@ export function ScheduleEmployee() {
 
   const weekDays = getWeekDays(weekStart);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (signal?: AbortSignal) => {
     const initData = useUserStore.getState().initData;
     const [todayResult, empResult, teamSchedResult] = await Promise.all([
       getWorkingToday(initData ?? ""),
       getColleagues(initData ?? ""),
       getSchedule(weekStart.getFullYear(), weekStart.getMonth() + 1, initData ?? ""),
     ]);
+    if (signal?.aborted) return;
     if (todayResult.success && todayResult.data) setWorkingToday(todayResult.data);
     if (empResult.success && empResult.data) setEmployees(empResult.data);
     if (teamSchedResult.success && teamSchedResult.data) {
@@ -72,8 +60,9 @@ export function ScheduleEmployee() {
   }, [weekStart]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadData();
+    const controller = new AbortController();
+    void loadData(controller.signal);
+    return () => controller.abort();
   }, [loadData]);
 
   const getTeamType = (userId: string, date: Date): ScheduleType => {
@@ -147,7 +136,7 @@ export function ScheduleEmployee() {
 
       <div className="mt-3 flex items-center gap-3">
         {(["work", "off", "vacation", "sick"] as const).map((type) => (
-          <span key={type} className="flex items-center gap-1 text-[11px]">
+          <span key={type} className="flex items-center gap-1 text-xs">
             <span className={`h-2.5 w-2.5 rounded-full ${TYPE_COLORS[type].dot}`} />
             <span className={TYPE_COLORS[type].text}>{t(`schedule.${type}`)}</span>
           </span>
@@ -159,14 +148,14 @@ export function ScheduleEmployee() {
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="sticky left-0 z-20 bg-[var(--bg-surface)] p-2 text-left text-[11px] font-medium text-[var(--text-secondary)] min-w-[90px]">
+                <th className="sticky left-0 z-20 bg-[var(--bg-surface)] p-2 text-left text-xs font-medium text-[var(--text-secondary)] min-w-[90px]">
                   {t("payroll.employee")}
                 </th>
                 {weekDays.map((day, i) => {
                   const isToday = toDateStr(day) === todayStr;
                   return (
                     <th key={i} className="p-1.5 text-center">
-                      <div className={`text-[11px] font-medium ${isToday ? "text-[var(--brand-primary)] font-bold" : "text-[var(--text-secondary)]"}`}>
+                      <div className={`text-xs font-medium ${isToday ? "text-[var(--brand-primary)] font-bold" : "text-[var(--text-secondary)]"}`}>
                         {dayNames[i]}
                       </div>
                       <div className={`text-[13px] font-bold ${isToday ? "text-[var(--brand-primary)]" : "text-[var(--text-primary)]"}`}>
@@ -198,7 +187,7 @@ export function ScheduleEmployee() {
                       return (
                         <td key={i} className="p-0.5">
                           <div
-                            className={`flex h-10 w-full items-center justify-center rounded-xl text-[11px] font-bold ${colors.bg} ${colors.text} ${isToday ? "ring-1 ring-[var(--brand-primary)]/30" : ""}`}
+                            className={`flex h-10 w-full items-center justify-center rounded-xl text-xs font-bold ${colors.bg} ${colors.text} ${isToday ? "ring-1 ring-[var(--brand-primary)]/30" : ""}`}
                           >
                             {type === "work" ? t("schedule.abbrWork") : type === "off" ? t("schedule.abbrOff") : type === "vacation" ? t("schedule.abbrVacation") : t("schedule.abbrSick")}
                           </div>
@@ -215,7 +204,7 @@ export function ScheduleEmployee() {
 
       {workingToday.length > 0 && (
         <div className="border-t border-[var(--border-color)] pt-4 pb-24">
-          <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
             {t("schedule.todayOnShift")}
           </h2>
           <div className="space-y-2">
@@ -227,7 +216,7 @@ export function ScheduleEmployee() {
                 <div>
                   <p className="text-sm font-medium text-[var(--text-primary)]">{w.full_name}</p>
                   {w.position && (
-                    <p className="text-[11px] text-[var(--text-secondary)]">{w.position}</p>
+                    <p className="text-xs text-[var(--text-secondary)]">{w.position}</p>
                   )}
                 </div>
                 {w.clock_in ? (
@@ -236,10 +225,10 @@ export function ScheduleEmployee() {
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--brand-primary)] opacity-75" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--brand-primary)]" />
                     </span>
-                    <span className="text-[11px] text-[var(--brand-primary)]">{t("shift.onShift")}</span>
+                    <span className="text-xs text-[var(--brand-primary)]">{t("shift.onShift")}</span>
                   </span>
                 ) : (
-                  <span className="text-[11px] text-[var(--text-secondary)]">{t("schedule.notArrived")}</span>
+                  <span className="text-xs text-[var(--text-secondary)]">{t("schedule.notArrived")}</span>
                 )}
               </div>
             ))}

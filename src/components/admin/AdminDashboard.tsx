@@ -11,6 +11,7 @@ import { useUserStore } from "@/store/userStore";
 import { useI18n } from "@/lib/i18n";
 import { hapticImpact, hapticNotification } from "@/lib/haptic";
 import { useToast } from "@/store/toastStore";
+import { POLL_INTERVAL_MS } from "@/lib/constants";
 import type { DashboardStats, Location, Shift } from "@/types/database";
 
 type AdminView = "live" | "forgotten" | "salary" | "schedule" | "settings" | "shifts";
@@ -18,8 +19,6 @@ type AdminView = "live" | "forgotten" | "salary" | "schedule" | "settings" | "sh
 interface AdminDashboardProps {
   onNavigate: (view: AdminView) => void;
 }
-
-const POLL_INTERVAL_MS = 15000;
 
 export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const user = useUserStore((s) => s.user);
@@ -35,37 +34,44 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
   const adminLocationId = user?.location_id;
 
-  const loadStats = useCallback(async () => {
+  const loadStats = useCallback(async (signal?: AbortSignal) => {
     const result = await getDashboardStats(initData ?? "");
+    if (signal?.aborted) return;
     if (result.success && result.data) {
       setStats(result.data);
       setError(null);
     } else {
-      setError(result.error ?? "Ошибка");
+      setError(result.error ?? t("common.error"));
     }
     setLoading(false);
   }, [user?.id]);
 
-  const loadLocations = useCallback(async () => {
+  const loadLocations = useCallback(async (signal?: AbortSignal) => {
     const result = await getLocations(initData ?? "");
+    if (signal?.aborted) return;
     if (result.success && result.data) setLocations(result.data);
   }, [initData]);
 
-  const loadMyShift = useCallback(async () => {
+  const loadMyShift = useCallback(async (signal?: AbortSignal) => {
     if (!user) return;
     const result = await getActiveShift(user.id, initData ?? "");
+    if (signal?.aborted) return;
     if (result.success) setMyShift(result.data ?? null);
   }, [user]);
 
   useEffect(() => {
-    void loadStats();
-    void loadMyShift();
-    void loadLocations();
+    const controller = new AbortController();
+    void loadStats(controller.signal);
+    void loadMyShift(controller.signal);
+    void loadLocations(controller.signal);
     const interval = setInterval(() => {
       void loadStats();
       void loadMyShift();
     }, POLL_INTERVAL_MS);
-    return () => clearInterval(interval);
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+    };
   }, [loadStats, loadMyShift, loadLocations]);
 
   const handleToggleShift = () => {
@@ -231,7 +237,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
               <div className={`${item.color}`}>{item.icon}</div>
               <p className="text-sm font-bold text-[var(--text-primary)]">{item.title}</p>
               {item.badge != null && item.badge > 0 && (
-                <span className="absolute right-3 top-3 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--color-warning)]/20 px-1 text-[11px] font-bold text-[var(--color-warning)]">
+                <span className="absolute right-3 top-3 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[var(--color-warning)]/20 px-1 text-xs font-bold text-[var(--color-warning)]">
                   {item.badge}
                 </span>
               )}

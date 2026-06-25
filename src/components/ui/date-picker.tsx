@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameDay, isAfter, isBefore } from "date-fns";
 import { ru } from "date-fns/locale";
+import { ro } from "date-fns/locale";
 import { useI18n } from "@/lib/i18n";
 
 interface DatePickerProps {
@@ -14,12 +15,14 @@ interface DatePickerProps {
 }
 
 export function DatePicker({ value, onChange, placeholder, minDate, maxDate }: DatePickerProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(value ? new Date(value) : new Date());
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  const dateLocale = locale === "ro" ? ro : ru;
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -49,7 +52,7 @@ export function DatePicker({ value, onChange, placeholder, minDate, maxDate }: D
         className="flex w-full items-center justify-between rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 h-12 text-sm text-left"
       >
         <span className={value ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}>
-          {value ? format(new Date(value), "d MMMM yyyy", { locale: ru }) : (placeholder ?? t("datePicker.placeholder"))}
+          {value ? format(new Date(value), "d MMMM yyyy", { locale: dateLocale }) : (placeholder ?? t("datePicker.placeholder"))}
         </span>
         <svg className="h-4 w-4 text-[var(--text-secondary)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -67,7 +70,7 @@ export function DatePicker({ value, onChange, placeholder, minDate, maxDate }: D
                 </svg>
               </button>
               <p className="text-sm font-semibold text-[var(--text-primary)]">
-                {format(currentMonth, "LLLL yyyy", { locale: ru })}
+                {format(currentMonth, "LLLL yyyy", { locale: dateLocale })}
               </p>
               <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { formatDuration, getElapsedSeconds } from "@/lib/utils";
 
 interface ShiftTimerProps {
@@ -8,13 +8,13 @@ interface ShiftTimerProps {
   className?: string;
 }
 
-export function ShiftTimer({ clockIn, className }: ShiftTimerProps) {
+export const ShiftTimer = React.memo(function ShiftTimer({ clockIn, className }: ShiftTimerProps) {
   const [seconds, setSeconds] = useState(() => getElapsedSeconds(clockIn));
 
   useEffect(() => {
     const interval = setInterval(() => {
       setSeconds(getElapsedSeconds(clockIn));
-    }, 1000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [clockIn]);
@@ -24,4 +24,4 @@ export function ShiftTimer({ clockIn, className }: ShiftTimerProps) {
       {formatDuration(seconds)}
     </span>
   );
-}
+});

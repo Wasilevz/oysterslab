@@ -21,7 +21,7 @@ export function ToastContainer() {
           <button
             key={toast.id}
             onClick={() => dismiss(toast.id)}
-            className={`pointer-events-auto max-w-xs rounded-2xl border px-4 py-3 text-sm font-semibold shadow-lg backdrop-blur-sm transition-all animate-in slide-in-from-top-2 fade-in duration-200 ${colors[toast.type]}`}
+            className={`pointer-events-auto max-w-xs rounded-2xl border px-4 py-3 text-sm font-semibold shadow-lg backdrop-blur-sm transition-all animate-toast-in ${colors[toast.type]}`}
           >
             {toast.message}
           </button>

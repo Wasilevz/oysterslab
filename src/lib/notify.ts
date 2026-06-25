@@ -16,7 +16,8 @@ async function sendMessage(chatId: number, text: string): Promise<boolean> {
       body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" }),
     });
     return res.ok;
-  } catch {
+  } catch (err) {
+    console.error("[NOTIFY] sendMessage error:", err);
     return false;
   }
 }

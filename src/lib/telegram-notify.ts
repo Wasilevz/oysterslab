@@ -17,7 +17,8 @@ export async function sendTelegramMessage(chatId: number, text: string): Promise
       }),
     });
     return res.ok;
-  } catch {
+  } catch (err) {
+    console.error("[TELEGRAM] sendTelegramMessage error:", err);
     return false;
   }
 }

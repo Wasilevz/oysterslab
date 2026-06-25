@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
-import { LiveTab } from "@/components/admin/LiveTab";
-import { ForgottenTab } from "@/components/admin/ForgottenTab";
-import { SalaryPage } from "@/components/admin/SalaryPage";
-import { ScheduleAdmin } from "@/components/admin/ScheduleAdmin";
-import { ShiftEditor } from "@/components/admin/ShiftEditor";
-import { SettingsPage } from "@/components/admin/SettingsPage";
+import { Skeleton } from "@/components/ui/skeleton";
 import { hapticImpact } from "@/lib/haptic";
+
+const LiveTab = lazy(() => import("@/components/admin/LiveTab").then(m => ({ default: m.LiveTab })));
+const ForgottenTab = lazy(() => import("@/components/admin/ForgottenTab").then(m => ({ default: m.ForgottenTab })));
+const SalaryPage = lazy(() => import("@/components/admin/SalaryPage").then(m => ({ default: m.SalaryPage })));
+const ScheduleAdmin = lazy(() => import("@/components/admin/ScheduleAdmin").then(m => ({ default: m.ScheduleAdmin })));
+const ShiftEditor = lazy(() => import("@/components/admin/ShiftEditor").then(m => ({ default: m.ShiftEditor })));
+const SettingsPage = lazy(() => import("@/components/admin/SettingsPage").then(m => ({ default: m.SettingsPage })));
 
 type AdminView = "dashboard" | "live" | "forgotten" | "salary" | "schedule" | "settings" | "shifts";
 
@@ -61,7 +63,9 @@ export function AdminScreen() {
 
   return (
     <main className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] animate-fade-in">
-      {renderView()}
+      <Suspense fallback={<div className="flex flex-1 flex-col gap-4 p-4 pb-24"><Skeleton className="h-8 w-32" /><Skeleton className="h-64 w-full rounded-2xl" /></div>}>
+        {renderView()}
+      </Suspense>
     </main>
   );
 }

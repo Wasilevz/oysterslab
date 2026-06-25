@@ -47,7 +47,8 @@ export async function getAuditLogs(
       .range(offset, offset + limit - 1);
 
     return (data ?? []) as AuditLog[];
-  } catch {
+  } catch (err) {
+    console.error("[AUDIT] getAuditLogs error:", err);
     return [];
   }
 }

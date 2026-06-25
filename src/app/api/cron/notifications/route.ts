@@ -19,7 +19,8 @@ export async function GET(request: Request) {
       reminders,
       autoClose,
     });
-  } catch {
+  } catch (err) {
+    console.error("[CRON] notifications GET error:", err);
     return NextResponse.json(
       { error: "Ошибка сервера" },
       { status: 500 },
@@ -82,7 +83,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
-  } catch {
+  } catch (err) {
+    console.error("[CRON] notifications POST error:", err);
     return NextResponse.json(
       { error: "Ошибка сервера" },
       { status: 500 },

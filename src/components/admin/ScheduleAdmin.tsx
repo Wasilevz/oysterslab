@@ -9,14 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
 import { hapticImpact } from "@/lib/haptic";
+import { TYPE_COLORS } from "@/lib/schedule-constants";
 import type { Schedule, ScheduleType, User } from "@/types/database";
-
-const TYPE_COLORS: Record<ScheduleType, { bg: string; text: string; dot: string }> = {
-  work: { bg: "bg-[var(--text-secondary)]/20", text: "text-[var(--text-secondary)]", dot: "bg-[var(--text-secondary)]" },
-  off: { bg: "bg-emerald-500/20", text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" },
-  vacation: { bg: "bg-[var(--color-warning)]/20", text: "text-[var(--color-warning)]", dot: "bg-[var(--color-warning)]" },
-  sick: { bg: "bg-[var(--color-error)]/20", text: "text-[var(--color-error)]", dot: "bg-[var(--color-error)]" },
-};
 
 const TYPE_ORDER: ScheduleType[] = ["work", "off", "vacation", "sick"];
 
@@ -72,11 +66,12 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
     }
   }, [initData]);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (signal?: AbortSignal) => {
     const [empResult, todayResult] = await Promise.all([
       getEmployees(initData ?? ""),
       getWorkingToday(initData ?? ""),
     ]);
+    if (signal?.aborted) return;
     if (empResult.success && empResult.data) setEmployees(empResult.data);
     if (todayResult.success && todayResult.data) setWorkingToday(todayResult.data);
     await loadScheduleForWeek(weekStart);
@@ -85,7 +80,9 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
 
   useEffect(() => {
     setLoading(true);
-    void loadData();
+    const controller = new AbortController();
+    void loadData(controller.signal);
+    return () => controller.abort();
   }, [loadData]);
 
   const getScheduleType = (userId: string, date: Date): ScheduleType => {
@@ -201,7 +198,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
 
         <div className="mt-3 flex items-center gap-3">
           {(["work", "off", "vacation", "sick"] as const).map((type) => (
-            <span key={type} className="flex items-center gap-1 text-[11px]">
+            <span key={type} className="flex items-center gap-1 text-xs">
               <span className={`h-2.5 w-2.5 rounded-full ${TYPE_COLORS[type].dot}`} />
               <span className={TYPE_COLORS[type].text}>{t(`schedule.${type}`)}</span>
             </span>
@@ -218,14 +215,14 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="sticky left-0 z-20 bg-[var(--bg-surface)] p-2 text-left text-[11px] font-medium text-[var(--text-secondary)] min-w-[90px]">
+                <th className="sticky left-0 z-20 bg-[var(--bg-surface)] p-2 text-left text-xs font-medium text-[var(--text-secondary)] min-w-[90px]">
                   {t("payroll.employee")}
                 </th>
                 {weekDays.map((day, i) => {
                   const isToday = toDateStr(day) === todayStr;
                   return (
                     <th key={i} className="p-1.5 text-center">
-                      <div className={`text-[11px] font-medium ${isToday ? "text-[var(--brand-primary)] font-bold" : "text-[var(--text-secondary)]"}`}>
+                      <div className={`text-xs font-medium ${isToday ? "text-[var(--brand-primary)] font-bold" : "text-[var(--text-secondary)]"}`}>
                         {dayLabels[i]}
                       </div>
                       <div className={`text-[13px] font-bold ${isToday ? "text-[var(--brand-primary)]" : "text-[var(--text-primary)]"}`}>
@@ -253,7 +250,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
                       <td key={i} className="p-0.5">
                         <button
                           onClick={() => cycleType(emp.id, day)}
-                          className={`h-10 w-full rounded-xl text-[11px] font-bold transition-all active:scale-95 ${colors.bg} ${colors.text} ${isToday ? "ring-1 ring-[var(--brand-primary)]/30" : ""}`}
+                          className={`h-10 w-full rounded-xl text-xs font-bold transition-all active:scale-95 ${colors.bg} ${colors.text} ${isToday ? "ring-1 ring-[var(--brand-primary)]/30" : ""}`}
                         >
                           {type === "work" ? t("schedule.abbrWork") : type === "off" ? t("schedule.abbrOff") : type === "vacation" ? t("schedule.abbrVacation") : t("schedule.abbrSick")}
                         </button>
@@ -269,7 +266,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
 
       {workingToday.length > 0 && (
         <div className="border-t border-[var(--border-color)] px-4 pt-4 pb-24">
-          <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
             {t("schedule.todayOnShift")}
           </h2>
           <div className="space-y-2">
@@ -281,7 +278,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
                 <div>
                   <p className="text-sm font-medium text-[var(--text-primary)]">{w.full_name}</p>
                   {w.position && (
-                    <p className="text-[11px] text-[var(--text-secondary)]">{w.position}</p>
+                    <p className="text-xs text-[var(--text-secondary)]">{w.position}</p>
                   )}
                 </div>
                 {w.clock_in ? (
@@ -290,10 +287,10 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--brand-primary)] opacity-75" />
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--brand-primary)]" />
                     </span>
-                    <span className="text-[11px] text-[var(--brand-primary)]">{t("shift.onShift")}</span>
+                    <span className="text-xs text-[var(--brand-primary)]">{t("shift.onShift")}</span>
                   </span>
                 ) : (
-                  <span className="text-[11px] text-[var(--text-secondary)]">{t("schedule.notArrived")}</span>
+                  <span className="text-xs text-[var(--text-secondary)]">{t("schedule.notArrived")}</span>
                 )}
               </div>
             ))}

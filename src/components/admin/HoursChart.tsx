@@ -50,7 +50,7 @@ export function HoursChart({ data }: HoursChartProps) {
           <Tooltip
             contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: "12px", color: tooltipText, fontSize: 13 }}
             labelStyle={{ color: tooltipLabel }}
-            formatter={(value) => [`${value} ч`, t("charts.hoursLabel")]}
+            formatter={(value) => [`${value} ${t("common.hoursAbbrev")}`, t("charts.hoursLabel")]}
           />
           <Bar dataKey="hours" radius={[6, 6, 0, 0]} maxBarSize={40}>
             {data.map((_, index) => (

@@ -62,7 +62,8 @@ export async function verifyTelegramAuth(
       data: user as User,
       telegramId,
     };
-  } catch {
+  } catch (err) {
+    console.error("[AUTH] verifyTelegramAuth error:", err);
     return {
       success: false,
       telegramId,

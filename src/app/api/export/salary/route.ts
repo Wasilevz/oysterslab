@@ -34,7 +34,8 @@ export async function GET(request: Request) {
         "Content-Disposition": `attachment; filename="${filename}"`,
       },
     });
-  } catch {
+  } catch (err) {
+    console.error("[EXPORT] salary GET error:", err);
     return NextResponse.json(
       { error: "Ошибка экспорта" },
       { status: 500 },

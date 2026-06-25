@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
+import { ro } from "date-fns/locale";
 import { getMyPayments, confirmPayment } from "@/actions/salaryActions";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,7 +20,8 @@ function formatMoney(amount: number): string {
 }
 
 export function EmployeeSalary() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const dateLocale = locale === "ro" ? ro : ru;
   const user = useUserStore((s) => s.user);
   const [payments, setPayments] = useState<SalaryPayment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,26 +90,26 @@ export function EmployeeSalary() {
           >
             <div className="flex items-start justify-between">
               <p className="text-sm text-[var(--text-secondary)]">
-                {format(new Date(p.period_start), "d MMM", { locale: ru })} —{" "}
-                {format(new Date(p.period_end), "d MMM", { locale: ru })}
+                {format(new Date(p.period_start), "d MMM", { locale: dateLocale })} —{" "}
+                {format(new Date(p.period_end), "d MMM", { locale: dateLocale })}
               </p>
               {p.status === "paid" ? (
-                <span className="rounded-lg bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-400">{t("salary.received")}</span>
+                <span className="rounded-lg bg-emerald-500/10 px-2 py-0.5 text-xs font-bold text-emerald-400">{t("salary.received")}</span>
               ) : p.status === "approved" ? (
-                <span className="rounded-lg bg-[var(--accent-money)]/10 px-2 py-0.5 text-[11px] font-bold text-[var(--brand-primary)]">{t("salary.approvedStatus")}</span>
+                <span className="rounded-lg bg-[var(--accent-money)]/10 px-2 py-0.5 text-xs font-bold text-[var(--brand-primary)]">{t("salary.approvedStatus")}</span>
               ) : (
-                <span className="rounded-lg bg-amber-500/10 px-2 py-0.5 text-[11px] font-bold text-amber-400">{t("salary.waiting")}</span>
+                <span className="rounded-lg bg-amber-500/10 px-2 py-0.5 text-xs font-bold text-amber-400">{t("salary.waiting")}</span>
               )}
             </div>
 
             <div className="mt-2 flex items-center justify-between">
-              <span className="text-xs text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} ч × {Number(p.hourly_rate)} л/ч</span>
+              <span className="text-xs text-[var(--text-secondary)]">{t("salary.hoursXrate", { hours: Number(p.hours_worked).toFixed(1), rate: Number(p.hourly_rate) })}</span>
               <p className="font-mono text-lg font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</p>
             </div>
 
             {p.paid_at && (
-              <p className="mt-1.5 text-[11px] text-emerald-400">
-                {t("salary.received")}: {format(new Date(p.paid_at), "d MMM, HH:mm", { locale: ru })}
+              <p className="mt-1.5 text-xs text-emerald-400">
+                {t("salary.received")}: {format(new Date(p.paid_at), "d MMM, HH:mm", { locale: dateLocale })}
               </p>
             )}
 

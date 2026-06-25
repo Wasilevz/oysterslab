@@ -1,4 +1,10 @@
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+interface BucketEntry {
+  tokens: number;
+  lastRefill: number;
+}
+
+const buckets = new Map<string, BucketEntry>();
+const MAX_ENTRIES = 1000;
 
 export function checkRateLimit(
   key: string,
@@ -6,27 +12,31 @@ export function checkRateLimit(
   windowMs: number = 60000,
 ): { allowed: boolean; remaining: number } {
   const now = Date.now();
-  const entry = rateLimitMap.get(key);
+  const refillRate = maxRequests / windowMs;
+  const entry = buckets.get(key);
 
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
+  if (entry && now - entry.lastRefill > windowMs) {
+    buckets.delete(key);
+  }
+
+  if (!buckets.has(key)) {
+    if (buckets.size >= MAX_ENTRIES) {
+      const oldestKey = buckets.keys().next().value;
+      if (oldestKey !== undefined) buckets.delete(oldestKey);
+    }
+    buckets.set(key, { tokens: maxRequests - 1, lastRefill: now });
     return { allowed: true, remaining: maxRequests - 1 };
   }
 
-  if (entry.count >= maxRequests) {
+  const bucket = buckets.get(key)!;
+  const elapsed = now - bucket.lastRefill;
+  bucket.tokens = Math.min(maxRequests, bucket.tokens + elapsed * refillRate);
+  bucket.lastRefill = now;
+
+  if (bucket.tokens < 1) {
     return { allowed: false, remaining: 0 };
   }
 
-  entry.count++;
-  return { allowed: true, remaining: maxRequests - entry.count };
+  bucket.tokens -= 1;
+  return { allowed: true, remaining: Math.floor(bucket.tokens) };
 }
-
-// Cleanup old entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of rateLimitMap) {
-    if (now > entry.resetAt) {
-      rateLimitMap.delete(key);
-    }
-  }
-}, 300000);

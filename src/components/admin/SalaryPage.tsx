@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { format, startOfWeek, endOfWeek, subWeeks, addWeeks } from "date-fns";
 import { ru } from "date-fns/locale";
+import { ro } from "date-fns/locale";
 import {
-  getEmployees,
   getShiftsForPeriod,
   createPayment,
   approvePayment,
@@ -12,6 +12,7 @@ import {
   getMonthlyReport,
   deletePayment,
 } from "@/actions/salaryActions";
+import { getEmployees } from "@/actions/employeeActions";
 import { getFines } from "@/actions/finesActions";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -33,7 +34,8 @@ interface SalaryPageProps {
 }
 
 export function SalaryPage({ onBack }: SalaryPageProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const dateLocale = locale === "ro" ? ro : ru;
   const [employees, setEmployees] = useState<User[]>([]);
   const [payments, setPayments] = useState<SalaryPaymentWithUser[]>([]);
   const [fines, setFines] = useState<FineWithUser[]>([]);
@@ -175,7 +177,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
       <header className="border-b border-[var(--border-color)] px-4 py-5">
         <div className="flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} aria-label="Назад" className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+            <button onClick={onBack} aria-label={t("common.back")} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
@@ -227,7 +229,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               >
                 <option value="">{t("salary.selectEmployee")}</option>
                 {employees.map((emp) => (
-                  <option key={emp.id} value={emp.id}>{emp.full_name} — {emp.hourly_rate} л/ч</option>
+                  <option key={emp.id} value={emp.id}>{emp.full_name} — {emp.hourly_rate} {t("common.ratePerHour")}</option>
                 ))}
               </select>
             </div>
@@ -257,11 +259,11 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               <p className="text-sm font-semibold text-[var(--brand-primary)]">{t("salary.calculation")}</p>
               <div className="flex justify-between text-sm">
                 <span className="text-[var(--text-secondary)]">{t("salary.hours")}</span>
-                <span className="font-mono font-bold text-[var(--text-primary)]">{preview.hours.toFixed(1)} ч</span>
+                <span className="font-mono font-bold text-[var(--text-primary)]">{preview.hours.toFixed(1)} {t("common.hoursAbbrev")}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[var(--text-secondary)]">{t("salary.rate")}</span>
-                <span className="font-mono text-[var(--text-primary)]">{preview.rate} л/ч</span>
+                <span className="font-mono text-[var(--text-primary)]">{preview.rate} {t("common.ratePerHour")}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[var(--text-secondary)]">{t("salary.shifts")}</span>
@@ -299,13 +301,13 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
                         <p className="font-bold text-[var(--text-primary)]">{p.users.full_name}</p>
                         {p.users.position && <p className="text-[10px] text-[var(--text-secondary)]">{p.users.position}</p>}
                         <p className="text-xs text-[var(--text-secondary)]">
-                          {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
+                          {format(new Date(p.period_start), "d MMM", { locale: dateLocale })} — {format(new Date(p.period_end), "d MMM", { locale: dateLocale })}
                         </p>
                       </div>
                       <span className="rounded-lg bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">{t("salary.waiting")}</span>
                     </div>
                     <div className="mt-2 flex justify-between text-sm">
-                      <span className="text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} ч × {Number(p.hourly_rate)} л/ч</span>
+                      <span className="text-[var(--text-secondary)]">{t("salary.hoursXrate", { hours: Number(p.hours_worked).toFixed(1), rate: Number(p.hourly_rate) })}</span>
                       <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</span>
                     </div>
                     <div className="mt-3 flex gap-2">
@@ -328,13 +330,13 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
                       <div>
                         <p className="font-bold text-[var(--text-primary)]">{p.users.full_name}</p>
                         <p className="text-xs text-[var(--text-secondary)]">
-                          {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
+                          {format(new Date(p.period_start), "d MMM", { locale: dateLocale })} — {format(new Date(p.period_end), "d MMM", { locale: dateLocale })}
                         </p>
                       </div>
                       <span className="rounded-lg bg-[var(--accent-money)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--brand-primary)]">{t("salary.approvedStatus")}</span>
                     </div>
                     <div className="mt-2 flex justify-between">
-                      <span className="text-sm text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} ч</span>
+                      <span className="text-sm text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} {t("common.hoursAbbrev")}</span>
                       <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</span>
                     </div>
                   </div>
@@ -353,18 +355,18 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
                       <div>
                         <p className="font-bold text-[var(--text-primary)]">{p.users.full_name}</p>
                         <p className="text-xs text-[var(--text-secondary)]">
-                          {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
+                          {format(new Date(p.period_start), "d MMM", { locale: dateLocale })} — {format(new Date(p.period_end), "d MMM", { locale: dateLocale })}
                         </p>
                       </div>
                       <span className="rounded-lg bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">{t("salary.paidStatus")}</span>
                     </div>
                     <div className="mt-2 flex justify-between">
-                      <span className="text-sm text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} ч</span>
+                      <span className="text-sm text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} {t("common.hoursAbbrev")}</span>
                       <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</span>
                     </div>
                     {p.paid_at && (
                       <p className="mt-1 text-[10px] text-emerald-400">
-                        {format(new Date(p.paid_at), "d MMM, HH:mm", { locale: ru })}
+                        {format(new Date(p.paid_at), "d MMM, HH:mm", { locale: dateLocale })}
                       </p>
                     )}
                   </div>
@@ -393,7 +395,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
                 href={`/api/export/salary?year=${reportYear}&month=${reportMonth}`}
                 download
                 className="rounded-xl p-2 text-[var(--brand-primary)] hover:bg-[var(--bg-surface)]"
-                title="Скачать CSV"
+                title={t("common.downloadCSV")}
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />

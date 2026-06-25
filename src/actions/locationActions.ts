@@ -21,7 +21,8 @@ export async function getLocations(
 
     if (error) return { success: false, error: "Ошибка сервера" };
     return { success: true, data: (data ?? []) as Location[] };
-  } catch {
+  } catch (err) {
+    console.error("[LOCATION] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -47,7 +48,8 @@ export async function addLocation(
 
     if (error) return { success: false, error: "Ошибка сервера" };
     return { success: true, data: data as Location };
-  } catch {
+  } catch (err) {
+    console.error("[LOCATION] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -69,7 +71,8 @@ export async function deleteLocation(
 
     if (error) return { success: false, error: "Ошибка сервера" };
     return { success: true };
-  } catch {
+  } catch (err) {
+    console.error("[LOCATION] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -95,7 +98,8 @@ export async function updateLocation(
 
     if (error) return { success: false, error: "Ошибка сервера" };
     return { success: true };
-  } catch {
+  } catch (err) {
+    console.error("[LOCATION] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -132,7 +136,8 @@ export async function getLocationSettings(
         authMode: data.auth_mode ?? "ip",
       },
     };
-  } catch {
+  } catch (err) {
+    console.error("[LOCATION] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -158,7 +163,8 @@ export async function saveLocationSettings(
     if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true };
-  } catch {
+  } catch (err) {
+    console.error("[LOCATION] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }

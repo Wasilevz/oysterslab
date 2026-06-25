@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
+import { ro } from "date-fns/locale";
 import { approvePayroll, generatePayroll } from "@/actions/adminActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +33,8 @@ function formatMoney(amount: number): string {
 }
 
 export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const dateLocale = locale === "ro" ? ro : ru;
   const [isPending, startTransition] = useTransition();
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -151,14 +153,14 @@ export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
                 </TableCell>
                 <TableCell className="text-[var(--text-secondary)]">
                   {format(new Date(payroll.period_start), "d MMM", {
-                    locale: ru,
+                    locale: dateLocale,
                   })}
                   {" — "}
                   {format(new Date(payroll.period_end), "d MMM", {
-                    locale: ru,
+                    locale: dateLocale,
                   })}
                 </TableCell>
-                <TableCell>{payroll.total_hours} ч</TableCell>
+                <TableCell>{payroll.total_hours} {t("common.hoursAbbrev")}</TableCell>
                 <TableCell className="font-bold">
                   {formatMoney(payroll.total_amount)}
                 </TableCell>

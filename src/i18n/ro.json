@@ -235,5 +235,30 @@
   "schedule.abbrWork": "L",
   "schedule.abbrOff": "—",
   "schedule.abbrVacation": "C",
-  "schedule.abbrSick": "B"
+  "schedule.abbrSick": "B",
+
+  "common.hoursAbbrev": "h",
+  "common.ratePerHour": "L/h",
+  "common.shiftsCount": "{count} ture",
+  "common.shiftFrom": "tură din",
+  "common.downloadCSV": "Descarcă CSV",
+  "common.backAria": "Înapoi",
+
+  "dialog.close": "Închide",
+
+  "settings.confirmDeleteEmployee": "Șterge angajatul?",
+  "settings.confirmDeleteLocation": "Șterge locația?",
+  "settings.locations": "Locații",
+  "settings.locationNamePlaceholder": "Nume",
+  "settings.addressPlaceholder2": "Adresă",
+  "settings.noLocation": "Fără locație",
+  "settings.auditLog": "Jurnal de acțiuni",
+  "settings.noLogs": "Nicio înregistrare",
+  "settings.enterLocationName": "Introdu numele",
+  "settings.enterTelegramId": "Introdu Telegram ID",
+  "settings.locationLabel": "Locație",
+
+  "onboarding.next": "Mai departe",
+  "onboarding.start": "Începe",
+  "onboarding.skip": "Sari"
 }

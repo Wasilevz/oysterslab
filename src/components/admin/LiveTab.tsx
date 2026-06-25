@@ -6,6 +6,7 @@ import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
 import { getElapsedSeconds } from "@/lib/utils";
+import { POLL_INTERVAL_MS } from "@/lib/constants";
 import type { ActiveShiftCard } from "@/types/database";
 
 interface LiveTabProps {
@@ -17,8 +18,9 @@ export function LiveTab({ onBack }: LiveTabProps) {
   const [activeShifts, setActiveShifts] = useState<ActiveShiftCard[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (signal?: AbortSignal) => {
     const result = await getDashboardStats(useUserStore.getState().initData ?? "");
+    if (signal?.aborted) return;
     if (result.success && result.data) {
       setActiveShifts(result.data.activeShifts);
     }
@@ -26,17 +28,20 @@ export function LiveTab({ onBack }: LiveTabProps) {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadData();
-    const interval = setInterval(() => void loadData(), 15000);
-    return () => clearInterval(interval);
+    const controller = new AbortController();
+    void loadData(controller.signal);
+    const interval = setInterval(() => void loadData(), POLL_INTERVAL_MS);
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+    };
   }, [loadData]);
 
   return (
     <div className="px-4 pt-4 pb-8">
       <div className="mb-4 flex items-center gap-3">
         {onBack && (
-          <button onClick={onBack} aria-label="Назад" className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+          <button onClick={onBack} aria-label={t("common.back")} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
@@ -78,7 +83,7 @@ export function LiveTab({ onBack }: LiveTabProps) {
                   </div>
                   <div className="text-right">
                     <ShiftTimer clockIn={shift.clock_in} className="font-mono text-2xl font-black tabular-nums text-[var(--brand-primary)]" />
-                    {isLongShift && <p className="mt-0.5 text-[11px] font-medium text-amber-400">{hours}+ ч</p>}
+                    {isLongShift && <p className="mt-0.5 text-xs font-medium text-amber-400">{hours}+ {t("common.hoursAbbrev")}</p>}
                   </div>
                 </div>
               </article>

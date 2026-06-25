@@ -12,7 +12,7 @@ const STEPS = [
 
 export function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState(0);
-  const { locale } = useI18n();
+  const { t: tFn, locale } = useI18n();
 
   const texts: Record<string, Record<string, { title: string; desc: string }>> = {
     ru: {
@@ -29,8 +29,8 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
     },
   };
 
-  const t = texts[locale] ?? texts.ru;
-  const current = t[STEPS[step].key];
+  const stepTexts = texts[locale] ?? texts.ru;
+  const current = stepTexts[STEPS[step].key];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-app)]">
@@ -66,7 +66,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
           }}
           className="w-full rounded-2xl bg-[var(--brand-primary)] py-4 text-base font-bold text-white hover:opacity-90 transition-all active:scale-[0.98]"
         >
-          {step < STEPS.length - 1 ? (locale === "ro" ? "Mai departe" : "Далее") : (locale === "ro" ? "Începe" : "Начать")}
+          {step < STEPS.length - 1 ? tFn("onboarding.next") : tFn("onboarding.start")}
         </button>
 
         <button
@@ -76,7 +76,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
           }}
           className="mt-3 w-full py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
         >
-          {locale === "ro" ? "Sari" : "Пропустить"}
+          {tFn("onboarding.skip")}
         </button>
       </div>
     </div>

@@ -40,7 +40,8 @@ export async function getEmployees(initData?: string): Promise<ActionResult<User
     if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true, data: (data ?? []) as User[] };
-  } catch {
+  } catch (err) {
+    console.error("[EMPLOYEE] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -96,7 +97,8 @@ export async function addEmployee(
     void logAction(callerId, "add_employee", "user", data?.id, `${fullName} (${role})`);
 
     return { success: true, data: data as User };
-  } catch {
+  } catch (err) {
+    console.error("[EMPLOYEE] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -154,7 +156,8 @@ export async function updateEmployee(
     void logAction(callerId, "update_employee", "user", userId);
 
     return { success: true };
-  } catch {
+  } catch (err) {
+    console.error("[EMPLOYEE] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -173,7 +176,8 @@ export async function deleteEmployee(userId: string, callerId: string): Promise<
     void logAction(callerId, "delete_employee", "user", userId);
 
     return { success: true };
-  } catch {
+  } catch (err) {
+    console.error("[EMPLOYEE] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useI18n } from "@/lib/i18n";
 import type { DashboardStats } from "@/types/database";
 
@@ -7,7 +8,7 @@ interface StatsCardsProps {
   stats: DashboardStats;
 }
 
-export function StatsCards({ stats }: StatsCardsProps) {
+export const StatsCards = React.memo(function StatsCards({ stats }: StatsCardsProps) {
   const { t } = useI18n();
   const pendingCount = stats.autoClosedShifts.length;
 
@@ -30,4 +31,4 @@ export function StatsCards({ stats }: StatsCardsProps) {
       ))}
     </div>
   );
-}
+});

@@ -30,7 +30,8 @@ export async function getSchedule(
     if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true, data: (data ?? []) as Schedule[] };
-  } catch {
+  } catch (err) {
+    console.error("[SCHEDULE] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -63,7 +64,8 @@ export async function getMySchedule(
     if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true, data: (data ?? []) as Schedule[] };
-  } catch {
+  } catch (err) {
+    console.error("[SCHEDULE] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -90,7 +92,8 @@ export async function setScheduleDay(
     if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true };
-  } catch {
+  } catch (err) {
+    console.error("[SCHEDULE] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -144,7 +147,8 @@ export async function setBulkWeekends(
     if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true, data: updates.length };
-  } catch {
+  } catch (err) {
+    console.error("[SCHEDULE] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -197,7 +201,8 @@ export async function getWorkingToday(
     }));
 
     return { success: true, data: result };
-  } catch {
+  } catch (err) {
+    console.error("[SCHEDULE] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -218,7 +223,8 @@ export async function getColleagues(
 
     if (error) return { success: false, error: "Ошибка сервера" };
     return { success: true, data: (data ?? []) };
-  } catch {
+  } catch (err) {
+    console.error("[SCHEDULE] error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }

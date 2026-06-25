@@ -235,5 +235,30 @@
   "schedule.abbrWork": "Р",
   "schedule.abbrOff": "—",
   "schedule.abbrVacation": "О",
-  "schedule.abbrSick": "Б"
+  "schedule.abbrSick": "Б",
+
+  "common.hoursAbbrev": "ч",
+  "common.ratePerHour": "л/ч",
+  "common.shiftsCount": "{count} смен",
+  "common.shiftFrom": "смена от",
+  "common.downloadCSV": "Скачать CSV",
+  "common.backAria": "Назад",
+
+  "dialog.close": "Закрыть",
+
+  "settings.confirmDeleteEmployee": "Удалить сотрудника?",
+  "settings.confirmDeleteLocation": "Удалить локацию?",
+  "settings.locations": "Локации",
+  "settings.locationNamePlaceholder": "Название",
+  "settings.addressPlaceholder2": "Адрес",
+  "settings.noLocation": "Без локации",
+  "settings.auditLog": "Журнал действий",
+  "settings.noLogs": "Нет записей",
+  "settings.enterLocationName": "Введите название",
+  "settings.enterTelegramId": "Введите Telegram ID",
+  "settings.locationLabel": "Локация",
+
+  "onboarding.next": "Далее",
+  "onboarding.start": "Начать",
+  "onboarding.skip": "Пропустить"
 }

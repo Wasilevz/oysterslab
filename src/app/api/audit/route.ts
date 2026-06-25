@@ -17,7 +17,8 @@ export async function GET(request: Request) {
 
     const logs = await getAuditLogs(limit, offset);
     return NextResponse.json({ ok: true, logs });
-  } catch {
+  } catch (err) {
+    console.error("[AUDIT] GET error:", err);
     return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
   }
 }

@@ -77,11 +77,9 @@ export async function clockIn(
     }
 
     return { success: true, data: shift as Shift };
-  } catch {
-    return {
-      success: false,
-      error: "Не удалось начать смену",
-    };
+  } catch (err) {
+    console.error("[SHIFT] clockIn error:", err);
+    return { success: false, error: "Ошибка сервера" };
   }
 }
 
@@ -147,11 +145,9 @@ export async function clockOut(
     }
 
     return { success: true, data: shift as Shift };
-  } catch {
-    return {
-      success: false,
-      error: "Не удалось завершить смену",
-    };
+  } catch (err) {
+    console.error("[SHIFT] clockOut error:", err);
+    return { success: false, error: "Ошибка сервера" };
   }
 }
 
@@ -179,11 +175,9 @@ export async function getMyShifts(
     }
 
     return { success: true, data: (data ?? []) as Shift[] };
-  } catch {
-    return {
-      success: false,
-      error: "Не удалось загрузить смены",
-    };
+  } catch (err) {
+    console.error("[SHIFT] getMyShifts error:", err);
+    return { success: false, error: "Ошибка сервера" };
   }
 }
 
@@ -209,11 +203,9 @@ export async function getActiveShift(
     }
 
     return { success: true, data: (data as Shift | null) ?? null };
-  } catch {
-    return {
-      success: false,
-      error: "Не удалось загрузить активную смену",
-    };
+  } catch (err) {
+    console.error("[SHIFT] getActiveShift error:", err);
+    return { success: false, error: "Ошибка сервера" };
   }
 }
 
@@ -265,11 +257,9 @@ export async function reviewAutoClosedShift(
     }
 
     return { success: true, data: updated as Shift };
-  } catch {
-    return {
-      success: false,
-      error: "Не удалось сохранить смену",
-    };
+  } catch (err) {
+    console.error("[SHIFT] reviewAutoClosedShift error:", err);
+    return { success: false, error: "Ошибка сервера" };
   }
 }
 
@@ -324,7 +314,8 @@ export async function editShift(
     void logAction(callerId, "edit_shift", "shift", shiftId, `clock_in: ${clockIn}, clock_out: ${clockOut}`);
 
     return { success: true, data: updated as Shift };
-  } catch {
+  } catch (err) {
+    console.error("[SHIFT] editShift error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -364,7 +355,8 @@ export async function getAllShifts(
     if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true, data: (data ?? []) as (Shift & { users: { full_name: string; position: string | null } })[] };
-  } catch {
+  } catch (err) {
+    console.error("[SHIFT] getAllShifts error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { ru } from "date-fns/locale";
+import { ro } from "date-fns/locale";
 import {
   getActiveShift,
   getMyShifts,
@@ -17,6 +18,7 @@ import { useI18n } from "@/lib/i18n";
 import { hapticImpact, hapticNotification } from "@/lib/haptic";
 import { useToast } from "@/store/toastStore";
 import { useUserStore } from "@/store/userStore";
+import { SHIFT_HISTORY_LIMIT } from "@/lib/constants";
 import type { EmployeeStats, Shift } from "@/types/database";
 
 function formatMoney(amount: number): string {
@@ -42,7 +44,7 @@ const STATUS_COLORS: Record<string, string> = {
   ACTIVE: "text-[var(--brand-primary)]",
   COMPLETED: "text-[var(--color-success)]",
   AUTO_CLOSED: "text-[var(--color-warning)]",
-  REVIEWED: "text-[var(--accent-money)]",
+  REVIEWED: "text-[var(--text-secondary)]",
 };
 
 export function EmployeeScreen() {
@@ -53,6 +55,8 @@ export function EmployeeScreen() {
   const [stats, setStats] = useState<EmployeeStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
+
+  const dateLocale = locale === "ro" ? ro : ru;
   const [showOnboarding, setShowOnboarding] = useState(() => {
     if (typeof window !== "undefined") {
       return !localStorage.getItem("onboarded");
@@ -63,7 +67,7 @@ export function EmployeeScreen() {
   const [historyPeriod, setHistoryPeriod] = useState<PeriodType | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (signal?: AbortSignal) => {
     if (!user) return;
 
     const initData = useUserStore.getState().initData;
@@ -73,6 +77,7 @@ export function EmployeeScreen() {
       getEmployeeStats(user.id, initData ?? ""),
     ]);
 
+    if (signal?.aborted) return;
     if (activeResult.success) setActiveShift(activeResult.data ?? null);
     if (statsResult.success && statsResult.data) setStats(statsResult.data);
 
@@ -80,8 +85,9 @@ export function EmployeeScreen() {
   }, [user]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void loadData();
+    const controller = new AbortController();
+    void loadData(controller.signal);
+    return () => controller.abort();
   }, [loadData]);
 
   const handleToggleShift = () => {
@@ -138,7 +144,7 @@ export function EmployeeScreen() {
     }
 
     const initData = useUserStore.getState().initData;
-    const result = await getMyShifts(user.id, 100, initData ?? "");
+    const result = await getMyShifts(user.id, SHIFT_HISTORY_LIMIT, initData ?? "");
 
     if (result.success && result.data) {
       const filtered = result.data.filter((s) => {
@@ -186,7 +192,7 @@ export function EmployeeScreen() {
             {user?.full_name ? getInitials(user.full_name) : "—"}
           </div>
           <div>
-            <p className="text-[11px] font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
+            <p className="text-xs font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
               {t("employee.hello")}
             </p>
             <h1 className="text-lg font-bold dark:text-white text-zinc-900">{user?.full_name}</h1>
@@ -221,7 +227,7 @@ export function EmployeeScreen() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--brand-primary)] opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--brand-primary)]" />
                 </span>
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--brand-primary)]">
+                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--brand-primary)]">
                   {t("shift.onShift")}
                 </p>
               </div>
@@ -252,13 +258,13 @@ export function EmployeeScreen() {
             onClick={() => openShiftHistory("week")}
             className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 text-left transition-all active:scale-[0.98] hover:border-[var(--brand-primary)]/30"
           >
-            <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+            <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
               {t("employee.thisWeek")}
             </p>
             <p className="mt-1 font-mono text-2xl font-bold text-[var(--text-primary)]">
               {stats.hoursThisWeek.toFixed(1)}
               <span className="ml-1 text-xs font-normal text-[var(--text-secondary)]">
-                ч
+                {t("common.hoursAbbrev")}
               </span>
             </p>
             <p className="mt-1 text-[10px] text-[var(--brand-primary)]">
@@ -269,13 +275,13 @@ export function EmployeeScreen() {
             onClick={() => openShiftHistory("month")}
             className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 text-left transition-all active:scale-[0.98] hover:border-[var(--brand-primary)]/30"
           >
-            <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+            <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
               {t("employee.thisMonth")}
             </p>
             <p className="mt-1 font-mono text-2xl font-bold text-[var(--text-primary)]">
               {stats.hoursThisMonth.toFixed(1)}
               <span className="ml-1 text-xs font-normal text-[var(--text-secondary)]">
-                ч
+                {t("common.hoursAbbrev")}
               </span>
             </p>
             <p className="mt-1 text-[10px] text-[var(--brand-primary)]">
@@ -283,14 +289,14 @@ export function EmployeeScreen() {
             </p>
           </button>
           <div className="col-span-2 rounded-2xl border border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5 p-4">
-            <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
+            <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">
               {t("employee.expectedSalary")}
             </p>
             <p className="mt-1 font-mono text-2xl font-bold text-[var(--brand-primary)]">
               {formatMoney(stats.expectedSalary)}
             </p>
-            <p className="mt-0.5 text-[11px] text-[var(--text-secondary)]">
-              {stats.hourlyRate} л/ч · {stats.totalShifts} смен
+            <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
+              {stats.hourlyRate} {t("common.ratePerHour")} · {t("common.shiftsCount", { count: stats.totalShifts })}
             </p>
           </div>
         </div>
@@ -353,7 +359,7 @@ export function EmployeeScreen() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-semibold text-[var(--text-primary)]">
-                          {format(new Date(shift.clock_in), "d MMM, EEEE", { locale: ru })}
+                          {format(new Date(shift.clock_in), "d MMM, EEEE", { locale: dateLocale })}
                         </p>
                         <p className="text-xs text-[var(--text-secondary)]">
                           {format(new Date(shift.clock_in), "HH:mm")}
@@ -365,7 +371,7 @@ export function EmployeeScreen() {
                       <div className="text-right">
                         {shift.hours_worked != null && (
                           <p className="font-mono text-lg font-bold text-[var(--text-primary)]">
-                            {shift.hours_worked.toFixed(1)}ч
+                            {shift.hours_worked.toFixed(1)} {t("common.hoursAbbrev")}
                           </p>
                         )}
                         <p className={`text-[10px] font-semibold ${STATUS_COLORS[shift.status] ?? "text-[var(--text-secondary)]"}`}>

@@ -9,34 +9,7 @@ import type {
   EmployeeStats,
   SalaryPayment,
   SalaryPaymentWithUser,
-  User,
 } from "@/types/database";
-
-export async function getEmployees(initData?: string): Promise<ActionResult<User[]>> {
-  try {
-    const authResult = await requireAdmin(initData ?? "");
-    if ("error" in authResult) return { success: false, error: authResult.error };
-
-    const supabase = getSupabaseAdmin();
-    const locationId = await getAdminLocationId(authResult.user.id);
-
-    let query = supabase
-      .from("users")
-      .select("*")
-      .in("role", ["employee", "admin"])
-      .order("full_name");
-
-    if (locationId) {
-      query = query.eq("location_id", locationId);
-    }
-
-    const { data, error } = await query;
-    if (error) return { success: false, error: "Ошибка сервера" };
-    return { success: true, data: (data ?? []) as User[] };
-  } catch {
-    return { success: false, error: "Ошибка сервера" };
-  }
-}
 
 export async function getShiftsForPeriod(
   userId: string,
@@ -75,7 +48,8 @@ export async function getShiftsForPeriod(
       success: true,
       data: { hours: rounded, amount, rate, shiftCount: list.length },
     };
-  } catch {
+  } catch (err) {
+    console.error("[SALARY] getEmployees error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -140,7 +114,8 @@ export async function createPayment(
     if (error) return { success: false, error: "Ошибка сервера" };
 
     return { success: true, data: data as SalaryPayment };
-  } catch {
+  } catch (err) {
+    console.error("[SALARY] getEmployees error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -166,7 +141,8 @@ export async function approvePayment(
     void logAction(callerId, "approve_payment", "salary_payment", paymentId);
 
     return { success: true };
-  } catch {
+  } catch (err) {
+    console.error("[SALARY] getEmployees error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -187,6 +163,17 @@ export async function confirmPayment(
     if (!auth) return { success: false, error: "Не авторизован" };
 
     const supabase = getSupabaseAdmin();
+
+    const { data: payment } = await supabase
+      .from("salary_payments")
+      .select("user_id, status")
+      .eq("id", paymentId)
+      .single();
+
+    if (!payment || payment.user_id !== auth.id) {
+      return { success: false, error: "Не авторизован" };
+    }
+
     const { error } = await supabase
       .from("salary_payments")
       .update({ status: "paid", paid_at: new Date().toISOString() })
@@ -199,7 +186,8 @@ export async function confirmPayment(
     void logAction("system", "confirm_payment", "salary_payment", paymentId);
 
     return { success: true };
-  } catch {
+  } catch (err) {
+    console.error("[SALARY] getEmployees error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -220,7 +208,8 @@ export async function deletePayment(
       .eq("status", "pending");
     if (error) return { success: false, error: "Ошибка сервера" };
     return { success: true };
-  } catch {
+  } catch (err) {
+    console.error("[SALARY] getEmployees error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -245,7 +234,8 @@ export async function getAllPayments(initData?: string): Promise<ActionResult<Sa
     const { data, error } = await query;
     if (error) return { success: false, error: "Ошибка сервера" };
     return { success: true, data: (data ?? []) as SalaryPaymentWithUser[] };
-  } catch {
+  } catch (err) {
+    console.error("[SALARY] getEmployees error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -321,7 +311,8 @@ export async function getMonthlyReport(
       success: true,
       data: { employees: result, grandTotal: Math.round(grandTotal) },
     };
-  } catch {
+  } catch (err) {
+    console.error("[SALARY] getEmployees error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -409,7 +400,8 @@ export async function getEmployeeStats(
         weeklyHours,
       },
     };
-  } catch {
+  } catch (err) {
+    console.error("[SALARY] getEmployees error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -431,7 +423,8 @@ export async function getMyPayments(
 
     if (error) return { success: false, error: "Ошибка сервера" };
     return { success: true, data: (data ?? []) as SalaryPaymentWithUser[] };
-  } catch {
+  } catch (err) {
+    console.error("[SALARY] getEmployees error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }

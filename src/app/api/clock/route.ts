@@ -74,6 +74,16 @@ export async function POST(request: Request) {
 
     const supabase = getSupabaseAdmin();
 
+    const { data: userExists } = await supabase
+      .from("users")
+      .select("id")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (!userExists) {
+      return NextResponse.json({ error: "Пользователь не найден" }, { status: 404 });
+    }
+
     const { data: settings } = await supabase
       .from("location_settings")
       .select("allowed_ips, auth_mode")
@@ -162,7 +172,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
-  } catch {
+  } catch (err) {
+    console.error("[CLOCK] POST error:", err);
     return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
   }
 }

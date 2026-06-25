@@ -46,7 +46,8 @@ export const useThemeStore = create<ThemeState>((set) => ({
         applyTheme(initial);
         set({ theme: initial });
       }
-    } catch {
+    } catch (err) {
+      console.error("[THEME] initFromTelegram error:", err);
       const stored = localStorage.getItem("theme") as Theme | null;
       const initial = stored ?? "dark";
       applyTheme(initial);
