@@ -13,6 +13,8 @@ import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
 import { ScheduleEmployee } from "@/components/employee/ScheduleEmployee";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
+import { hapticImpact, hapticNotification } from "@/lib/haptic";
+import { useToast } from "@/store/toastStore";
 import { useUserStore } from "@/store/userStore";
 import type { EmployeeStats, Shift } from "@/types/database";
 
@@ -36,11 +38,10 @@ function getInitials(name: string): string {
 export function EmployeeScreen() {
   const { t, locale, setLocale } = useI18n();
   const user = useUserStore((s) => s.user);
+  const show = useToast((s) => s.show);
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
   const [stats, setStats] = useState<EmployeeStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const loadData = useCallback(async () => {
@@ -66,9 +67,8 @@ export function EmployeeScreen() {
 
   const handleToggleShift = () => {
     if (!user) return;
-    setActionError(null);
-    setSuccess(null);
     const action = activeShift ? "clockOut" : "clockIn";
+    hapticImpact("medium");
 
     startTransition(async () => {
       try {
@@ -81,14 +81,17 @@ export function EmployeeScreen() {
         const data = await res.json();
 
         if (!res.ok) {
-          setActionError(data.error ?? t("common.operationError"));
+          hapticNotification("error");
+          show(data.error ?? t("common.operationError"), "error");
           return;
         }
 
-        setSuccess(action === "clockOut" ? t("shift.closed") : t("shift.opened"));
+        hapticNotification("success");
+        show(action === "clockOut" ? t("shift.closed") : t("shift.opened"), "success");
         void loadData();
       } catch {
-        setActionError(t("common.networkError"));
+        hapticNotification("error");
+        show(t("common.networkError"), "error");
       }
     });
   };
@@ -175,17 +178,6 @@ export function EmployeeScreen() {
             </div>
           )}
         </div>
-
-        {actionError && (
-          <p className="px-5 pb-4 text-center text-xs text-rose-400">
-            {actionError}
-          </p>
-        )}
-        {success && (
-          <p className="px-5 pb-4 text-center text-xs text-[var(--brand-primary)]">
-            {success}
-          </p>
-        )}
       </div>
 
       {/* Статистика */}

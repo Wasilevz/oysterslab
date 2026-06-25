@@ -9,6 +9,8 @@ import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUserStore } from "@/store/userStore";
 import { useI18n } from "@/lib/i18n";
+import { hapticImpact, hapticNotification } from "@/lib/haptic";
+import { useToast } from "@/store/toastStore";
 import type { DashboardStats, Location, Shift } from "@/types/database";
 
 type AdminView = "live" | "forgotten" | "salary" | "schedule" | "settings" | "shifts";
@@ -23,6 +25,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const user = useUserStore((s) => s.user);
   const initData = useUserStore((s) => s.initData);
   const { t } = useI18n();
+  const show = useToast((s) => s.show);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +70,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
 
   const handleToggleShift = () => {
     if (!user) return;
-    setError(null);
+    hapticImpact("medium");
 
     startTransition(async () => {
       try {
@@ -78,13 +81,17 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         });
         const data = await res.json();
         if (!res.ok) {
-          setError(data.error ?? "Ошибка");
+          hapticNotification("error");
+          show(data.error ?? t("common.error"), "error");
           return;
         }
+        hapticNotification("success");
+        show(myShift ? t("shift.closed") : t("shift.opened"), "success");
         void loadMyShift();
         void loadStats();
       } catch {
-        setError("Ошибка сети");
+        hapticNotification("error");
+        show(t("common.networkError"), "error");
       }
     });
   };
@@ -209,18 +216,12 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         )}
       </header>
 
-      {error && (
-        <div className="mb-4 rounded-[12px] border border-[var(--color-error)]/20 bg-[var(--color-error)]/10 px-4 py-3">
-          <p className="text-sm text-[var(--color-error)]">{error}</p>
-        </div>
-      )}
-
       <div className="mt-6">
         <div className="grid grid-cols-2 gap-3">
           {menuItems.map((item) => (
             <button
               key={item.key}
-              onClick={() => onNavigate(item.key)}
+              onClick={() => { hapticImpact("light"); onNavigate(item.key); }}
               className="relative flex flex-col items-center gap-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 text-center transition-all active:scale-[0.98] hover:border-[var(--brand-primary)]/30"
             >
               <div className={`${item.color}`}>{item.icon}</div>
