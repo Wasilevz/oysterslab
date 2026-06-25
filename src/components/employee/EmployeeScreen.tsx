@@ -192,10 +192,10 @@ export function EmployeeScreen() {
             {user?.full_name ? getInitials(user.full_name) : "—"}
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-widest dark:text-zinc-600 text-zinc-400">
+            <p className="text-xs font-medium uppercase tracking-widest text-[var(--text-secondary)]">
               {t("employee.hello")}
             </p>
-            <h1 className="text-lg font-bold dark:text-white text-zinc-900">{user?.full_name}</h1>
+            <h1 className="text-lg font-bold text-[var(--text-primary)]">{user?.full_name}</h1>
           </div>
         </div>
         <button
@@ -207,7 +207,7 @@ export function EmployeeScreen() {
               : "bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/25"
           }`}
         >
-          {isPending ? "..." : isOnShift ? t("shift.end") : t("shift.start")}
+          {isPending ? <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> : isOnShift ? t("shift.end") : t("shift.start")}
         </button>
       </header>
 
@@ -307,7 +307,7 @@ export function EmployeeScreen() {
       <ScheduleEmployee />
 
       <div className="mt-6">
-        <div className="rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
+        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
           <p className="mb-3 text-sm font-semibold text-[var(--text-primary)]">{t("settings.language")}</p>
           <div className="grid grid-cols-2 gap-2">
             <button onClick={() => setLocale("ru")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
@@ -332,7 +332,7 @@ export function EmployeeScreen() {
               <h2 className="text-lg font-bold text-[var(--text-primary)]">
                 {historyPeriod === "week" ? t("employee.shiftsThisWeek") : t("employee.shiftsThisMonth")}
               </h2>
-              <button onClick={closeShiftHistory} className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]">
+              <button onClick={closeShiftHistory} aria-label={t("nav.close")} className="flex h-11 w-11 items-center justify-center rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -346,7 +346,10 @@ export function EmployeeScreen() {
                 ))}
               </div>
             ) : shiftHistory.length === 0 ? (
-              <div className="flex min-h-[20vh] items-center justify-center">
+              <div className="flex min-h-[20vh] flex-col items-center justify-center gap-3">
+                <svg className="h-10 w-10 text-[var(--text-secondary)]/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 <p className="text-sm text-[var(--text-secondary)]">{t("employee.noShifts")}</p>
               </div>
             ) : (

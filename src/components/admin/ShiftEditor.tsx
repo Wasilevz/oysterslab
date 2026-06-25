@@ -99,7 +99,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
     <div className="px-4 pt-4 pb-24">
       <div className="mb-4 flex items-center gap-3">
         {onBack && (
-          <button onClick={onBack} aria-label={t("common.back")} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+          <button onClick={onBack} aria-label={t("common.back")} className="flex h-11 w-11 items-center justify-center rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
@@ -138,8 +138,11 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
       {loading ? (
         <Skeleton className="h-48 w-full rounded-2xl" />
       ) : shifts.length === 0 ? (
-        <div className="flex min-h-[30vh] items-center justify-center">
-          <p className="text-[var(--text-secondary)]">{t("shiftEditor.noShifts")}</p>
+        <div className="flex min-h-[30vh] flex-col items-center justify-center gap-3">
+          <svg className="h-12 w-12 text-[var(--text-secondary)]/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-sm text-[var(--text-secondary)]">{t("shiftEditor.noShifts")}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -179,7 +182,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                       <button
                         onClick={() => startEdit(shift)}
                         aria-label={t("settings.edit")}
-                        className="rounded-lg border border-[var(--border-color)] px-2 py-1 text-xs text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]"
+                        className="flex h-11 w-11 items-center justify-center rounded-lg border border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]"
                       >
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
@@ -217,7 +220,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                         {t("common.cancel")}
                       </Button>
                       <Button variant="blue" className="flex-1" onClick={handleSave} disabled={isPending}>
-                        {isPending ? "..." : t("common.save")}
+                        {isPending ? <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> : t("common.save")}
                       </Button>
                     </div>
                   </div>

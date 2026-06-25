@@ -209,11 +209,11 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
       <header className="border-b border-[var(--border-color)] px-4 py-5">
         <div className="flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} aria-label={t("common.back")} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-              </svg>
-            </button>
+          <button onClick={onBack} aria-label={t("common.back")} className="flex h-11 w-11 items-center justify-center rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+          </button>
           )}
           <div>
             <p className="text-xs font-medium uppercase tracking-widest text-[var(--text-secondary)]">
@@ -249,14 +249,14 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
               <div key={i} className="flex gap-2">
                 <Input type="text" placeholder={t("settings.ipPlaceholder")} value={ip} onChange={(e) => updateIP(i, e.target.value)} />
                 {allowedIPs.length > 1 && (
-                  <button onClick={() => removeIP(i)} className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border-color)] text-[var(--text-secondary)] hover:border-rose-500/50 hover:text-rose-400">×</button>
+                  <button onClick={() => removeIP(i)} aria-label={t("nav.remove")} className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--border-color)] text-[var(--text-secondary)] hover:border-rose-500/50 hover:text-rose-400">×</button>
                 )}
               </div>
             ))}
           </div>
           <div className="mt-3 flex gap-2">
             <Button variant="blue" className="flex-1" onClick={() => void detectMyIP()}>{t("settings.detectIP")}</Button>
-            <button onClick={addIPField} className="flex h-10 w-10 items-center justify-center rounded-xl border border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">+</button>
+            <button onClick={addIPField} aria-label={t("nav.add")} className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--border-color)] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">+</button>
           </div>
           <p className="mt-3 text-xs text-[var(--text-secondary)]">{t("settings.detectIPDesc")}</p>
         </div>
@@ -284,7 +284,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                 <p className="text-sm font-bold text-[var(--text-primary)]">{loc.name}</p>
                 {loc.address && <p className="text-xs text-[var(--text-secondary)]">{loc.address}</p>}
               </div>
-              <button onClick={() => void handleDeleteLocation(loc.id)} className="rounded-lg px-2 py-1 text-xs text-[var(--color-error)] hover:bg-[var(--color-error)]/10">{t("settings.delete")}</button>
+              <button onClick={() => void handleDeleteLocation(loc.id)} className="flex h-11 items-center rounded-lg px-3 text-xs text-[var(--color-error)] hover:bg-[var(--color-error)]/10">{t("settings.delete")}</button>
             </div>
           ))}
           <div className="flex gap-2">
@@ -321,7 +321,14 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
         )}
 
         <div className="space-y-2">
-          {employees.map((emp) => (
+          {employees.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-8">
+              <svg className="h-10 w-10 text-[var(--text-secondary)]/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+              </svg>
+              <p className="text-sm text-[var(--text-secondary)]">{t("settings.employees")}</p>
+            </div>
+          ) : employees.map((emp) => (
             <div key={emp.id} className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
               {editingId === emp.id ? (
                 <div className="space-y-2">
@@ -360,8 +367,8 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => startEdit(emp)} className="rounded-[1440px] border border-[var(--border-color)] px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">{t("settings.edit")}</button>
-                    <button onClick={() => void handleDeleteEmployee(emp.id)} className="rounded-[1440px] border border-[var(--border-color)] px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:border-rose-500/30 hover:text-rose-500">{t("settings.delete")}</button>
+                    <button onClick={() => startEdit(emp)} className="flex h-11 items-center rounded-[1440px] border border-[var(--border-color)] px-4 text-xs text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">{t("settings.edit")}</button>
+                    <button onClick={() => void handleDeleteEmployee(emp.id)} className="flex h-11 items-center rounded-[1440px] border border-[var(--border-color)] px-4 text-xs text-[var(--text-secondary)] hover:border-rose-500/30 hover:text-rose-500">{t("settings.delete")}</button>
                   </div>
                 </div>
               )}
@@ -374,6 +381,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
       <div className="px-4 mt-6 pb-24">
         <button
           onClick={() => { setShowLogs(!showLogs); if (!showLogs) void loadLogs(); }}
+          aria-label={t("settings.auditLog")}
           className="flex w-full items-center justify-between rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4"
         >
           <span className="text-sm font-semibold text-[var(--text-primary)]">{t("settings.auditLog")}</span>

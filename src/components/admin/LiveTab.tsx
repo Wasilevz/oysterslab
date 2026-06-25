@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getDashboardStats } from "@/actions/adminActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
 import { getElapsedSeconds } from "@/lib/utils";
@@ -41,7 +42,7 @@ export function LiveTab({ onBack }: LiveTabProps) {
     <div className="px-4 pt-4 pb-8">
       <div className="mb-4 flex items-center gap-3">
         {onBack && (
-          <button onClick={onBack} aria-label={t("common.back")} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+          <button onClick={onBack} aria-label={t("common.back")} className="flex h-11 w-11 items-center justify-center rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
@@ -51,9 +52,16 @@ export function LiveTab({ onBack }: LiveTabProps) {
       </div>
 
       {loading ? (
-        <p className="text-sm text-[var(--text-secondary)]">{t("common.loading")}</p>
+        <div className="grid gap-3">
+          {[1, 2].map((i) => (
+            <Skeleton key={i} className="h-24 w-full rounded-2xl" />
+          ))}
+        </div>
       ) : activeShifts.length === 0 ? (
-        <div className="flex min-h-[40vh] items-center justify-center">
+        <div className="flex min-h-[40vh] flex-col items-center justify-center gap-3">
+          <svg className="h-12 w-12 text-[var(--text-secondary)]/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
           <p className="text-sm font-medium text-[var(--text-secondary)]">{t("shift.noOneOnShift")}</p>
         </div>
       ) : (

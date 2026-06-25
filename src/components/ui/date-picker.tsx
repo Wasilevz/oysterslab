@@ -64,7 +64,7 @@ export function DatePicker({ value, onChange, placeholder, minDate, maxDate }: D
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 shadow-2xl">
             <div className="mb-3 flex items-center justify-between">
-              <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+              <button onClick={() => setCurrentMonth(subMonths(currentMonth, 1))} aria-label={t("nav.prevMonth")} className="flex h-11 w-11 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
@@ -72,7 +72,7 @@ export function DatePicker({ value, onChange, placeholder, minDate, maxDate }: D
               <p className="text-sm font-semibold text-[var(--text-primary)]">
                 {format(currentMonth, "LLLL yyyy", { locale: dateLocale })}
               </p>
-              <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+              <button onClick={() => setCurrentMonth(addMonths(currentMonth, 1))} aria-label={t("nav.nextMonth")} className="flex h-11 w-11 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>

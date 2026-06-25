@@ -260,5 +260,13 @@
 
   "onboarding.next": "Далее",
   "onboarding.start": "Начать",
-  "onboarding.skip": "Пропустить"
+  "onboarding.skip": "Пропустить",
+
+  "nav.prevWeek": "Предыдущая неделя",
+  "nav.nextWeek": "Следующая неделя",
+  "nav.prevMonth": "Предыдущий месяц",
+  "nav.nextMonth": "Следующий месяц",
+  "nav.close": "Закрыть",
+  "nav.remove": "Удалить",
+  "nav.add": "Добавить"
 }

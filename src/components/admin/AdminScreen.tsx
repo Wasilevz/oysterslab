@@ -16,10 +16,22 @@ type AdminView = "dashboard" | "live" | "forgotten" | "salary" | "schedule" | "s
 
 export function AdminScreen() {
   const [view, setView] = useState<AdminView>("dashboard");
+  const [displayedView, setDisplayedView] = useState<AdminView>("dashboard");
+  const [transitioning, setTransitioning] = useState(false);
 
   const goBack = () => {
     hapticImpact("light");
-    setView("dashboard");
+    switchView("dashboard");
+  };
+
+  const switchView = (next: AdminView) => {
+    if (next === displayedView) return;
+    setTransitioning(true);
+    setTimeout(() => {
+      setDisplayedView(next);
+      setView(next);
+      setTransitioning(false);
+    }, 150);
   };
 
   useEffect(() => {
@@ -43,7 +55,7 @@ export function AdminScreen() {
   }, [view]);
 
   const renderView = () => {
-    switch (view) {
+    switch (displayedView) {
       case "live":
         return <LiveTab onBack={goBack} />;
       case "forgotten":
@@ -57,14 +69,19 @@ export function AdminScreen() {
       case "shifts":
         return <ShiftEditor onBack={goBack} />;
       default:
-        return <AdminDashboard onNavigate={setView} />;
+        return <AdminDashboard onNavigate={switchView} />;
     }
   };
 
   return (
     <main className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)] animate-fade-in">
       <Suspense fallback={<div className="flex flex-1 flex-col gap-4 p-4 pb-24"><Skeleton className="h-8 w-32" /><Skeleton className="h-64 w-full rounded-2xl" /></div>}>
-        {renderView()}
+        <div
+          className="transition-opacity duration-150 ease-in-out"
+          style={{ opacity: transitioning ? 0 : 1 }}
+        >
+          {renderView()}
+        </div>
       </Suspense>
     </main>
   );

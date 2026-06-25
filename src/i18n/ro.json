@@ -260,5 +260,13 @@
 
   "onboarding.next": "Mai departe",
   "onboarding.start": "Începe",
-  "onboarding.skip": "Sari"
+  "onboarding.skip": "Sari",
+
+  "nav.prevWeek": "Săptămâna anterioară",
+  "nav.nextWeek": "Săptămâna următoare",
+  "nav.prevMonth": "Luna anterioară",
+  "nav.nextMonth": "Luna următoare",
+  "nav.close": "Închide",
+  "nav.remove": "Elimină",
+  "nav.add": "Adaugă"
 }

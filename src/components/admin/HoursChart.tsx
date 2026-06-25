@@ -24,7 +24,10 @@ export function HoursChart({ data }: HoursChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="flex h-[250px] items-center justify-center rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-white px-4">
+      <div className="flex h-[250px] flex-col items-center justify-center gap-3 rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-white px-4">
+        <svg className="h-10 w-10 dark:text-[#334155] text-[#CBD5E1]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
         <p className="text-sm dark:text-[#64748B] text-[#718096]">{t("charts.noDataMonth")}</p>
       </div>
     );
