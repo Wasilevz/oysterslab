@@ -29,8 +29,8 @@ export async function logAction(
       details,
       ip_address: ipAddress,
     });
-  } catch {
-    // Silent fail - don't break the app if logging fails
+  } catch (err) {
+    console.error("[AUDIT] Failed to log action:", err);
   }
 }
 

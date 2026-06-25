@@ -80,9 +80,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
 
   const loadLogs = useCallback(async () => {
     try {
-      const res = await fetch("/api/audit?limit=30", {
-        headers: { Authorization: `Bearer ${process.env.NEXT_PUBLIC_CRON_SECRET || ""}` },
-      });
+      const res = await fetch("/api/audit?limit=30");
       const data = await res.json();
       if (data.ok) setAuditLogs(data.logs);
     } catch {}
