@@ -11,6 +11,7 @@ import { getEmployeeStats } from "@/actions/salaryActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
 import { ScheduleEmployee } from "@/components/employee/ScheduleEmployee";
+import { Onboarding } from "@/components/employee/Onboarding";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import { hapticImpact, hapticNotification } from "@/lib/haptic";
@@ -43,6 +44,12 @@ export function EmployeeScreen() {
   const [stats, setStats] = useState<EmployeeStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    if (typeof window !== "undefined") {
+      return !localStorage.getItem("onboarded");
+    }
+    return false;
+  });
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -111,6 +118,10 @@ export function EmployeeScreen() {
   }
 
   const isOnShift = Boolean(activeShift);
+
+  if (showOnboarding) {
+    return <Onboarding onComplete={() => setShowOnboarding(false)} />;
+  }
 
   return (
     <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
