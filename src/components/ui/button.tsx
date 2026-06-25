@@ -4,12 +4,12 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[4px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[1440px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
   {
     variants: {
       variant: {
-        default: "bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-hover)] shadow-[rgba(71,103,136,0.06)_0px_4px_5px_0px,rgba(71,103,136,0.03)_0px_8px_15px_0px,rgba(71,103,136,0.08)_0px_15px_30px_0px]",
-        blue: "bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-hover)] shadow-[rgba(71,103,136,0.06)_0px_4px_5px_0px,rgba(71,103,136,0.03)_0px_8px_15px_0px,rgba(71,103,136,0.08)_0px_15px_30px_0px]",
+        default: "bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-hover)]",
+        blue: "bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-hover)]",
         rose: "bg-[var(--color-error)] text-white hover:opacity-90",
         outline: "border border-[var(--border-color)] bg-transparent text-[var(--text-primary)] hover:bg-[var(--bg-surface)]",
         ghost: "text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]",
