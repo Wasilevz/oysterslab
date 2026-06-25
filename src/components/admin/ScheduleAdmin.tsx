@@ -1,11 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
 import { getSchedule, setScheduleDay, getWorkingToday } from "@/actions/scheduleActions";
 import { getEmployees } from "@/actions/employeeActions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
+import { hapticImpact } from "@/lib/haptic";
 import type { Schedule, ScheduleType, User } from "@/types/database";
 
 const TYPE_COLORS: Record<ScheduleType, { bg: string; text: string; dot: string }> = {
@@ -15,59 +18,88 @@ const TYPE_COLORS: Record<ScheduleType, { bg: string; text: string; dot: string 
   sick: { bg: "bg-[var(--color-error)]/20", text: "text-[var(--color-error)]", dot: "bg-[var(--color-error)]" },
 };
 
-const TYPE_LABELS: Record<ScheduleType, string> = {
-  work: "schedule.work",
-  off: "schedule.off",
-  vacation: "schedule.vacation",
-  sick: "schedule.sick",
-};
-
 const TYPE_ORDER: ScheduleType[] = ["work", "off", "vacation", "sick"];
+
+function getWeekStart(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function getWeekDays(weekStart: Date): Date[] {
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+    return d;
+  });
+}
+
+function toDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
   const { t } = useI18n();
-  const currentUser = useUserStore((s) => s.user);
   const initData = useUserStore((s) => s.initData);
   const [employees, setEmployees] = useState<User[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [workingToday, setWorkingToday] = useState<{ id: string; full_name: string; position: string | null; clock_in: string | null }[]>([]);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [loading, setLoading] = useState(true);
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth() + 1;
-  const daysInMonth = new Date(year, month, 0).getDate();
+  const weekDays = getWeekDays(weekStart);
+  const touchStartX = useRef(0);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const loadScheduleForWeek = useCallback(async (ws: Date) => {
+    const endOfMonth = new Date(ws.getFullYear(), ws.getMonth() + 1, 0);
+    const startOfMonth = new Date(ws.getFullYear(), ws.getMonth(), 1);
+    const fetchStart = ws < startOfMonth ? startOfMonth : ws;
+    const fetchEnd = new Date(ws);
+    fetchEnd.setDate(fetchEnd.getDate() + 6);
+    const actualEnd = fetchEnd > endOfMonth ? endOfMonth : fetchEnd;
+
+    const schedResult = await getSchedule(
+      fetchStart.getFullYear(),
+      fetchStart.getMonth() + 1,
+      initData ?? "",
+    );
+    if (schedResult.success && schedResult.data) {
+      const weekDates = weekDays.map(toDateStr);
+      setSchedules(schedResult.data.filter((s) => weekDates.includes(s.date)));
+    }
+  }, [initData]);
+
   const loadData = useCallback(async () => {
-    const [schedResult, empResult, todayResult] = await Promise.all([
-      getSchedule(year, month, initData ?? ""),
+    const [empResult, todayResult] = await Promise.all([
       getEmployees(initData ?? ""),
       getWorkingToday(initData ?? ""),
     ]);
-    if (schedResult.success && schedResult.data) setSchedules(schedResult.data);
     if (empResult.success && empResult.data) setEmployees(empResult.data);
     if (todayResult.success && todayResult.data) setWorkingToday(todayResult.data);
+    await loadScheduleForWeek(weekStart);
     setLoading(false);
-  }, [year, month, initData]);
+  }, [weekStart, initData, loadScheduleForWeek]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     void loadData();
   }, [loadData]);
 
-  const getScheduleType = (userId: string, day: number): ScheduleType => {
-    const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  const getScheduleType = (userId: string, date: Date): ScheduleType => {
+    const dateStr = toDateStr(date);
     const entry = schedules.find((s) => s.user_id === userId && s.date === dateStr);
     return entry?.type ?? "work";
   };
 
-  const cycleType = (userId: string, day: number) => {
-    const current = getScheduleType(userId, day);
+  const cycleType = (userId: string, date: Date) => {
+    hapticImpact("light");
+    const current = getScheduleType(userId, date);
     const idx = TYPE_ORDER.indexOf(current);
     const next = TYPE_ORDER[(idx + 1) % TYPE_ORDER.length];
-    const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const dateStr = toDateStr(date);
 
     setSchedules((prev) => {
       const filtered = prev.filter((s) => !(s.user_id === userId && s.date === dateStr));
@@ -77,26 +109,42 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
     void setScheduleDay(userId, dateStr, next, initData ?? "");
   };
 
-  const prevMonth = () => {
-    const d = new Date(currentDate);
-    d.setMonth(d.getMonth() - 1);
-    setCurrentDate(d);
+  const prevWeek = () => {
+    hapticImpact("light");
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() - 7);
+    setWeekStart(d);
   };
 
-  const nextMonth = () => {
-    const d = new Date(currentDate);
-    d.setMonth(d.getMonth() + 1);
-    setCurrentDate(d);
+  const nextWeek = () => {
+    hapticImpact("light");
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + 7);
+    setWeekStart(d);
   };
 
-  const monthNames = [
-    t("month.january"), t("month.february"), t("month.march"), t("month.april"), t("month.may"), t("month.june"),
-    t("month.july"), t("month.august"), t("month.september"), t("month.october"), t("month.november"), t("month.december"),
-  ];
+  const goToThisWeek = () => {
+    hapticImpact("light");
+    setWeekStart(getWeekStart(new Date()));
+  };
+
+  const isCurrentWeek = getWeekStart(new Date()).getTime() === weekStart.getTime();
 
   const dayLabels = [t("day.mon"), t("day.tue"), t("day.wed"), t("day.thu"), t("day.fri"), t("day.sat"), t("day.sun")];
   const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const todayStr = toDateStr(today);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const diff = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(diff) > 80) {
+      if (diff > 0) prevWeek();
+      else nextWeek();
+    }
+  };
 
   if (loading) {
     return (
@@ -112,7 +160,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
       <header className="border-b border-[var(--border-color)] px-4 py-5">
         <div className="flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} aria-label="Назад" className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+            <button onClick={onBack} aria-label={t("common.back")} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
@@ -128,119 +176,95 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
       </header>
 
       <div className="px-4 pt-4">
-        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold text-[var(--text-primary)]">{t("schedule.myMonth")}</p>
-            <div className="flex items-center gap-2">
-              {(["work", "off", "vacation", "sick"] as const).map((type) => (
-                <span key={type} className="flex items-center gap-1 text-[11px]">
-                  <span className={`h-2.5 w-2.5 rounded-full ${TYPE_COLORS[type].dot}`} />
-                  <span className={TYPE_COLORS[type].text}>{t(TYPE_LABELS[type])}</span>
-                </span>
-              ))}
-            </div>
+        <div className="flex items-center justify-between">
+          <button onClick={prevWeek} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+          </button>
+          <div className="text-center">
+            <p className="text-lg font-bold text-[var(--text-primary)]">
+              {format(weekDays[0], "d MMM", { locale: ru })} – {format(weekDays[6], "d MMM", { locale: ru })}
+            </p>
+            {!isCurrentWeek && (
+              <button onClick={goToThisWeek} className="mt-0.5 text-[11px] font-semibold text-[var(--brand-primary)]">
+                {t("schedule.thisWeek")}
+              </button>
+            )}
           </div>
+          <button onClick={nextWeek} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
+          </button>
+        </div>
 
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {dayLabels.map((d) => (
-              <div key={d} className="py-1 text-center text-[11px] font-medium text-[var(--text-secondary)]">{d}</div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7 gap-1">
-            {Array.from({ length: (new Date(year, month - 1, 1).getDay() + 6) % 7 }).map((_, i) => (
-              <div key={`empty-${i}`} />
-            ))}
-            {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-              const type = currentUser ? getScheduleType(currentUser.id, day) : "work";
-              const colors = TYPE_COLORS[type];
-              const isToday = todayStr === `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-
-              return (
-                <div
-                  key={day}
-                  className={`flex flex-col items-center rounded-lg py-1.5 ${
-                    isToday ? "ring-1 ring-[var(--brand-primary)]/50" : ""
-                  }`}
-                >
-                  <span className={`text-xs font-medium ${isToday ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}`}>
-                    {day}
-                  </span>
-                  <span className={`mt-0.5 h-1.5 w-1.5 rounded-full ${colors.dot}`} />
-                </div>
-              );
-            })}
-          </div>
+        <div className="mt-3 flex items-center gap-3">
+          {(["work", "off", "vacation", "sick"] as const).map((type) => (
+            <span key={type} className="flex items-center gap-1 text-[11px]">
+              <span className={`h-2.5 w-2.5 rounded-full ${TYPE_COLORS[type].dot}`} />
+              <span className={TYPE_COLORS[type].text}>{t(`schedule.${type}`)}</span>
+            </span>
+          ))}
         </div>
       </div>
 
-      <div className="mt-4 px-4">
-          <div className="flex items-center gap-2">
-            <button onClick={prevMonth} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-              </svg>
-            </button>
-            <p className="text-lg font-bold text-[var(--text-primary)]">
-              {monthNames[month - 1]} {year}
-            </p>
-            <button onClick={nextMonth} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-              </svg>
-            </button>
-          </div>
-      </div>
-
-      <div className="mt-3 flex-1 overflow-x-auto px-4 pb-24 relative">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th className="sticky left-0 z-20 bg-[var(--bg-app)] p-1.5 text-left text-[11px] font-medium text-[var(--text-secondary)] min-w-[100px] shadow-[8px_0_12px_-4px_rgba(0,0,0,0.05)]">
-                {t("salary.employee")}
-              </th>
-              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-                const date = new Date(year, month - 1, day);
-                const dow = (date.getDay() + 6) % 7;
-                const isWeekend = dow >= 5;
-                return (
-                  <th
-                    key={day}
-                    className={`p-1 text-center text-[11px] font-medium ${isWeekend ? "text-[var(--color-error)]" : "text-[var(--text-secondary)]"}`}
-                  >
-                    <div className={isWeekend ? "font-bold" : ""}>{day}</div>
-                    <div className={`text-[9px] ${isWeekend ? "text-[var(--color-error)]/60" : ""}`}>{dayLabels[dow]}</div>
-                  </th>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {employees.map((emp) => (
-              <tr key={emp.id}>
-                <td className="sticky left-0 z-20 bg-[var(--bg-app)] py-1.5 pr-3 min-w-[100px] shadow-[8px_0_12px_-4px_rgba(0,0,0,0.05)]">
-                  <p className="truncate text-xs font-semibold text-[var(--text-primary)]">{emp.full_name}</p>
-                  {emp.position && (
-                    <p className="truncate text-[9px] text-[var(--text-secondary)]">{emp.position}</p>
-                  )}
-                </td>
-                {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-                  const type = getScheduleType(emp.id, day);
-                  const colors = TYPE_COLORS[type];
+      <div
+        className="mt-3 flex-1 px-4 pb-24"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-hidden">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                <th className="sticky left-0 z-20 bg-[var(--bg-surface)] p-2 text-left text-[11px] font-medium text-[var(--text-secondary)] min-w-[90px]">
+                  {t("payroll.employee")}
+                </th>
+                {weekDays.map((day, i) => {
+                  const isToday = toDateStr(day) === todayStr;
                   return (
-                    <td key={day} className="p-0.5">
-                      <button
-                        onClick={() => cycleType(emp.id, day)}
-                        className={`h-9 w-9 rounded-xl text-[11px] font-bold transition-all active:scale-95 ${colors.bg} ${colors.text}`}
-                      >
-                        {type === "work" ? t("schedule.abbrWork") : type === "off" ? t("schedule.abbrOff") : type === "vacation" ? t("schedule.abbrVacation") : t("schedule.abbrSick")}
-                      </button>
-                    </td>
+                    <th key={i} className="p-1.5 text-center">
+                      <div className={`text-[11px] font-medium ${isToday ? "text-[var(--brand-primary)] font-bold" : "text-[var(--text-secondary)]"}`}>
+                        {dayLabels[i]}
+                      </div>
+                      <div className={`text-[13px] font-bold ${isToday ? "text-[var(--brand-primary)]" : "text-[var(--text-primary)]"}`}>
+                        {day.getDate()}
+                      </div>
+                    </th>
                   );
                 })}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {employees.map((emp) => (
+                <tr key={emp.id} className="border-t border-[var(--border-color)]">
+                  <td className="sticky left-0 z-20 bg-[var(--bg-surface)] py-2 pr-2 min-w-[90px]">
+                    <p className="truncate text-xs font-semibold text-[var(--text-primary)]">{emp.full_name}</p>
+                    {emp.position && (
+                      <p className="truncate text-[10px] text-[var(--text-secondary)]">{emp.position}</p>
+                    )}
+                  </td>
+                  {weekDays.map((day, i) => {
+                    const type = getScheduleType(emp.id, day);
+                    const colors = TYPE_COLORS[type];
+                    const isToday = toDateStr(day) === todayStr;
+                    return (
+                      <td key={i} className="p-0.5">
+                        <button
+                          onClick={() => cycleType(emp.id, day)}
+                          className={`h-10 w-full rounded-xl text-[11px] font-bold transition-all active:scale-95 ${colors.bg} ${colors.text} ${isToday ? "ring-1 ring-[var(--brand-primary)]/30" : ""}`}
+                        >
+                          {type === "work" ? t("schedule.abbrWork") : type === "off" ? t("schedule.abbrOff") : type === "vacation" ? t("schedule.abbrVacation") : t("schedule.abbrSick")}
+                        </button>
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {workingToday.length > 0 && (

@@ -102,6 +102,7 @@
   "schedule.sick": "Больничный",
   "schedule.todayOnShift": "Сегодня на смене",
   "schedule.notArrived": "Ещё не пришёл",
+  "schedule.thisWeek": "Эта неделя",
 
   "settings.title": "Настройки",
   "settings.security": "Безопасность",
