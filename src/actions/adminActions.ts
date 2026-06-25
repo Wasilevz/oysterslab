@@ -51,7 +51,7 @@ export async function getDashboardStats(initData?: string): Promise<ActionResult
           let q = supabase
             .from("users")
             .select("id, hourly_rate")
-            .eq("role", "employee");
+            .in("role", ["employee", "admin"]);
           if (locationFilter) q = q.eq("location_id", locationFilter.value);
           return q;
         })(),
@@ -187,7 +187,7 @@ export async function generatePayroll(
     const { data: employees, error: empError } = await supabase
       .from("users")
       .select("id, hourly_rate")
-      .eq("role", "employee");
+      .in("role", ["employee", "admin"]);
 
     if (empError) return { success: false, error: empError.message };
     if (!employees || employees.length === 0) return { success: false, error: "Нет сотрудников" };
