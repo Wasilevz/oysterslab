@@ -2,7 +2,7 @@
 
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { requireAdmin, verifyRequestAuth } from "@/lib/auth";
-import type { ActionResult, Schedule, ScheduleType } from "@/types/database";
+import type { ActionResult, Schedule, ScheduleType, User } from "@/types/database";
 
 export async function getSchedule(
   year: number,
@@ -197,6 +197,27 @@ export async function getWorkingToday(
     }));
 
     return { success: true, data: result };
+  } catch {
+    return { success: false, error: "Ошибка сервера" };
+  }
+}
+
+export async function getColleagues(
+  initData?: string,
+): Promise<ActionResult<Pick<User, "id" | "full_name" | "position">[]>> {
+  try {
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, full_name, position")
+      .in("role", ["employee", "admin"])
+      .order("full_name");
+
+    if (error) return { success: false, error: "Ошибка сервера" };
+    return { success: true, data: (data ?? []) };
   } catch {
     return { success: false, error: "Ошибка сервера" };
   }

@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
-import { getMySchedule, getSchedule, getWorkingToday } from "@/actions/scheduleActions";
-import { getEmployees } from "@/actions/employeeActions";
+import { getMySchedule, getSchedule, getWorkingToday, getColleagues } from "@/actions/scheduleActions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
 import { useUserStore } from "@/store/userStore";
@@ -49,7 +48,7 @@ export function ScheduleEmployee() {
   const { t } = useI18n();
   const user = useUserStore((s) => s.user);
   const [teamSchedules, setTeamSchedules] = useState<Schedule[]>([]);
-  const [employees, setEmployees] = useState<User[]>([]);
+  const [employees, setEmployees] = useState<Pick<User, "id" | "full_name" | "position">[]>([]);
   const [workingToday, setWorkingToday] = useState<{ id: string; full_name: string; position: string | null; clock_in: string | null }[]>([]);
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [loading, setLoading] = useState(true);
@@ -60,7 +59,7 @@ export function ScheduleEmployee() {
     const initData = useUserStore.getState().initData;
     const [todayResult, empResult, teamSchedResult] = await Promise.all([
       getWorkingToday(initData ?? ""),
-      getEmployees(initData ?? ""),
+      getColleagues(initData ?? ""),
       getSchedule(weekStart.getFullYear(), weekStart.getMonth() + 1, initData ?? ""),
     ]);
     if (todayResult.success && todayResult.data) setWorkingToday(todayResult.data);
