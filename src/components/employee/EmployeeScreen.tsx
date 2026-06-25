@@ -179,26 +179,8 @@ export function EmployeeScreen() {
             </div>
           ) : (
             <div className="flex flex-col items-center text-center">
-              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--bg-surface)]/80">
-                <svg
-                  className="h-7 w-7 text-[var(--text-secondary)]"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
               <p className="text-sm font-semibold text-[var(--text-secondary)]">
                 {t("shift.notStarted")}
-              </p>
-              <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                {t("shift.tapToStart")}
               </p>
             </div>
           )}
