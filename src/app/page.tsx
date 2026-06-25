@@ -127,7 +127,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[var(--bg-app)] text-[var(--text-primary)]">
-      {effectiveRole === "admin" ? <AdminScreen /> : <EmployeeScreen />}
+      {(effectiveRole === "admin" || effectiveRole === "superadmin") ? <AdminScreen /> : <EmployeeScreen />}
     </main>
   );
 }
