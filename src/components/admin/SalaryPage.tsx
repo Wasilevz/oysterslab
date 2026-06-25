@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { format, startOfWeek, endOfWeek, subWeeks, addWeeks } from "date-fns";
@@ -163,7 +163,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
     return (
       <div className="flex flex-1 flex-col gap-4 p-4 pb-24">
         <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-64 w-full rounded-[16px]" />
+        <Skeleton className="h-64 w-full rounded-2xl" />
       </div>
     );
   }
@@ -173,7 +173,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
       <header className="border-b border-[var(--border-color)] px-4 py-5">
         <div className="flex items-center gap-3">
           {onBack && (
-            <button onClick={onBack} className="rounded-[12px] p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+            <button onClick={onBack} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
               </svg>
@@ -191,7 +191,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
           <button
             key={v}
             onClick={() => setView(v)}
-            className={`rounded-[12px] px-3 py-2 text-xs font-semibold transition-colors ${
+            className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
               view === v ? "bg-[var(--brand-primary)]/20 text-[var(--brand-primary)]" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
@@ -201,19 +201,19 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
       </div>
 
       {error && (
-        <div className="mx-4 mt-3 rounded-[12px] border border-red-500/20 bg-red-500/10 px-4 py-3">
+        <div className="mx-4 mt-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
           <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
       {success && (
-        <div className="mx-4 mt-3 rounded-[12px] border border-emerald-500/20 bg-emerald-500/10 px-4 py-3">
+        <div className="mx-4 mt-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3">
           <p className="text-sm text-emerald-400">{success}</p>
         </div>
       )}
 
       {view === "create" && (
         <div className="px-4 pt-4 pb-24 space-y-4">
-          <div className="rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 space-y-3">
+          <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 space-y-3">
             <p className="text-sm font-semibold text-[var(--text-primary)]">{t("salary.newPayment")}</p>
 
             <div>
@@ -221,11 +221,11 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               <select
                 value={selectedEmp}
                 onChange={(e) => setSelectedEmp(e.target.value)}
-                className="w-full rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2.5 text-sm text-[var(--text-primary)]"
+                className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2.5 text-sm text-[var(--text-primary)]"
               >
                 <option value="">{t("salary.selectEmployee")}</option>
                 {employees.map((emp) => (
-                  <option key={emp.id} value={emp.id}>{emp.full_name} â€” {emp.hourly_rate} Ð»/Ñ‡</option>
+                  <option key={emp.id} value={emp.id}>{emp.full_name} — {emp.hourly_rate} л/ч</option>
                 ))}
               </select>
             </div>
@@ -233,8 +233,8 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
             <div>
               <p className="mb-1 text-xs text-[var(--text-secondary)]">{t("salary.quickPeriods")}</p>
               <div className="flex gap-2">
-                <button onClick={() => setWeekRange(0)} className="flex-1 rounded-[12px] border border-[var(--border-color)] py-2 text-[10px] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">{t("salary.thisWeek")}</button>
-                <button onClick={() => setWeekRange(-1)} className="flex-1 rounded-[12px] border border-[var(--border-color)] py-2 text-[10px] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">{t("salary.lastWeek")}</button>
+                <button onClick={() => setWeekRange(0)} className="flex-1 rounded-xl border border-[var(--border-color)] py-2 text-[10px] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">{t("salary.thisWeek")}</button>
+                <button onClick={() => setWeekRange(-1)} className="flex-1 rounded-xl border border-[var(--border-color)] py-2 text-[10px] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">{t("salary.lastWeek")}</button>
               </div>
             </div>
 
@@ -251,15 +251,15 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
           </div>
 
           {preview && (
-            <div className="rounded-[16px] border border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5 p-4 space-y-2">
+            <div className="rounded-2xl border border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5 p-4 space-y-2">
               <p className="text-sm font-semibold text-[var(--brand-primary)]">{t("salary.calculation")}</p>
               <div className="flex justify-between text-sm">
                 <span className="text-[var(--text-secondary)]">{t("salary.hours")}</span>
-                <span className="font-mono font-bold text-[var(--text-primary)]">{preview.hours.toFixed(1)} Ñ‡</span>
+                <span className="font-mono font-bold text-[var(--text-primary)]">{preview.hours.toFixed(1)} ч</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[var(--text-secondary)]">{t("salary.rate")}</span>
-                <span className="font-mono text-[var(--text-primary)]">{preview.rate} Ð»/Ñ‡</span>
+                <span className="font-mono text-[var(--text-primary)]">{preview.rate} л/ч</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[var(--text-secondary)]">{t("salary.shifts")}</span>
@@ -291,19 +291,19 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-amber-400">{t("salary.pending", { count: pendingPayments.length })}</p>
               <div className="space-y-2">
                 {pendingPayments.map((p) => (
-                  <div key={p.id} className="rounded-[16px] border border-amber-500/10 bg-amber-500/5 p-4">
+                  <div key={p.id} className="rounded-2xl border border-amber-500/10 bg-amber-500/5 p-4">
                     <div className="flex items-start justify-between">
                       <div>
                         <p className="font-bold text-[var(--text-primary)]">{p.users.full_name}</p>
                         {p.users.position && <p className="text-[10px] text-[var(--text-secondary)]">{p.users.position}</p>}
                         <p className="text-xs text-[var(--text-secondary)]">
-                          {format(new Date(p.period_start), "d MMM", { locale: ru })} â€” {format(new Date(p.period_end), "d MMM", { locale: ru })}
+                          {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
                         </p>
                       </div>
                       <span className="rounded-lg bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">{t("salary.waiting")}</span>
                     </div>
                     <div className="mt-2 flex justify-between text-sm">
-                      <span className="text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} Ñ‡ Ã— {Number(p.hourly_rate)} Ð»/Ñ‡</span>
+                      <span className="text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} ч × {Number(p.hourly_rate)} л/ч</span>
                       <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</span>
                     </div>
                     <div className="mt-3 flex gap-2">
@@ -321,18 +321,18 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--brand-primary)]">{t("salary.approved", { count: approvedPayments.length })}</p>
               <div className="space-y-2">
                 {approvedPayments.map((p) => (
-                  <div key={p.id} className="rounded-[16px] border border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5 p-4">
+                  <div key={p.id} className="rounded-2xl border border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5 p-4">
                     <div className="flex items-start justify-between">
                       <div>
                         <p className="font-bold text-[var(--text-primary)]">{p.users.full_name}</p>
                         <p className="text-xs text-[var(--text-secondary)]">
-                          {format(new Date(p.period_start), "d MMM", { locale: ru })} â€” {format(new Date(p.period_end), "d MMM", { locale: ru })}
+                          {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
                         </p>
                       </div>
                       <span className="rounded-lg bg-[var(--accent-money)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--brand-primary)]">{t("salary.approvedStatus")}</span>
                     </div>
                     <div className="mt-2 flex justify-between">
-                      <span className="text-sm text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} Ñ‡</span>
+                      <span className="text-sm text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} ч</span>
                       <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</span>
                     </div>
                   </div>
@@ -346,18 +346,18 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-emerald-400">{t("salary.paid", { count: paidPayments.length })}</p>
               <div className="space-y-2">
                 {paidPayments.slice(0, 20).map((p) => (
-                  <div key={p.id} className="rounded-[16px] border border-emerald-500/10 bg-emerald-500/5 p-4">
+                  <div key={p.id} className="rounded-2xl border border-emerald-500/10 bg-emerald-500/5 p-4">
                     <div className="flex items-start justify-between">
                       <div>
                         <p className="font-bold text-[var(--text-primary)]">{p.users.full_name}</p>
                         <p className="text-xs text-[var(--text-secondary)]">
-                          {format(new Date(p.period_start), "d MMM", { locale: ru })} â€” {format(new Date(p.period_end), "d MMM", { locale: ru })}
+                          {format(new Date(p.period_start), "d MMM", { locale: ru })} — {format(new Date(p.period_end), "d MMM", { locale: ru })}
                         </p>
                       </div>
                       <span className="rounded-lg bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400">{t("salary.paidStatus")}</span>
                     </div>
                     <div className="mt-2 flex justify-between">
-                      <span className="text-sm text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} Ñ‡</span>
+                      <span className="text-sm text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} ч</span>
                       <span className="font-mono font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</span>
                     </div>
                     {p.paid_at && (
@@ -382,7 +382,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
       {view === "report" && (
         <div className="px-4 pt-4 pb-24 space-y-4">
           <div className="flex items-center justify-between">
-            <button onClick={() => { if (reportMonth === 1) { setReportMonth(12); setReportYear(reportYear - 1); } else { setReportMonth(reportMonth - 1); } }} className="rounded-[12px] p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+            <button onClick={() => { if (reportMonth === 1) { setReportMonth(12); setReportYear(reportYear - 1); } else { setReportMonth(reportMonth - 1); } }} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
             </button>
             <p className="text-lg font-bold text-[var(--text-primary)]">{monthNames[reportMonth - 1]} {reportYear}</p>
@@ -390,21 +390,21 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
               <a
                 href={`/api/export/salary?year=${reportYear}&month=${reportMonth}`}
                 download
-                className="rounded-[12px] p-2 text-[var(--brand-primary)] hover:bg-[var(--bg-surface)]"
-                title="Ð¡ÐºÐ°Ñ‡Ð°Ñ‚ÑŒ CSV"
+                className="rounded-xl p-2 text-[var(--brand-primary)] hover:bg-[var(--bg-surface)]"
+                title="Скачать CSV"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
                 </svg>
               </a>
-              <button onClick={() => { if (reportMonth === 12) { setReportMonth(1); setReportYear(reportYear + 1); } else { setReportMonth(reportMonth + 1); } }} className="rounded-[12px] p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+              <button onClick={() => { if (reportMonth === 12) { setReportMonth(1); setReportYear(reportYear + 1); } else { setReportMonth(reportMonth + 1); } }} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
               </button>
             </div>
           </div>
 
           {monthlyReport && monthlyReport.employees.length > 0 && (
-            <div className="rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-hidden">
+            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-hidden">
               <div className="grid grid-cols-4 gap-px bg-[var(--border-color)] text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                 <div className="bg-[var(--bg-surface)] px-3 py-2">{t("salary.employee")}</div>
                 <div className="bg-[var(--bg-surface)] px-3 py-2 text-center">{t("salary.hours")}</div>

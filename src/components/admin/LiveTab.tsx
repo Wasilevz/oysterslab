@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { getDashboardStats } from "@/actions/adminActions";
@@ -35,7 +35,7 @@ export function LiveTab({ onBack }: LiveTabProps) {
     <div className="px-4 pt-4 pb-8">
       <div className="mb-4 flex items-center gap-3">
         {onBack && (
-          <button onClick={onBack} className="rounded-[12px] p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+          <button onClick={onBack} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
@@ -60,7 +60,7 @@ export function LiveTab({ onBack }: LiveTabProps) {
             return (
               <article
                 key={shift.id}
-                className={`rounded-[16px] border p-4 ${
+                className={`rounded-2xl border p-4 ${
                   isLongShift ? "border-[var(--color-warning)]/20 bg-[var(--color-warning)]/5" : "border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5"
                 }`}
               >
@@ -77,7 +77,7 @@ export function LiveTab({ onBack }: LiveTabProps) {
                   </div>
                   <div className="text-right">
                     <ShiftTimer clockIn={shift.clock_in} className="font-mono text-2xl font-black tabular-nums text-[var(--brand-primary)]" />
-                    {isLongShift && <p className="mt-0.5 text-[10px] font-medium text-amber-400">{hours}+ Ñ‡</p>}
+                    {isLongShift && <p className="mt-0.5 text-[10px] font-medium text-amber-400">{hours}+ ч</p>}
                   </div>
                 </div>
               </article>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   BarChart,
@@ -22,8 +22,8 @@ export function HoursChart({ data }: HoursChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="flex h-[250px] items-center justify-center rounded-[16px] border dark:border-[var(--border-color)] border-[#E2E8F0] dark:bg-[var(--bg-surface)] bg-white px-4">
-        <p className="text-sm dark:text-[var(--text-secondary)] text-[#718096]">ÐÐµÑ‚ Ð´Ð°Ð½Ð½Ñ‹Ñ… Ð·Ð° ÑÑ‚Ð¾Ñ‚ Ð¼ÐµÑÑÑ†</p>
+      <div className="flex h-[250px] items-center justify-center rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-white px-4">
+        <p className="text-sm dark:text-[#64748B] text-[#718096]">Нет данных за этот месяц</p>
       </div>
     );
   }
@@ -36,9 +36,9 @@ export function HoursChart({ data }: HoursChartProps) {
   const tooltipLabel = theme === "dark" ? "#94A3B8" : "#718096";
 
   return (
-    <div className="rounded-[16px] border dark:border-[var(--border-color)] border-[#E2E8F0] dark:bg-[var(--bg-surface)] bg-white p-4">
-      <p className="mb-4 text-sm font-semibold dark:text-[var(--text-secondary)] text-[#718096]">
-        Ð§Ð°ÑÑ‹ Ð¿Ð¾ ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ°Ð¼
+    <div className="rounded-2xl border dark:border-[#334155] border-[#E2E8F0] dark:bg-[#1E293B]/80 bg-white p-4">
+      <p className="mb-4 text-sm font-semibold dark:text-[#94A3B8] text-[#718096]">
+        Часы по сотрудникам
       </p>
       <ResponsiveContainer width="100%" height={250}>
         <BarChart data={data} margin={{ top: 5, right: 10, left: -15, bottom: 5 }}>
@@ -48,7 +48,7 @@ export function HoursChart({ data }: HoursChartProps) {
           <Tooltip
             contentStyle={{ backgroundColor: tooltipBg, border: `1px solid ${tooltipBorder}`, borderRadius: "12px", color: tooltipText, fontSize: 13 }}
             labelStyle={{ color: tooltipLabel }}
-            formatter={(value) => [`${value} Ñ‡`, "Ð§Ð°ÑÑ‹"]}
+            formatter={(value) => [`${value} ч`, "Часы"]}
           />
           <Bar dataKey="hours" radius={[6, 6, 0, 0]} maxBarSize={40}>
             {data.map((_, index) => (

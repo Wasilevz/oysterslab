@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { format } from "date-fns";
@@ -57,7 +57,7 @@ export function EmployeeSalary() {
     return (
       <section className="mt-6">
         <Skeleton className="mb-3 h-5 w-24" />
-        <Skeleton className="h-24 w-full rounded-[16px]" />
+        <Skeleton className="h-24 w-full rounded-2xl" />
       </section>
     );
   }
@@ -77,7 +77,7 @@ export function EmployeeSalary() {
         {myPayments.map((p) => (
           <li
             key={p.id}
-            className={`rounded-[16px] border p-4 ${
+            className={`rounded-2xl border p-4 ${
               p.status === "paid"
                 ? "border-emerald-500/10 bg-emerald-500/5"
                 : p.status === "approved"
@@ -87,7 +87,7 @@ export function EmployeeSalary() {
           >
             <div className="flex items-start justify-between">
               <p className="text-sm text-[var(--text-secondary)]">
-                {format(new Date(p.period_start), "d MMM", { locale: ru })} â€”{" "}
+                {format(new Date(p.period_start), "d MMM", { locale: ru })} —{" "}
                 {format(new Date(p.period_end), "d MMM", { locale: ru })}
               </p>
               {p.status === "paid" ? (
@@ -100,7 +100,7 @@ export function EmployeeSalary() {
             </div>
 
             <div className="mt-2 flex items-center justify-between">
-              <span className="text-xs text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} Ñ‡ Ã— {Number(p.hourly_rate)} Ð»/Ñ‡</span>
+              <span className="text-xs text-[var(--text-secondary)]">{Number(p.hours_worked).toFixed(1)} ч × {Number(p.hourly_rate)} л/ч</span>
               <p className="font-mono text-lg font-bold text-[var(--text-primary)]">{formatMoney(Number(p.total_amount))}</p>
             </div>
 

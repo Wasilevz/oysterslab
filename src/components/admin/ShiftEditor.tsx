@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { format } from "date-fns";
@@ -94,7 +94,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
     <div className="px-4 pt-4 pb-24">
       <div className="mb-4 flex items-center gap-3">
         {onBack && (
-          <button onClick={onBack} className="rounded-[12px] p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+          <button onClick={onBack} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
@@ -110,7 +110,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
             type="date"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
-            className="w-full rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)]"
           />
         </div>
         <div>
@@ -119,19 +119,19 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
-            className="w-full rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)]"
           />
         </div>
       </div>
 
       {error && (
-        <div className="mb-3 rounded-[12px] border border-red-500/20 bg-red-500/10 px-4 py-3">
+        <div className="mb-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
           <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
 
       {loading ? (
-        <Skeleton className="h-48 w-full rounded-[16px]" />
+        <Skeleton className="h-48 w-full rounded-2xl" />
       ) : shifts.length === 0 ? (
         <div className="flex min-h-[30vh] items-center justify-center">
           <p className="text-[var(--text-secondary)]">{t("shiftEditor.noShifts")}</p>
@@ -146,7 +146,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
             return (
               <div
                 key={shift.id}
-                className="rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-surface)] p-4"
+                className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -157,12 +157,12 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                     <p className="mt-1 text-xs text-[var(--text-secondary)]">
                       {format(new Date(shift.clock_in), "d MMM, HH:mm", { locale: ru })}
                       {shift.clock_out && (
-                        <> â†’ {format(new Date(shift.clock_out), "HH:mm", { locale: ru })}</>
+                        <> → {format(new Date(shift.clock_out), "HH:mm", { locale: ru })}</>
                       )}
                     </p>
                     {shift.hours_worked != null && (
                       <p className="text-[10px] text-[var(--text-secondary)]">
-                        {shift.hours_worked.toFixed(1)} Ñ‡
+                        {shift.hours_worked.toFixed(1)} ч
                       </p>
                     )}
                   </div>
@@ -175,7 +175,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                         onClick={() => startEdit(shift)}
                         className="rounded-lg border border-[var(--border-color)] px-2 py-1 text-[10px] text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]"
                       >
-                        âœŽ
+                        ✎
                       </button>
                     )}
                   </div>
@@ -189,7 +189,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                         type="datetime-local"
                         value={editClockIn}
                         onChange={(e) => setEditClockIn(e.target.value)}
-                        className="w-full rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                        className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)]"
                       />
                     </div>
                     <div>
@@ -198,7 +198,7 @@ export function ShiftEditor({ onBack }: { onBack?: () => void }) {
                         type="datetime-local"
                         value={editClockOut}
                         onChange={(e) => setEditClockOut(e.target.value)}
-                        className="w-full rounded-[12px] border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                        className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-3 py-2 text-sm text-[var(--text-primary)]"
                       />
                       <p className="mt-0.5 text-[10px] text-[var(--text-secondary)]">
                         {t("shiftEditor.clockOutHint")}

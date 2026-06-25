@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { getDashboardStats } from "@/actions/adminActions";
@@ -39,7 +39,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       setStats(result.data);
       setError(null);
     } else {
-      setError(result.error ?? "ÐžÑˆÐ¸Ð±ÐºÐ°");
+      setError(result.error ?? "Ошибка");
     }
     setLoading(false);
   }, [user?.id]);
@@ -79,13 +79,13 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         });
         const data = await res.json();
         if (!res.ok) {
-          setError(data.error ?? "ÐžÑˆÐ¸Ð±ÐºÐ°");
+          setError(data.error ?? "Ошибка");
           return;
         }
         void loadMyShift();
         void loadStats();
       } catch {
-        setError("ÐžÑˆÐ¸Ð±ÐºÐ° ÑÐµÑ‚Ð¸");
+        setError("Ошибка сети");
       }
     });
   };
@@ -161,10 +161,10 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       <div className="flex flex-1 flex-col gap-4 p-4 pb-24">
         <Skeleton className="h-12 w-48" />
         <div className="grid grid-cols-2 gap-3">
-          <Skeleton className="h-32 rounded-[16px]" />
-          <Skeleton className="h-32 rounded-[16px]" />
+          <Skeleton className="h-32 rounded-2xl" />
+          <Skeleton className="h-32 rounded-2xl" />
         </div>
-        <Skeleton className="h-[200px] rounded-[16px]" />
+        <Skeleton className="h-[200px] rounded-2xl" />
       </div>
     );
   }
@@ -184,7 +184,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
           <button
             onClick={handleToggleShift}
             disabled={isPending}
-            className={`rounded-[16px] px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
+            className={`rounded-2xl px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
               myShift
                 ? "bg-[var(--color-error)]/15 text-[var(--color-error)] hover:bg-[var(--color-error)]/25"
                 : "bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/25"
@@ -195,7 +195,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </div>
 
         {myShift && (
-          <div className="mt-3 flex items-center justify-between rounded-[16px] border border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5 px-4 py-3">
+          <div className="mt-3 flex items-center justify-between rounded-2xl border border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5 px-4 py-3">
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--brand-primary)] opacity-75" />
@@ -212,7 +212,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
       </header>
 
       {error && (
-        <div className="mb-4 rounded-[12px] border border-[var(--color-error)]/20 bg-[var(--color-error)]/10 px-4 py-3">
+        <div className="mb-4 rounded-xl border border-[var(--color-error)]/20 bg-[var(--color-error)]/10 px-4 py-3">
           <p className="text-sm text-[var(--color-error)]">{error}</p>
         </div>
       )}
@@ -225,7 +225,7 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
             <button
               key={item.key}
               onClick={() => onNavigate(item.key)}
-              className="relative flex flex-col items-center gap-3 rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 text-center transition-all active:scale-[0.98] hover:border-[var(--brand-primary)]/30"
+              className="relative flex flex-col items-center gap-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-5 text-center transition-all active:scale-[0.98] hover:border-[var(--brand-primary)]/30"
             >
               <div className={`${item.color}`}>{item.icon}</div>
               <p className="text-sm font-bold text-[var(--text-primary)]">{item.title}</p>
