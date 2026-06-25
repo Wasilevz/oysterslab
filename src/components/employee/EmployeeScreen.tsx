@@ -43,7 +43,7 @@ function getInitials(name: string): string {
 }
 
 export function EmployeeScreen() {
-  const { t } = useI18n();
+  const { t, locale, setLocale } = useI18n();
   const user = useUserStore((s) => s.user);
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
   const [recentShifts, setRecentShifts] = useState<Shift[]>([]);
@@ -240,6 +240,20 @@ export function EmployeeScreen() {
       <EmployeeSalary />
 
       <ScheduleEmployee />
+
+      <div className="mt-6 px-4">
+        <div className="rounded-[16px] border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
+          <p className="mb-3 text-sm font-semibold dark:text-white text-zinc-900">{t("settings.language")}</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => setLocale("ru")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] dark:text-[var(--text-secondary)] text-zinc-500"}`}>
+              🇷🇺 Русский
+            </button>
+            <button onClick={() => setLocale("ro")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ro" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] dark:text-[var(--text-secondary)] text-zinc-500"}`}>
+              🇲🇩 Română
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

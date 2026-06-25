@@ -25,6 +25,8 @@ const themeScript = `
 (function() {
   var t = localStorage.getItem('theme') || 'dark';
   document.documentElement.classList.add(t);
+  var l = localStorage.getItem('locale') || 'ru';
+  document.documentElement.setAttribute('lang', l);
 })()
 `;
 
