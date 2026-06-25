@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { format } from "date-fns";
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { ru } from "date-fns/locale";
 import {
   getActiveShift,
@@ -36,6 +36,15 @@ function getInitials(name: string): string {
     .slice(0, 2);
 }
 
+type PeriodType = "week" | "month";
+
+const STATUS_COLORS: Record<string, string> = {
+  ACTIVE: "text-[var(--brand-primary)]",
+  COMPLETED: "text-[var(--color-success)]",
+  AUTO_CLOSED: "text-[var(--color-warning)]",
+  REVIEWED: "text-[var(--accent-money)]",
+};
+
 export function EmployeeScreen() {
   const { t, locale, setLocale } = useI18n();
   const user = useUserStore((s) => s.user);
@@ -50,6 +59,9 @@ export function EmployeeScreen() {
     }
     return false;
   });
+  const [shiftHistory, setShiftHistory] = useState<Shift[]>([]);
+  const [historyPeriod, setHistoryPeriod] = useState<PeriodType | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const loadData = useCallback(async () => {
     if (!user) return;
@@ -101,6 +113,48 @@ export function EmployeeScreen() {
         show(t("common.networkError"), "error");
       }
     });
+  };
+
+  const openShiftHistory = async (period: PeriodType) => {
+    if (!user) return;
+    hapticImpact("light");
+    setHistoryPeriod(period);
+    setHistoryLoading(true);
+
+    const now = new Date();
+    let from: string;
+    let to: string;
+
+    if (period === "week") {
+      const ws = startOfWeek(now, { weekStartsOn: 1 });
+      const we = endOfWeek(now, { weekStartsOn: 1 });
+      from = ws.toISOString().split("T")[0];
+      to = we.toISOString().split("T")[0];
+    } else {
+      const ms = startOfMonth(now);
+      const me = endOfMonth(now);
+      from = ms.toISOString().split("T")[0];
+      to = me.toISOString().split("T")[0];
+    }
+
+    const initData = useUserStore.getState().initData;
+    const result = await getMyShifts(user.id, 100, initData ?? "");
+
+    if (result.success && result.data) {
+      const filtered = result.data.filter((s) => {
+        const d = s.clock_in.split("T")[0];
+        return d >= from && d <= to;
+      });
+      setShiftHistory(filtered);
+    }
+
+    setHistoryLoading(false);
+  };
+
+  const closeShiftHistory = () => {
+    hapticImpact("light");
+    setHistoryPeriod(null);
+    setShiftHistory([]);
   };
 
   if (loading) {
@@ -191,10 +245,13 @@ export function EmployeeScreen() {
         </div>
       </div>
 
-      {/* Статистика */}
+      {/* Статистика — кликабельные карточки */}
       {stats && (
         <div className="mb-5 grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
+          <button
+            onClick={() => openShiftHistory("week")}
+            className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 text-left transition-all active:scale-[0.98] hover:border-[var(--brand-primary)]/30"
+          >
             <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
               {t("employee.thisWeek")}
             </p>
@@ -204,8 +261,14 @@ export function EmployeeScreen() {
                 ч
               </span>
             </p>
-          </div>
-          <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
+            <p className="mt-1 text-[10px] text-[var(--brand-primary)]">
+              {t("employee.viewShifts")}
+            </p>
+          </button>
+          <button
+            onClick={() => openShiftHistory("month")}
+            className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4 text-left transition-all active:scale-[0.98] hover:border-[var(--brand-primary)]/30"
+          >
             <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
               {t("employee.thisMonth")}
             </p>
@@ -215,7 +278,10 @@ export function EmployeeScreen() {
                 ч
               </span>
             </p>
-          </div>
+            <p className="mt-1 text-[10px] text-[var(--brand-primary)]">
+              {t("employee.viewShifts")}
+            </p>
+          </button>
           <div className="col-span-2 rounded-2xl border border-[var(--brand-primary)]/10 bg-[var(--brand-primary)]/5 p-4">
             <p className="text-[11px] font-medium uppercase tracking-wider text-[var(--text-secondary)]">
               {t("employee.expectedSalary")}
@@ -239,14 +305,81 @@ export function EmployeeScreen() {
           <p className="mb-3 text-sm font-semibold text-[var(--text-primary)]">{t("settings.language")}</p>
           <div className="grid grid-cols-2 gap-2">
             <button onClick={() => setLocale("ru")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
-              🇷🇺 Русский
+              Русский
             </button>
             <button onClick={() => setLocale("ro")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ro" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
-              🇲🇩 Română
+              Română
             </button>
           </div>
         </div>
       </div>
+
+      {/* Модалка со списком смен */}
+      {historyPeriod && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={closeShiftHistory}>
+          <div className="absolute inset-0 bg-black/50" />
+          <div
+            className="relative w-full max-w-lg rounded-t-3xl bg-[var(--bg-app)] p-5 pb-8 animate-in slide-in-from-bottom duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-[var(--text-primary)]">
+                {historyPeriod === "week" ? t("employee.shiftsThisWeek") : t("employee.shiftsThisMonth")}
+              </h2>
+              <button onClick={closeShiftHistory} className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {historyLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-20 w-full rounded-2xl" />
+                ))}
+              </div>
+            ) : shiftHistory.length === 0 ? (
+              <div className="flex min-h-[20vh] items-center justify-center">
+                <p className="text-sm text-[var(--text-secondary)]">{t("employee.noShifts")}</p>
+              </div>
+            ) : (
+              <div className="max-h-[50vh] space-y-2 overflow-y-auto">
+                {shiftHistory.map((shift) => (
+                  <div
+                    key={shift.id}
+                    className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold text-[var(--text-primary)]">
+                          {format(new Date(shift.clock_in), "d MMM, EEEE", { locale: ru })}
+                        </p>
+                        <p className="text-xs text-[var(--text-secondary)]">
+                          {format(new Date(shift.clock_in), "HH:mm")}
+                          {shift.clock_out && (
+                            <> → {format(new Date(shift.clock_out), "HH:mm")}</>
+                          )}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        {shift.hours_worked != null && (
+                          <p className="font-mono text-lg font-bold text-[var(--text-primary)]">
+                            {shift.hours_worked.toFixed(1)}ч
+                          </p>
+                        )}
+                        <p className={`text-[10px] font-semibold ${STATUS_COLORS[shift.status] ?? "text-[var(--text-secondary)]"}`}>
+                          {t(`shiftEditor.${shift.status === "AUTO_CLOSED" ? "autoClosed" : shift.status.toLowerCase()}`)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

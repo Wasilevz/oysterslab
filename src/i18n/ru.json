@@ -185,6 +185,9 @@
   "employee.noShifts": "Пока нет смен",
   "employee.weeklyHours": "Часы за неделю",
   "employee.salary": "Зарплата",
+  "employee.viewShifts": "Посмотреть смены →",
+  "employee.shiftsThisWeek": "Смены за неделю",
+  "employee.shiftsThisMonth": "Смены за месяц",
 
   "forgotten.hours": "Отработанные часы",
   "forgotten.systemCalc": "Система рассчитала:",

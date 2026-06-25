@@ -185,6 +185,9 @@
   "employee.noShifts": "Încă nu sunt ture",
   "employee.weeklyHours": "Ore săptămânale",
   "employee.salary": "Salariu",
+  "employee.viewShifts": "Vezi turele →",
+  "employee.shiftsThisWeek": "Turele pe saptamana",
+  "employee.shiftsThisMonth": "Turele pe luna",
 
   "forgotten.hours": "Ore lucrate",
   "forgotten.systemCalc": "Sistemul a calculat:",
