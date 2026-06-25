@@ -48,29 +48,21 @@ function toDateStr(d: Date): string {
 export function ScheduleEmployee() {
   const { t } = useI18n();
   const user = useUserStore((s) => s.user);
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [teamSchedules, setTeamSchedules] = useState<Schedule[]>([]);
   const [employees, setEmployees] = useState<User[]>([]);
   const [workingToday, setWorkingToday] = useState<{ id: string; full_name: string; position: string | null; clock_in: string | null }[]>([]);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [weekStart] = useState(() => getWeekStart(new Date()));
+  const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [loading, setLoading] = useState(true);
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth() + 1;
-  const daysInMonth = new Date(year, month, 0).getDate();
   const weekDays = getWeekDays(weekStart);
 
   const loadData = useCallback(async () => {
-    if (!user) return;
     const initData = useUserStore.getState().initData;
-    const [schedResult, todayResult, empResult, teamSchedResult] = await Promise.all([
-      getMySchedule(user.id, year, month, initData ?? ""),
+    const [todayResult, empResult, teamSchedResult] = await Promise.all([
       getWorkingToday(initData ?? ""),
       getEmployees(initData ?? ""),
       getSchedule(weekStart.getFullYear(), weekStart.getMonth() + 1, initData ?? ""),
     ]);
-    if (schedResult.success && schedResult.data) setSchedules(schedResult.data);
     if (todayResult.success && todayResult.data) setWorkingToday(todayResult.data);
     if (empResult.success && empResult.data) setEmployees(empResult.data);
     if (teamSchedResult.success && teamSchedResult.data) {
@@ -78,18 +70,12 @@ export function ScheduleEmployee() {
       setTeamSchedules(teamSchedResult.data.filter((s) => weekDates.includes(s.date)));
     }
     setLoading(false);
-  }, [user, year, month, weekStart]);
+  }, [weekStart]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadData();
   }, [loadData]);
-
-  const getDayType = (day: number): ScheduleType => {
-    const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    const entry = schedules.find((s) => s.date === dateStr);
-    return entry?.type ?? "work";
-  };
 
   const getTeamType = (userId: string, date: Date): ScheduleType => {
     const dateStr = toDateStr(date);
@@ -97,22 +83,23 @@ export function ScheduleEmployee() {
     return entry?.type ?? "work";
   };
 
-  const prevMonth = () => {
-    const d = new Date(currentDate);
-    d.setMonth(d.getMonth() - 1);
-    setCurrentDate(d);
+  const prevWeek = () => {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() - 7);
+    setWeekStart(d);
   };
 
-  const nextMonth = () => {
-    const d = new Date(currentDate);
-    d.setMonth(d.getMonth() + 1);
-    setCurrentDate(d);
+  const nextWeek = () => {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + 7);
+    setWeekStart(d);
   };
 
-  const monthNames = [
-    t("month.january"), t("month.february"), t("month.march"), t("month.april"), t("month.may"), t("month.june"),
-    t("month.july"), t("month.august"), t("month.september"), t("month.october"), t("month.november"), t("month.december"),
-  ];
+  const goToThisWeek = () => {
+    setWeekStart(getWeekStart(new Date()));
+  };
+
+  const isCurrentWeek = getWeekStart(new Date()).getTime() === weekStart.getTime();
 
   const dayNames = [t("day.mon"), t("day.tue"), t("day.wed"), t("day.thu"), t("day.fri"), t("day.sat"), t("day.sun")];
   const today = new Date();
@@ -129,92 +116,61 @@ export function ScheduleEmployee() {
 
   return (
     <div className="flex flex-col">
-      <header className="mb-5">
+      <header className="mb-4">
         <p className="text-xs font-medium uppercase tracking-widest text-[var(--text-secondary)]">
-          {t("schedule.mySchedule")}
+          {t("schedule.subtitle")}
         </p>
-        <h1 className="mt-1 text-2xl font-bold text-[var(--text-primary)]">
-          {monthNames[month - 1]} {year}
-        </h1>
+        <h1 className="mt-1 text-2xl font-bold text-[var(--text-primary)]">{t("schedule.title")}</h1>
       </header>
 
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={prevMonth} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+      <div className="flex items-center justify-between">
+        <button onClick={prevWeek} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </button>
-        <div className="flex gap-2">
-          {(["work", "off", "vacation", "sick"] as const).map((type) => (
-              <span key={type} className={`flex items-center gap-1.5 text-[11px] font-medium ${TYPE_COLORS[type].text}`}>
-                <span className={`h-2.5 w-2.5 rounded-full ${TYPE_COLORS[type].dot}`} />
-                {t(TYPE_LABELS[type])}
-              </span>
-          ))}
+        <div className="text-center">
+          <p className="text-lg font-bold text-[var(--text-primary)]">
+            {format(weekDays[0], "d MMM", { locale: ru })} – {format(weekDays[6], "d MMM", { locale: ru })}
+          </p>
+          {!isCurrentWeek && (
+            <button onClick={goToThisWeek} className="mt-1.5 rounded-full border border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 px-4 py-1.5 text-xs font-bold text-[var(--brand-primary)] transition-all active:scale-95 hover:bg-[var(--brand-primary)]/20">
+              ← {t("schedule.thisWeek")}
+            </button>
+          )}
         </div>
-        <button onClick={nextMonth} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+        <button onClick={nextWeek} className="rounded-xl p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
           <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
           </svg>
         </button>
       </div>
 
-      <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-3">
-        <div className="grid grid-cols-7 gap-1 mb-2">
-          {dayNames.map((d) => (
-            <div key={d} className="py-1 text-center text-[11px] font-medium text-[var(--text-secondary)]">{d}</div>
-          ))}
-        </div>
-        <div className="grid grid-cols-7 gap-1">
-          {Array.from({ length: (new Date(year, month - 1, 1).getDay() + 6) % 7 }).map((_, i) => (
-            <div key={`empty-${i}`} />
-          ))}
-          {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
-            const type = getDayType(day);
-            const colors = TYPE_COLORS[type];
-            const isToday = todayStr === `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-
-            return (
-              <div
-                key={day}
-                className={`flex flex-col items-center rounded-lg py-1.5 ${
-                  isToday ? "ring-1 ring-[var(--brand-primary)]/50" : ""
-                }`}
-              >
-                <span className={`text-xs font-medium ${isToday ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"}`}>
-                  {day}
-                </span>
-                <span className={`mt-1 h-2 w-2 rounded-full ${colors.dot}`} />
-              </div>
-            );
-          })}
-        </div>
+      <div className="mt-3 flex items-center gap-3">
+        {(["work", "off", "vacation", "sick"] as const).map((type) => (
+          <span key={type} className="flex items-center gap-1 text-[11px]">
+            <span className={`h-2.5 w-2.5 rounded-full ${TYPE_COLORS[type].dot}`} />
+            <span className={TYPE_COLORS[type].text}>{t(`schedule.${type}`)}</span>
+          </span>
+        ))}
       </div>
 
-      {/* Team this week - read only */}
-      <div className="mt-6">
-        <p className="text-xs font-medium uppercase tracking-widest text-[var(--text-secondary)] mb-1">
-          {t("schedule.teamWeek")}
-        </p>
-        <p className="text-sm font-bold text-[var(--text-primary)] mb-3">
-          {format(weekDays[0], "d MMM", { locale: ru })} – {format(weekDays[6], "d MMM", { locale: ru })}
-        </p>
-
+      <div className="mt-3 flex-1 pb-24">
         <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-hidden">
           <table className="w-full border-collapse">
             <thead>
               <tr>
-                <th className="sticky left-0 z-20 bg-[var(--bg-surface)] p-2 text-left text-[11px] font-medium text-[var(--text-secondary)] min-w-[80px]">
+                <th className="sticky left-0 z-20 bg-[var(--bg-surface)] p-2 text-left text-[11px] font-medium text-[var(--text-secondary)] min-w-[90px]">
                   {t("payroll.employee")}
                 </th>
                 {weekDays.map((day, i) => {
                   const isToday = toDateStr(day) === todayStr;
                   return (
-                    <th key={i} className="p-1 text-center">
-                      <div className={`text-[10px] font-medium ${isToday ? "text-[var(--brand-primary)] font-bold" : "text-[var(--text-secondary)]"}`}>
+                    <th key={i} className="p-1.5 text-center">
+                      <div className={`text-[11px] font-medium ${isToday ? "text-[var(--brand-primary)] font-bold" : "text-[var(--text-secondary)]"}`}>
                         {dayNames[i]}
                       </div>
-                      <div className={`text-[12px] font-bold ${isToday ? "text-[var(--brand-primary)]" : "text-[var(--text-primary)]"}`}>
+                      <div className={`text-[13px] font-bold ${isToday ? "text-[var(--brand-primary)]" : "text-[var(--text-primary)]"}`}>
                         {day.getDate()}
                       </div>
                     </th>
@@ -223,34 +179,43 @@ export function ScheduleEmployee() {
               </tr>
             </thead>
             <tbody>
-              {employees.filter((e) => e.id !== user?.id).map((emp) => (
-                <tr key={emp.id} className="border-t border-[var(--border-color)]">
-                  <td className="sticky left-0 z-20 bg-[var(--bg-surface)] py-1.5 pr-2 min-w-[80px]">
-                    <p className="truncate text-[11px] font-semibold text-[var(--text-primary)]">{emp.full_name}</p>
-                  </td>
-                  {weekDays.map((day, i) => {
-                    const type = getTeamType(emp.id, day);
-                    const colors = TYPE_COLORS[type];
-                    const isToday = toDateStr(day) === todayStr;
-                    return (
-                      <td key={i} className="p-0.5">
-                        <div
-                          className={`flex h-8 w-full items-center justify-center rounded-lg text-[10px] font-bold ${colors.bg} ${colors.text} ${isToday ? "ring-1 ring-[var(--brand-primary)]/20" : ""}`}
-                        >
-                          {type === "work" ? t("schedule.abbrWork") : type === "off" ? t("schedule.abbrOff") : type === "vacation" ? t("schedule.abbrVacation") : t("schedule.abbrSick")}
-                        </div>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
+              {employees.map((emp) => {
+                const isMe = emp.id === user?.id;
+                return (
+                  <tr key={emp.id} className={`border-t border-[var(--border-color)] ${isMe ? "bg-[var(--brand-primary)]/5" : ""}`}>
+                    <td className="sticky left-0 z-20 bg-[var(--bg-surface)] py-2 pr-2 min-w-[90px]">
+                      <p className={`truncate text-xs font-semibold ${isMe ? "text-[var(--brand-primary)]" : "text-[var(--text-primary)]"}`}>
+                        {emp.full_name}
+                        {isMe && <span className="ml-1 text-[9px] font-bold">★</span>}
+                      </p>
+                      {emp.position && (
+                        <p className="truncate text-[10px] text-[var(--text-secondary)]">{emp.position}</p>
+                      )}
+                    </td>
+                    {weekDays.map((day, i) => {
+                      const type = getTeamType(emp.id, day);
+                      const colors = TYPE_COLORS[type];
+                      const isToday = toDateStr(day) === todayStr;
+                      return (
+                        <td key={i} className="p-0.5">
+                          <div
+                            className={`flex h-10 w-full items-center justify-center rounded-xl text-[11px] font-bold ${colors.bg} ${colors.text} ${isToday ? "ring-1 ring-[var(--brand-primary)]/30" : ""}`}
+                          >
+                            {type === "work" ? t("schedule.abbrWork") : type === "off" ? t("schedule.abbrOff") : type === "vacation" ? t("schedule.abbrVacation") : t("schedule.abbrSick")}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
       {workingToday.length > 0 && (
-        <div className="mt-5">
+        <div className="border-t border-[var(--border-color)] pt-4 pb-24">
           <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
             {t("schedule.todayOnShift")}
           </h2>
