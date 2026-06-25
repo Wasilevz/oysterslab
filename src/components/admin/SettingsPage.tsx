@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import {
@@ -220,10 +220,10 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
         <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
           <p className="mb-3 text-sm font-semibold text-[var(--text-primary)]">{t("settings.language")}</p>
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => setLocale("ru")} className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
+            <button onClick={() => setLocale("ru")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
               Ð ÑƒÑÑÐºÐ¸Ð¹
             </button>
-            <button onClick={() => setLocale("ro")} className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${locale === "ro" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
+            <button onClick={() => setLocale("ro")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ro" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
               RomÃ¢nÄƒ
             </button>
           </div>
@@ -291,7 +291,7 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
       <div className="px-4 mt-6 pb-24">
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)]">{t("settings.employees")}</p>
-          <button onClick={() => setShowAddForm(!showAddForm)} className="rounded-xl border border-[var(--border-color)] px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">
+          <button onClick={() => setShowAddForm(!showAddForm)} className="rounded-[1440px] border border-[var(--border-color)] px-4 py-2 text-xs font-semibold text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">
             {showAddForm ? t("settings.hideForm") : t("settings.addEmployee")}
           </button>
         </div>
@@ -304,8 +304,8 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
             <Input type="text" placeholder={t("settings.positionPlaceholder")} value={newPosition} onChange={(e) => setNewPosition(e.target.value)} />
             <Input type="number" inputMode="decimal" step="0.5" min="0" placeholder={t("settings.ratePlaceholder")} value={newRate} onChange={(e) => setNewRate(e.target.value)} />
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => setNewRole("employee")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${newRole === "employee" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>{t("settings.employeeRole")}</button>
-              <button onClick={() => setNewRole("admin")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${newRole === "admin" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>{t("settings.adminRole")}</button>
+              <button onClick={() => setNewRole("employee")} className={`rounded-[1440px] border py-2 text-xs font-semibold transition-colors ${newRole === "employee" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>{t("settings.employeeRole")}</button>
+              <button onClick={() => setNewRole("admin")} className={`rounded-[1440px] border py-2 text-xs font-semibold transition-colors ${newRole === "admin" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>{t("settings.adminRole")}</button>
             </div>
             <Button variant="blue" className="w-full" onClick={() => void handleAddEmployee()}>{t("settings.addBtn")}</Button>
           </div>
@@ -333,8 +333,8 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                     </select>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => setEditRole("employee")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${editRole === "employee" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>{t("settings.employeeRole")}</button>
-                    <button onClick={() => setEditRole("admin")} className={`rounded-xl border py-2 text-xs font-semibold transition-colors ${editRole === "admin" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>{t("settings.adminRole")}</button>
+                    <button onClick={() => setEditRole("employee")} className={`rounded-[1440px] border py-2 text-xs font-semibold transition-colors ${editRole === "employee" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>{t("settings.employeeRole")}</button>
+                    <button onClick={() => setEditRole("admin")} className={`rounded-[1440px] border py-2 text-xs font-semibold transition-colors ${editRole === "admin" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>{t("settings.adminRole")}</button>
                   </div>
                   <div className="flex gap-2">
                     <Button variant="ghost" className="flex-1" onClick={cancelEdit}>{t("settings.cancel")}</Button>
@@ -351,8 +351,8 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => startEdit(emp)} className="rounded-xl border border-[var(--border-color)] px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">{t("settings.edit")}</button>
-                    <button onClick={() => void handleDeleteEmployee(emp.id)} className="rounded-xl border border-[var(--border-color)] px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:border-rose-500/30 hover:text-rose-500">{t("settings.delete")}</button>
+                    <button onClick={() => startEdit(emp)} className="rounded-[1440px] border border-[var(--border-color)] px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:border-[var(--brand-primary)]/30 hover:text-[var(--brand-primary)]">{t("settings.edit")}</button>
+                    <button onClick={() => void handleDeleteEmployee(emp.id)} className="rounded-[1440px] border border-[var(--border-color)] px-3 py-1.5 text-xs text-[var(--text-secondary)] hover:border-rose-500/30 hover:text-rose-500">{t("settings.delete")}</button>
                   </div>
                 </div>
               )}
