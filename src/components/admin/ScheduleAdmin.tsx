@@ -32,7 +32,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
   const cachedMonth = useRef<string>("");
   const touchStartX = useRef(0);
   const schedulesRef = useRef<Schedule[]>([]);
-  schedulesRef.current = schedules;
+  useEffect(() => { schedulesRef.current = schedules; });
 
   const weekDays = getWeekDays(weekStart);
 

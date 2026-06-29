@@ -76,7 +76,11 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   }, []);
 
   useEffect(() => {
-    void loadSettings();
+    let cancelled = false;
+    (async () => {
+      await loadSettings();
+    })();
+    return () => { cancelled = true; };
   }, [loadSettings]);
 
   const loadLogs = useCallback(async () => {

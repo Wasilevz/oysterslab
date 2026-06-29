@@ -11,7 +11,7 @@ interface MainButtonShiftProps {
 
 export function MainButtonShift({ activeShift, onToggle, loading }: MainButtonShiftProps) {
   const onToggleRef = useRef(onToggle);
-  onToggleRef.current = onToggle;
+  useEffect(() => { onToggleRef.current = onToggle; });
 
   useEffect(() => {
     let cancelled = false;
