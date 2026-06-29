@@ -31,14 +31,13 @@ export function getElapsedSeconds(from: string, to: Date = new Date()): number {
 export function roundTo30(date: Date): Date {
   const rounded = new Date(date);
   const m = rounded.getMinutes();
-  if (m >= 0 && m <= 15) {
+  if (m <= 15) {
     rounded.setMinutes(0, 0, 0);
-  } else if (m >= 16 && m <= 30) {
-    rounded.setMinutes(30, 0, 0);
-  } else if (m >= 31 && m <= 45) {
+  } else if (m <= 45) {
     rounded.setMinutes(30, 0, 0);
   } else {
-    rounded.setHours(rounded.getHours() + 1, 0, 0, 0);
+    rounded.setMinutes(30, 0, 0);
+    rounded.setHours(rounded.getHours() + 1);
   }
   return rounded;
 }

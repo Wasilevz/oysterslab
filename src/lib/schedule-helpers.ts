@@ -25,3 +25,21 @@ export function getWeekDays(weekStart: Date): Date[] {
 export function toDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
+
+export function getMonthWeeks(year: number, month: number): Date[][] {
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay = new Date(year, month, 0);
+  const weeks: Date[][] = [];
+  let current = getWeekStart(firstDay);
+
+  while (current <= lastDay || weeks.length === 0) {
+    const weekDays = getWeekDays(current);
+    weeks.push(weekDays);
+    const nextWeek = new Date(current);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    if (nextWeek > lastDay && weekDays[6]! >= lastDay) break;
+    current = nextWeek;
+  }
+
+  return weeks;
+}

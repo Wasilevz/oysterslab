@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { AdminDashboard } from "@/components/admin/AdminDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { hapticImpact } from "@/lib/haptic";
@@ -18,21 +18,23 @@ export function AdminScreen() {
   const [view, setView] = useState<AdminView>("dashboard");
   const [displayedView, setDisplayedView] = useState<AdminView>("dashboard");
   const [transitioning, setTransitioning] = useState(false);
+  const viewRef = useRef(view);
 
-  const goBack = () => {
-    hapticImpact("light");
-    switchView("dashboard");
-  };
-
-  const switchView = (next: AdminView) => {
-    if (next === displayedView) return;
+  const switchView = useCallback((next: AdminView) => {
+    if (next === viewRef.current) return;
     setTransitioning(true);
     setTimeout(() => {
       setDisplayedView(next);
       setView(next);
+      viewRef.current = next;
       setTransitioning(false);
     }, 150);
-  };
+  }, []);
+
+  const goBack = useCallback(() => {
+    hapticImpact("light");
+    switchView("dashboard");
+  }, [switchView]);
 
   useEffect(() => {
     let cleanup: (() => void) | undefined;
@@ -51,8 +53,7 @@ export function AdminScreen() {
     });
 
     return () => { cleanup?.(); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view]);
+  }, [view, goBack]);
 
   const renderView = () => {
     switch (displayedView) {

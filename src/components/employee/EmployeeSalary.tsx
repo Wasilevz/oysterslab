@@ -47,7 +47,8 @@ export function EmployeeSalary() {
 
   const handleConfirm = (id: string) => {
     startTransition(async () => {
-      const result = await confirmPayment(id);
+      const initData = useUserStore.getState().initData;
+      const result = await confirmPayment(id, initData ?? "");
       if (!result.success) {
         setError(result.error ?? t("common.error"));
         return;
@@ -69,7 +70,7 @@ export function EmployeeSalary() {
   if (myPayments.length === 0) return null;
 
   return (
-    <section className="mt-6">
+    <section>
       <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
         {t("employee.salary")}
       </h2>

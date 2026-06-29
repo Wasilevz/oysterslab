@@ -3,6 +3,10 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 export async function sendTelegramMessage(chatId: number, text: string): Promise<boolean> {
   if (!BOT_TOKEN) return false;
 
@@ -46,7 +50,7 @@ export async function notifyShiftApproved(paymentId: string): Promise<void> {
   const chatId = await getUserTelegramId(data.user_id);
   if (!chatId) return;
 
-  const userName = Array.isArray(data.users) ? data.users[0]?.full_name : (data.users as { full_name: string }).full_name;
+  const userName = escapeHtml(Array.isArray(data.users) ? data.users[0]?.full_name ?? "" : (data.users as { full_name: string }).full_name ?? "");
   const from = new Date(data.period_start).toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
   const to = new Date(data.period_end).toLocaleDateString("ru-RU", { day: "numeric", month: "short" });
 
@@ -72,7 +76,7 @@ export async function notifyPaymentReceived(paymentId: string): Promise<void> {
   const chatId = await getUserTelegramId(data.user_id);
   if (!chatId) return;
 
-  const userName = Array.isArray(data.users) ? data.users[0]?.full_name : (data.users as { full_name: string }).full_name;
+  const userName = escapeHtml(Array.isArray(data.users) ? data.users[0]?.full_name ?? "" : (data.users as { full_name: string }).full_name ?? "");
 
   await sendTelegramMessage(
     chatId,
@@ -91,10 +95,6 @@ export async function notifyNewSchedule(userId: string, startDate: string, endDa
     chatId,
     `📅 Обновлён график на ${from} — ${to}.\n\nОткройте приложение чтобы посмотреть расписание.`,
   );
-}
-
-function escapeHtml(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 export async function notifyFineAdded(userId: string, amount: number, reason: string): Promise<void> {

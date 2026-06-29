@@ -2,14 +2,12 @@
 
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { logAction } from "@/lib/audit";
-import { isIPAllowed } from "@/lib/location-auth";
 import { verifyRequestAuth, requireAdmin } from "@/lib/auth";
 import { roundTo30 } from "@/lib/utils";
 import type { ActionResult, Shift } from "@/types/database";
 
 export async function clockIn(
   initData: string,
-  clientIP?: string,
 ): Promise<ActionResult<Shift>> {
   try {
     const auth = await verifyRequestAuth(initData ?? "");
@@ -18,33 +16,35 @@ export async function clockIn(
 
     const supabase = getSupabaseAdmin();
 
-    const { data: activeShift, error: activeError } = await supabase
+    const { data: activeShifts, error: activeError } = await supabase
       .from("shifts")
-      .select("id")
+      .select("id, clock_in")
       .eq("user_id", userId)
       .eq("status", "ACTIVE")
-      .maybeSingle();
+      .order("clock_in", { ascending: false });
 
     if (activeError) {
-      return { success: false, error: "Ошибка сервера" };
+      console.error("[SHIFT] check active error:", activeError.message);
+      return { success: false, error: `Проверка смены: ${activeError.message}` };
     }
 
-    if (activeShift) {
-      return { success: false, error: "Смена уже активна" };
-    }
+    if (activeShifts && activeShifts.length > 0) {
+      const latest = activeShifts[0]!;
+      const clockInTime = roundTo30(new Date());
+      const hoursWorked = Math.round(((clockInTime.getTime() - new Date(latest.clock_in).getTime()) / 3600000) * 100) / 100;
 
-    const { data: settings } = await supabase
-      .from("location_settings")
-      .select("allowed_ips, auth_mode")
-      .single();
-
-    const authMode = settings?.auth_mode ?? "ip";
-    const allowedIPs = settings?.allowed_ips ?? [];
-
-    if (authMode === "ip" && allowedIPs.length > 0 && clientIP) {
-      if (!isIPAllowed(clientIP, allowedIPs)) {
-        return { success: false, error: "Подключитесь к WiFi заведения" };
+      for (const s of activeShifts) {
+        await supabase
+          .from("shifts")
+          .update({
+            clock_out: clockInTime.toISOString(),
+            status: "AUTO_CLOSED",
+            hours_worked: hoursWorked,
+          })
+          .eq("id", s.id);
       }
+
+      return { success: false, error: "Смена уже активна (дубли закрыты)" };
     }
 
     const clockInTime = roundTo30(new Date());
@@ -59,19 +59,19 @@ export async function clockIn(
       .single();
 
     if (error) {
-      return { success: false, error: "Ошибка сервера" };
+      console.error("[SHIFT] insert error:", error.message, error.code);
+      return { success: false, error: `Создание смены: ${error.message}` };
     }
 
     return { success: true, data: shift as Shift };
   } catch (err) {
-    console.error("[SHIFT] clockIn error:", err);
-    return { success: false, error: "Ошибка сервера" };
+    console.error("[SHIFT] clockIn exception:", err);
+    return { success: false, error: `Исключение: ${String(err)}` };
   }
 }
 
 export async function clockOut(
   initData: string,
-  clientIP?: string,
 ): Promise<ActionResult<Shift>> {
   try {
     const auth = await verifyRequestAuth(initData ?? "");
@@ -80,40 +80,26 @@ export async function clockOut(
 
     const supabase = getSupabaseAdmin();
 
-    const { data: activeShift, error: findError } = await supabase
+    const { data: activeShifts, error: findError } = await supabase
       .from("shifts")
       .select("*")
       .eq("user_id", userId)
       .eq("status", "ACTIVE")
-      .maybeSingle();
+      .order("clock_in", { ascending: false });
 
     if (findError) {
-      return { success: false, error: "Ошибка сервера" };
+      return { success: false, error: `Поиск смены: ${findError.message}` };
     }
 
-    if (!activeShift) {
+    if (!activeShifts || activeShifts.length === 0) {
       return { success: false, error: "Нет активной смены" };
     }
 
-    const { data: settings } = await supabase
-      .from("location_settings")
-      .select("allowed_ips, auth_mode")
-      .single();
-
-    const authMode = settings?.auth_mode ?? "ip";
-    const allowedIPs = settings?.allowed_ips ?? [];
-
-    if (authMode === "ip" && allowedIPs.length > 0 && clientIP) {
-      if (!isIPAllowed(clientIP, allowedIPs)) {
-        return { success: false, error: "Подключитесь к WiFi заведения" };
-      }
-    }
-
+    const activeShift = activeShifts[0]!;
     const clockOutTime = roundTo30(new Date());
     const clockIn = new Date(activeShift.clock_in);
     const hoursWorked =
-      Math.round(((clockOutTime.getTime() - clockIn.getTime()) / 3600000) * 100) /
-      100;
+      Math.round(((clockOutTime.getTime() - clockIn.getTime()) / 3600000) * 100) / 100;
 
     const { data: shift, error } = await supabase
       .from("shifts")
@@ -127,13 +113,35 @@ export async function clockOut(
       .single();
 
     if (error) {
-      return { success: false, error: "Ошибка сервера" };
+      return { success: false, error: `Закрытие смены: ${error.message}` };
     }
 
     return { success: true, data: shift as Shift };
   } catch (err) {
-    console.error("[SHIFT] clockOut error:", err);
-    return { success: false, error: "Ошибка сервера" };
+    console.error("[SHIFT] clockOut exception:", err);
+    return { success: false, error: `Исключение: ${String(err)}` };
+  }
+}
+
+export async function deleteShift(
+  shiftId: string,
+  initData?: string,
+): Promise<ActionResult<void>> {
+  try {
+    const authResult = await requireAdmin(initData ?? "");
+    if ("error" in authResult) return { success: false, error: authResult.error };
+
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("shifts")
+      .delete()
+      .eq("id", shiftId);
+
+    if (error) return { success: false, error: `Удаление: ${error.message}` };
+    return { success: true };
+  } catch (err) {
+    console.error("[SHIFT] deleteShift error:", err);
+    return { success: false, error: String(err) };
   }
 }
 
@@ -184,6 +192,8 @@ export async function getActiveShift(
       .select("*")
       .eq("user_id", userId)
       .eq("status", "ACTIVE")
+      .order("clock_in", { ascending: false })
+      .limit(1)
       .maybeSingle();
 
     if (error) {
@@ -274,7 +284,13 @@ export async function editShift(
     if (!shift) return { success: false, error: "Смена не найдена" };
 
     const clockInDate = new Date(clockIn);
+    if (!Number.isFinite(clockInDate.getTime())) {
+      return { success: false, error: "Некорректная дата начала" };
+    }
     const clockOutDate = clockOut ? new Date(clockOut) : null;
+    if (clockOut && clockOutDate && !Number.isFinite(clockOutDate.getTime())) {
+      return { success: false, error: "Некорректная дата окончания" };
+    }
     const hoursWorked = clockOutDate
       ? Math.round(((clockOutDate.getTime() - clockInDate.getTime()) / 3600000) * 100) / 100
       : null;

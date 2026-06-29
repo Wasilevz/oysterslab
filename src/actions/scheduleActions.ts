@@ -1,7 +1,7 @@
 "use server";
 
 import { getSupabaseAdmin } from "@/lib/supabase";
-import { requireAdmin, verifyRequestAuth } from "@/lib/auth";
+import { verifyRequestAuth } from "@/lib/auth";
 import type { ActionResult, Schedule, ScheduleType, User } from "@/types/database";
 
 export async function getSchedule(
@@ -10,147 +10,84 @@ export async function getSchedule(
   initData?: string,
 ): Promise<ActionResult<Schedule[]>> {
   try {
-    const authResult = await requireAdmin(initData ?? "");
-    if ("error" in authResult) return { success: false, error: authResult.error };
-
-    const supabase = getSupabaseAdmin();
-
-    const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-    const endMonth = month === 12 ? 1 : month + 1;
-    const endYear = month === 12 ? year + 1 : year;
-    const endDate = `${endYear}-${String(endMonth).padStart(2, "0")}-01`;
-
-    const { data, error } = await supabase
-      .from("schedules")
-      .select("*")
-      .gte("date", startDate)
-      .lt("date", endDate)
-      .order("date");
-
-    if (error) return { success: false, error: "Ошибка сервера" };
-
-    return { success: true, data: (data ?? []) as Schedule[] };
-  } catch (err) {
-    console.error("[SCHEDULE] error:", err);
-    return { success: false, error: "Ошибка сервера" };
-  }
-}
-
-export async function getMySchedule(
-  userId: string,
-  year: number,
-  month: number,
-  initData?: string,
-): Promise<ActionResult<Schedule[]>> {
-  try {
     const auth = await verifyRequestAuth(initData ?? "");
     if (!auth) return { success: false, error: "Не авторизован" };
-    if (auth.id !== userId) return { success: false, error: "Нет доступа" };
 
     const supabase = getSupabaseAdmin();
-
-    const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-    const endMonth = month === 12 ? 1 : month + 1;
-    const endYear = month === 12 ? year + 1 : year;
-    const endDate = `${endYear}-${String(endMonth).padStart(2, "0")}-01`;
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const start = `${year}-${pad(month)}-01`;
+    const nextM = month === 12 ? 1 : month + 1;
+    const nextY = month === 12 ? year + 1 : year;
+    const end = `${nextY}-${pad(nextM)}-01`;
 
     const { data, error } = await supabase
       .from("schedules")
       .select("*")
-      .eq("user_id", userId)
-      .gte("date", startDate)
-      .lt("date", endDate)
+      .gte("date", start)
+      .lt("date", end)
       .order("date");
 
-    if (error) return { success: false, error: "Ошибка сервера" };
+    if (error) {
+      console.error("[SCHEDULE] getSchedule error:", error);
+      return { success: false, error: error.message };
+    }
 
     return { success: true, data: (data ?? []) as Schedule[] };
   } catch (err) {
-    console.error("[SCHEDULE] error:", err);
-    return { success: false, error: "Ошибка сервера" };
+    console.error("[SCHEDULE] getSchedule exception:", err);
+    return { success: false, error: String(err) };
   }
 }
 
-export async function setScheduleDay(
-  userId: string,
-  date: string,
-  type: ScheduleType,
-  initData?: string,
-): Promise<ActionResult<void>> {
-  try {
-    const authResult = await requireAdmin(initData ?? "");
-    if ("error" in authResult) return { success: false, error: authResult.error };
-
-    const supabase = getSupabaseAdmin();
-
-    const { error } = await supabase
-      .from("schedules")
-      .upsert(
-        { user_id: userId, date, type },
-        { onConflict: "user_id,date" },
-      );
-
-    if (error) return { success: false, error: "Ошибка сервера" };
-
-    return { success: true };
-  } catch (err) {
-    console.error("[SCHEDULE] error:", err);
-    return { success: false, error: "Ошибка сервера" };
-  }
-}
-
-export async function setBulkWeekends(
-  year: number,
-  month: number,
-  type: ScheduleType,
+export async function saveSchedule(
+  entries: { userId: string; date: string; type: ScheduleType }[],
   initData?: string,
 ): Promise<ActionResult<number>> {
   try {
-    const authResult = await requireAdmin(initData ?? "");
-    if ("error" in authResult) return { success: false, error: authResult.error };
+    const auth = await verifyRequestAuth(initData ?? "");
+    if (!auth) return { success: false, error: "Не авторизован" };
+
+    if (entries.length === 0) return { success: true, data: 0 };
 
     const supabase = getSupabaseAdmin();
 
-    const { data: employees } = await supabase
-      .from("users")
-      .select("id")
-      .in("role", ["employee", "admin"]);
-
-    if (!employees || employees.length === 0) {
-      return { success: true, data: 0 };
-    }
-
-    const daysInMonth = new Date(year, month, 0).getDate();
-    const updates: { user_id: string; date: string; type: ScheduleType }[] = [];
-
-    for (const emp of employees) {
-      for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(year, month - 1, day);
-        const dayOfWeek = date.getDay();
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-          updates.push({
-            user_id: emp.id,
-            date: `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
-            type,
-          });
-        }
+    for (const e of entries) {
+      const { error: delErr } = await supabase
+        .from("schedules")
+        .delete()
+        .eq("user_id", e.userId)
+        .eq("date", e.date);
+      if (delErr) {
+        console.error("[SCHEDULE] delete error:", e.userId, e.date, delErr.message);
+        return { success: false, error: `Ошибка удаления: ${delErr.message}` };
       }
     }
 
-    if (updates.length === 0) {
-      return { success: true, data: 0 };
+    const rows = entries.map((e) => ({
+      user_id: e.userId,
+      date: e.date,
+      type: e.type,
+    }));
+
+    const { error, data } = await supabase
+      .from("schedules")
+      .insert(rows)
+      .select();
+
+    if (error) {
+      console.error("[SCHEDULE] insert error:", error.message, error.code);
+      return { success: false, error: `Ошибка записи: ${error.message}` };
     }
 
-    const { error } = await supabase
-      .from("schedules")
-      .upsert(updates, { onConflict: "user_id,date" });
+    if (!data || data.length !== rows.length) {
+      console.error("[SCHEDULE] partial insert:", data?.length, "of", rows.length);
+      return { success: false, error: `Записано ${data?.length ?? 0} из ${rows.length}` };
+    }
 
-    if (error) return { success: false, error: "Ошибка сервера" };
-
-    return { success: true, data: updates.length };
+    return { success: true, data: data.length };
   } catch (err) {
-    console.error("[SCHEDULE] error:", err);
-    return { success: false, error: "Ошибка сервера" };
+    console.error("[SCHEDULE] saveSchedule exception:", err);
+    return { success: false, error: String(err) };
   }
 }
 
@@ -164,8 +101,7 @@ export async function getWorkingToday(
     if (!auth) return { success: false, error: "Не авторизован" };
 
     const supabase = getSupabaseAdmin();
-
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Chisinau" });
 
     const { data: scheduleToday } = await supabase
       .from("schedules")
@@ -174,10 +110,7 @@ export async function getWorkingToday(
       .eq("type", "work");
 
     const workUserIds = (scheduleToday ?? []).map((s) => s.user_id);
-
-    if (workUserIds.length === 0) {
-      return { success: true, data: [] };
-    }
+    if (workUserIds.length === 0) return { success: true, data: [] };
 
     const { data: users } = await supabase
       .from("users")
@@ -203,7 +136,7 @@ export async function getWorkingToday(
 
     return { success: true, data: result };
   } catch (err) {
-    console.error("[SCHEDULE] error:", err);
+    console.error("[SCHEDULE] getWorkingToday error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }
@@ -225,7 +158,7 @@ export async function getColleagues(
     if (error) return { success: false, error: "Ошибка сервера" };
     return { success: true, data: (data ?? []) };
   } catch (err) {
-    console.error("[SCHEDULE] error:", err);
+    console.error("[SCHEDULE] getColleagues error:", err);
     return { success: false, error: "Ошибка сервера" };
   }
 }

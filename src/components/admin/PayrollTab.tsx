@@ -43,6 +43,7 @@ export function PayrollTab({ payrolls, onApproved }: PayrollTabProps) {
   const [genResult, setGenResult] = useState<string | null>(null);
 
   const handleApprove = (payrollId: string) => {
+    if (!window.confirm(t("common.confirm"))) return;
     setProcessingId(payrollId);
     setError(null);
 

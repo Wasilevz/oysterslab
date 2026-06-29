@@ -99,7 +99,7 @@ export function DatePicker({ value, onChange, placeholder, minDate, maxDate }: D
                     key={day.toISOString()}
                     onClick={() => !disabled && handleSelect(day)}
                     disabled={disabled}
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg text-xs font-medium transition-colors ${
+                    className={`flex h-11 w-11 items-center justify-center rounded-lg text-xs font-medium transition-colors ${
                       disabled
                         ? "text-[var(--text-secondary)] opacity-50 cursor-not-allowed"
                         : isSelected

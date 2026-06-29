@@ -20,12 +20,11 @@ export async function getShiftsForPeriod(
   try {
     const auth = await verifyRequestAuth(initData ?? "");
     if (!auth) return { success: false, error: "Не авторизован" };
-    if (auth.id !== userId) return { success: false, error: "Нет доступа" };
 
     return await calcShiftsForPeriod(userId, dateFrom, dateTo);
   } catch (err) {
-    console.error("[SALARY] getEmployees error:", err);
-    return { success: false, error: "Ошибка сервера" };
+    console.error("[SALARY] getShiftsForPeriod error:", err);
+    return { success: false, error: String(err) };
   }
 }
 
@@ -42,7 +41,8 @@ async function calcShiftsForPeriod(
     .eq("id", userId)
     .single();
 
-  const rate = user?.hourly_rate ?? 0;
+  if (!user) return { success: false, error: "Пользователь не найден" };
+  const rate = user.hourly_rate ?? 0;
 
   const { data: shifts } = await supabase
     .from("shifts")
@@ -71,7 +71,10 @@ export async function createPayment(
 ): Promise<ActionResult<SalaryPayment>> {
   try {
     const authResult = await requireAdmin(initData ?? "");
-    if ("error" in authResult) return { success: false, error: authResult.error };
+    if ("error" in authResult) {
+      console.error("[SALARY] createPayment auth error:", authResult.error);
+      return { success: false, error: authResult.error };
+    }
 
     const supabase = getSupabaseAdmin();
 
@@ -89,6 +92,7 @@ export async function createPayment(
 
     const calc = await calcShiftsForPeriod(userId, dateFrom, dateTo);
     if (!calc.success || !calc.data) {
+      console.error("[SALARY] calcShifts error:", calc.error);
       return { success: false, error: calc.error ?? "Ошибка расчёта" };
     }
 
@@ -120,12 +124,15 @@ export async function createPayment(
       .select("*, users!inner(id, full_name, position)")
       .single();
 
-    if (error) return { success: false, error: "Ошибка сервера" };
+    if (error) {
+      console.error("[SALARY] createPayment insert error:", error.message);
+      return { success: false, error: `Ошибка записи: ${error.message}` };
+    }
 
     return { success: true, data: data as SalaryPayment };
   } catch (err) {
-    console.error("[SALARY] getEmployees error:", err);
-    return { success: false, error: "Ошибка сервера" };
+    console.error("[SALARY] createPayment exception:", err);
+    return { success: false, error: String(err) };
   }
 }
 
@@ -186,7 +193,7 @@ export async function confirmPayment(
 
     const { notifyPaymentReceived } = await import("@/lib/telegram-notify");
     void notifyPaymentReceived(paymentId);
-    void logAction("system", "confirm_payment", "salary_payment", paymentId);
+    void logAction(auth.id, "confirm_payment", "salary_payment", paymentId);
 
     return { success: true };
   } catch (err) {
@@ -338,6 +345,7 @@ export async function getEmployeeStats(
     weekStart.setDate(now.getDate() - mondayOffset);
     weekStart.setHours(0, 0, 0, 0);
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
 
     const { data: user } = await supabase
       .from("users")
@@ -353,6 +361,16 @@ export async function getEmployeeStats(
       .eq("user_id", userId)
       .in("status", ["COMPLETED", "REVIEWED", "AUTO_CLOSED"])
       .gte("clock_in", monthStart.toISOString());
+
+    const { data: paidData } = await supabase
+      .from("salary_payments")
+      .select("total_amount")
+      .eq("user_id", userId)
+      .in("status", ["approved", "paid"])
+      .gte("period_start", monthStart.toISOString().split("T")[0])
+      .lte("period_end", monthEnd.toISOString().split("T")[0]);
+
+    const totalPaid = (paidData ?? []).reduce((s, p) => s + Number(p.total_amount), 0);
 
     let hoursThisWeek = 0;
     let hoursThisMonth = 0;
@@ -398,7 +416,7 @@ export async function getEmployeeStats(
       data: {
         hoursThisWeek: Math.round(hoursThisWeek * 10) / 10,
         hoursThisMonth: Math.round(hoursThisMonth * 10) / 10,
-        expectedSalary: Math.round(hoursThisMonth * hourlyRate),
+        expectedSalary: Math.max(0, Math.round(hoursThisMonth * hourlyRate - totalPaid)),
         totalShifts,
         hourlyRate,
         weeklyHours,

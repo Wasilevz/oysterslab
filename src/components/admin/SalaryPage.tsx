@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
+import { useToast } from "@/store/toastStore";
 import { useUserStore } from "@/store/userStore";
 import type { FineWithUser, SalaryPaymentWithUser, User, MonthlyReportEmployee } from "@/types/database";
 
@@ -35,6 +36,7 @@ interface SalaryPageProps {
 
 export function SalaryPage({ onBack }: SalaryPageProps) {
   const { t, locale } = useI18n();
+  const show = useToast((s) => s.show);
   const dateLocale = locale === "ro" ? ro : ru;
   const [employees, setEmployees] = useState<User[]>([]);
   const [payments, setPayments] = useState<SalaryPaymentWithUser[]>([]);
@@ -111,22 +113,27 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
     setSuccess(null);
 
     startTransition(async () => {
-      const initData = useUserStore.getState().initData ?? "";
-      const result = await createPayment(selectedEmp, dateFrom, dateTo, initData);
-      if (!result.success) {
-        setError(result.error ?? t("common.error"));
-        return;
+      try {
+        const initData = useUserStore.getState().initData ?? "";
+        const result = await createPayment(selectedEmp, dateFrom, dateTo, initData);
+        if (!result.success) {
+          setError(result.error ?? t("common.error"));
+          return;
+        }
+        setSuccess(t("salary.created"));
+        setSelectedEmp("");
+        setDateFrom("");
+        setDateTo("");
+        setPreview(null);
+        void loadData();
+      } catch (err) {
+        setError(String(err));
       }
-      setSuccess(t("salary.created"));
-      setSelectedEmp("");
-      setDateFrom("");
-      setDateTo("");
-      setPreview(null);
-      void loadData();
     });
   };
 
   const handleApprove = (id: string) => {
+    if (!window.confirm(t("common.confirm"))) return;
     startTransition(async () => {
       const result = await approvePayment(id, useUserStore.getState().initData ?? "");
       if (!result.success) {
@@ -144,6 +151,7 @@ export function SalaryPage({ onBack }: SalaryPageProps) {
         setError(result.error ?? t("common.error"));
         return;
       }
+      show(t("common.success"), "success");
       void loadData();
     });
   };

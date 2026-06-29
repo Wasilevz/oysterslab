@@ -1,15 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getDashboardStats } from "@/actions/adminActions";
 import { getActiveShift } from "@/actions/shiftActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
+import { FABShift } from "@/components/shared/FABShift";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUserStore } from "@/store/userStore";
 import { useI18n } from "@/lib/i18n";
-import { hapticImpact, hapticNotification } from "@/lib/haptic";
-import { useToast } from "@/store/toastStore";
+import { hapticImpact } from "@/lib/haptic";
 import { POLL_INTERVAL_MS } from "@/lib/constants";
 import type { DashboardStats, Shift } from "@/types/database";
 
@@ -23,11 +23,9 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const user = useUserStore((s) => s.user);
   const initData = useUserStore((s) => s.initData);
   const { t } = useI18n();
-  const show = useToast((s) => s.show);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [myShift, setMyShift] = useState<Shift | null>(null);
-  const [isPending, startTransition] = useTransition();
 
   const loadStats = useCallback(async (signal?: AbortSignal) => {
     const result = await getDashboardStats(initData ?? "");
@@ -60,33 +58,10 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
     };
   }, [loadStats, loadMyShift]);
 
-  const handleToggleShift = () => {
-    if (!user) return;
-    hapticImpact("medium");
-
-    startTransition(async () => {
-      try {
-        const res = await fetch("/api/clock", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: user.id, action: myShift ? "clockOut" : "clockIn", initData: useUserStore.getState().initData }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          hapticNotification("error");
-          show(data.error ?? t("common.error"), "error");
-          return;
-        }
-        hapticNotification("success");
-        show(myShift ? t("shift.closed") : t("shift.opened"), "success");
-        void loadMyShift();
-        void loadStats();
-      } catch {
-        hapticNotification("error");
-        show(t("common.networkError"), "error");
-      }
-    });
-  };
+  const reloadAfterToggle = useCallback(() => {
+    void loadMyShift();
+    void loadStats();
+  }, [loadMyShift, loadStats]);
 
   const menuItems = [
     {
@@ -170,7 +145,8 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
   const isSuperAdmin = user?.role === "superadmin";
 
   return (
-    <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
+    <div className="flex min-h-full flex-1 flex-col p-4 pb-32">
+      {!isSuperAdmin && <FABShift isOnShift={Boolean(myShift)} onToggled={reloadAfterToggle} />}
       <header className="mb-5">
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium uppercase tracking-widest text-[var(--text-secondary)]">
@@ -179,20 +155,6 @@ export function AdminDashboard({ onNavigate }: AdminDashboardProps) {
         </div>
         <div className="mt-1 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">{user?.full_name}</h1>
-
-          {!isSuperAdmin && (
-            <button
-              onClick={handleToggleShift}
-              disabled={isPending}
-              className={`rounded-[1440px] px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
-                myShift
-                  ? "bg-[var(--color-error)]/15 text-[var(--color-error)] hover:bg-[var(--color-error)]/25"
-                  : "bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/25"
-              }`}
-            >
-              {isPending ? <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> : myShift ? t("shift.end") : t("shift.start")}
-            </button>
-          )}
         </div>
 
         {!isSuperAdmin && myShift && (

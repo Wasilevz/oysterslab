@@ -76,7 +76,6 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadSettings();
   }, [loadSettings]);
 
@@ -119,7 +118,10 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
 
   const detectMyIP = async () => {
     try {
-      const res = await fetch("/api/my-ip");
+      const initData = useUserStore.getState().initData ?? "";
+      const res = await fetch("/api/my-ip", {
+        headers: { "x-telegram-initdata": initData },
+      });
       const data = await res.json();
       if (data.ip && data.ip !== "unknown") {
         setAllowedIPs([data.ip]);
@@ -227,16 +229,13 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
 
       {/* Language */}
       <div className="mt-4 px-4">
-        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
-          <p className="mb-3 text-sm font-semibold text-[var(--text-primary)]">{t("settings.language")}</p>
-          <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => setLocale("ru")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
-              {t("lang.ru")}
-            </button>
-            <button onClick={() => setLocale("ro")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ro" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
-              {t("lang.ro")}
-            </button>
-          </div>
+        <div className="flex items-center justify-center gap-2">
+          <button onClick={() => setLocale("ru")} className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${locale === "ru" ? "bg-[var(--brand-primary)] text-white" : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--border-color)]"}`}>
+            RU
+          </button>
+          <button onClick={() => setLocale("ro")} className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${locale === "ro" ? "bg-[var(--brand-primary)] text-white" : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--border-color)]"}`}>
+            RO
+          </button>
         </div>
       </div>
 

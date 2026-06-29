@@ -30,19 +30,13 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { userId, action, initData } = body as {
-      userId: string;
+    const { action, initData } = body as {
       action: "clockIn" | "clockOut";
       initData?: string;
     };
 
-    if (!userId || !action) {
-      return NextResponse.json({ error: "Missing userId or action" }, { status: 400 });
-    }
-
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRegex.test(userId)) {
-      return NextResponse.json({ error: "Некорректный userId" }, { status: 400 });
+    if (!action) {
+      return NextResponse.json({ error: "Missing action" }, { status: 400 });
     }
 
     if (!initData) {
@@ -54,21 +48,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
     }
 
-    if (authUser.id !== userId && authUser.role !== "admin") {
-      return NextResponse.json({ error: "Нет доступа" }, { status: 403 });
-    }
+    const userId = authUser.id;
 
     const supabase = getSupabaseAdmin();
-
-    const { data: userExists } = await supabase
-      .from("users")
-      .select("id")
-      .eq("id", userId)
-      .maybeSingle();
-
-    if (!userExists) {
-      return NextResponse.json({ error: "Пользователь не найден" }, { status: 404 });
-    }
 
     const { data: settings } = await supabase
       .from("location_settings")

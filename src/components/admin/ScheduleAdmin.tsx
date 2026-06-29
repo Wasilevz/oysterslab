@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import { ro, ru } from "date-fns/locale";
-import { getSchedule, setScheduleDay, getWorkingToday } from "@/actions/scheduleActions";
+import { getSchedule, saveSchedule, getWorkingToday } from "@/actions/scheduleActions";
 import { getEmployees } from "@/actions/employeeActions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
@@ -25,48 +25,69 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
   const [workingToday, setWorkingToday] = useState<{ id: string; full_name: string; position: string | null; clock_in: string | null }[]>([]);
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [loading, setLoading] = useState(true);
+  const [dirty, setDirty] = useState<Map<string, ScheduleType>>(new Map());
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [msgType, setMsgType] = useState<"ok" | "err">("ok");
+  const cachedMonth = useRef<string>("");
+  const touchStartX = useRef(0);
+  const schedulesRef = useRef<Schedule[]>([]);
+  schedulesRef.current = schedules;
 
   const weekDays = getWeekDays(weekStart);
-  const touchStartX = useRef(0);
 
-  const loadScheduleForWeek = useCallback(async (ws: Date) => {
-    const schedResult = await getSchedule(
-      ws.getFullYear(),
-      ws.getMonth() + 1,
-      initData ?? "",
-    );
-    if (schedResult.success && schedResult.data) {
-      const localWeekDays = getWeekDays(ws);
-      const weekDates = localWeekDays.map(toDateStr);
-      setSchedules(schedResult.data.filter((s) => weekDates.includes(s.date)));
+  const fetchMonth = useCallback(async (force = false) => {
+    const first = getWeekDays(weekStart)[0]!;
+    const last = getWeekDays(weekStart)[6]!;
+    const monthsToFetch = new Set<string>();
+    monthsToFetch.add(`${first.getFullYear()}-${first.getMonth() + 1}`);
+    if (last.getMonth() !== first.getMonth()) {
+      monthsToFetch.add(`${last.getFullYear()}-${last.getMonth() + 1}`);
     }
-  }, [initData]);
+    const monthKey = Array.from(monthsToFetch).sort().join(",");
+    if (!force && cachedMonth.current === monthKey) return;
 
-  const loadData = useCallback(async (signal?: AbortSignal) => {
-    const [empResult, todayResult] = await Promise.all([
-      getEmployees(initData ?? ""),
-      getWorkingToday(initData ?? ""),
-    ]);
-    if (signal?.aborted) return;
-    if (empResult.success && empResult.data) setEmployees(empResult.data);
-    if (todayResult.success && todayResult.data) setWorkingToday(todayResult.data);
-    await loadScheduleForWeek(weekStart);
-    setLoading(false);
-  }, [weekStart, initData, loadScheduleForWeek]);
+    console.log("[FETCH] loading months:", monthKey, "force:", force);
+    const allData: Schedule[] = [];
+    for (const mk of monthsToFetch) {
+      const parts = mk.split("-").map(Number);
+      const res = await getSchedule(parts[0]!, parts[1]!, initData ?? "");
+      console.log("[FETCH] month", mk, "->", res.success ? `${res.data?.length ?? 0} rows` : `FAIL: ${res.error}`);
+      if (res.success && res.data) allData.push(...res.data);
+    }
+    console.log("[FETCH] total rows:", allData.length);
+    setSchedules(allData);
+    cachedMonth.current = monthKey;
+  }, [weekStart, initData]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLoading(true);
-    const controller = new AbortController();
-    void loadData(controller.signal);
-    return () => controller.abort();
-  }, [loadData]);
+    let cancelled = false;
+    (async () => {
+      const [empRes, todayRes] = await Promise.all([
+        getEmployees(initData ?? ""),
+        getWorkingToday(initData ?? ""),
+      ]);
+      if (cancelled) return;
+      if (empRes.success && empRes.data) setEmployees(empRes.data);
+      if (todayRes.success && todayRes.data) setWorkingToday(todayRes.data);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [initData]);
+
+  useEffect(() => {
+    void fetchMonth();
+  }, [fetchMonth]);
+
+  const dirtyKey = (uid: string, d: string) => `${uid}|${d}`;
 
   const cycleType = (userId: string, date: Date) => {
     hapticImpact("light");
     const dateStr = toDateStr(date);
-    const current = getScheduleTypeForDay(schedules, userId, dateStr);
-    const idx = TYPE_ORDER.indexOf(current);
+    const key = dirtyKey(userId, dateStr);
+    const currentFromDirty = dirty.get(key);
+    const currentType = currentFromDirty ?? getScheduleTypeForDay(schedules, userId, dateStr);
+    const idx = TYPE_ORDER.indexOf(currentType);
     const next = TYPE_ORDER[(idx + 1) % TYPE_ORDER.length]!;
 
     setSchedules((prev) => {
@@ -74,45 +95,51 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
       return [...filtered, { id: "temp", user_id: userId, date: dateStr, type: next, created_at: "" }];
     });
 
-    void setScheduleDay(userId, dateStr, next, initData ?? "");
+    setDirty((prev) => {
+      const nextMap = new Map(prev);
+      const currentInDirty = prev.get(key);
+      if (currentInDirty === next) {
+        nextMap.delete(key);
+      } else {
+        nextMap.set(key, next);
+      }
+      return nextMap;
+    });
   };
 
-  const prevWeek = () => {
-    hapticImpact("light");
-    const d = new Date(weekStart);
-    d.setDate(d.getDate() - 7);
-    setWeekStart(d);
+  const saveAll = async () => {
+    if (dirty.size === 0) return;
+    hapticImpact("medium");
+    setSaving(true);
+
+    const entries = Array.from(dirty.entries()).map(([k, type]) => {
+      const [userId, date] = k.split("|");
+      return { userId: userId!, date: date!, type };
+    });
+
+    const res = await saveSchedule(entries, initData ?? "");
+    if (res.success) {
+      hapticImpact("heavy");
+      setDirty(new Map());
+      setMsg(t("schedule.saved"));
+      setMsgType("ok");
+      cachedMonth.current = "";
+      await fetchMonth(true);
+    } else {
+      setMsg(res.error ?? "Ошибка");
+      setMsgType("err");
+    }
+    setSaving(false);
+    setTimeout(() => setMsg(null), 8000);
   };
 
-  const nextWeek = () => {
-    hapticImpact("light");
-    const d = new Date(weekStart);
-    d.setDate(d.getDate() + 7);
-    setWeekStart(d);
-  };
-
-  const goToThisWeek = () => {
-    hapticImpact("light");
-    setWeekStart(getWeekStart(new Date()));
-  };
+  const prevWeek = () => { hapticImpact("light"); const d = new Date(weekStart); d.setDate(d.getDate() - 7); setWeekStart(d); };
+  const nextWeek = () => { hapticImpact("light"); const d = new Date(weekStart); d.setDate(d.getDate() + 7); setWeekStart(d); };
+  const goToThisWeek = () => { hapticImpact("light"); setWeekStart(getWeekStart(new Date())); };
 
   const isCurrentWeek = getWeekStart(new Date()).getTime() === weekStart.getTime();
-
   const dayLabels = [t("day.mon"), t("day.tue"), t("day.wed"), t("day.thu"), t("day.fri"), t("day.sat"), t("day.sun")];
-  const today = new Date();
-  const todayStr = toDateStr(today);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0]!.clientX;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const diff = e.changedTouches[0]!.clientX - touchStartX.current;
-    if (Math.abs(diff) > 80) {
-      if (diff > 0) prevWeek();
-      else nextWeek();
-    }
-  };
+  const todayStr = toDateStr(new Date());
 
   if (loading) {
     return (
@@ -145,7 +172,7 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
 
       <div className="px-4 pt-4">
         <div className="flex items-center justify-between">
-          <button onClick={prevWeek} aria-label={t("schedule.prevWeek")} className="flex h-11 w-11 items-center justify-center rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+          <button onClick={prevWeek} className="flex h-11 w-11 items-center justify-center rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
@@ -155,12 +182,12 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
               {format(weekDays[0]!, "d MMM", { locale: dateLocale })} – {format(weekDays[6]!, "d MMM", { locale: dateLocale })}
             </p>
             {!isCurrentWeek && (
-              <button onClick={goToThisWeek} aria-label={t("schedule.thisWeek")} className="mt-1.5 rounded-full border border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 px-4 py-2.5 text-xs font-bold text-[var(--brand-primary)] transition-all active:scale-95 hover:bg-[var(--brand-primary)]/20">
+              <button onClick={goToThisWeek} className="mt-1.5 rounded-full border border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 px-4 py-2.5 text-xs font-bold text-[var(--brand-primary)] transition-all active:scale-95 hover:bg-[var(--brand-primary)]/20">
                 ← {t("schedule.thisWeek")}
               </button>
             )}
           </div>
-          <button onClick={nextWeek} aria-label={t("nav.nextWeek")} className="flex h-11 w-11 items-center justify-center rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
+          <button onClick={nextWeek} className="flex h-11 w-11 items-center justify-center rounded-xl text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]">
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
@@ -179,8 +206,11 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
 
       <div
         className="mt-3 flex-1 px-4 pb-24"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+        onTouchStart={(e) => { touchStartX.current = e.touches[0]!.clientX; }}
+        onTouchEnd={(e) => {
+          const diff = e.changedTouches[0]!.clientX - touchStartX.current;
+          if (Math.abs(diff) > 80) { diff > 0 ? prevWeek() : nextWeek(); }
+        }}
       >
         <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] overflow-hidden">
           <table className="w-full border-collapse">
@@ -215,14 +245,17 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
                   </td>
                   {weekDays.map((day, i) => {
                     const dateStr = toDateStr(day);
-                    const type = getScheduleTypeForDay(schedules, emp.id, dateStr);
+                    const key = dirtyKey(emp.id, dateStr);
+                    const type = dirty.get(key) ?? getScheduleTypeForDay(schedules, emp.id, dateStr);
                     const colors = TYPE_COLORS[type];
-                    const isToday = toDateStr(day) === todayStr;
+                    const isToday = dateStr === todayStr;
+                    const isDirty = dirty.has(key);
                     return (
                       <td key={i} className="p-0.5">
                         <button
                           onClick={() => cycleType(emp.id, day)}
-                          className={`h-11 w-full rounded-xl text-xs font-bold transition-all active:scale-95 ${colors.bg} ${colors.text} ${isToday ? "ring-1 ring-[var(--brand-primary)]/30" : ""}`}
+                          aria-label={`${emp.full_name}, ${dayLabels[i]} ${day.getDate()}, ${t(`schedule.${type}`)}`}
+                          className={`h-11 w-full rounded-xl text-xs font-bold transition-all active:scale-95 ${colors.bg} ${colors.text} ${isToday ? "ring-1 ring-[var(--brand-primary)]/30" : ""} ${isDirty ? "ring-2 ring-amber-400" : ""}`}
                         >
                           {type === "work" ? t("schedule.abbrWork") : type === "off" ? t("schedule.abbrOff") : type === "vacation" ? t("schedule.abbrVacation") : t("schedule.abbrSick")}
                         </button>
@@ -236,6 +269,27 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
         </div>
       </div>
 
+      {dirty.size > 0 && (
+        <div className="sticky bottom-0 border-t border-[var(--border-color)] bg-[var(--bg-app)] px-4 py-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-amber-500">{t("schedule.unsaved")} ({dirty.size})</span>
+            <button
+              onClick={saveAll}
+              disabled={saving}
+              className="rounded-xl bg-[var(--brand-primary)] px-6 py-2.5 text-sm font-bold text-white transition-all active:scale-95 disabled:opacity-50"
+            >
+              {saving ? t("schedule.saving") : t("schedule.save")}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {msg && (
+        <div className={`mx-4 mb-3 rounded-xl border px-4 py-3 text-sm font-medium ${msgType === "ok" ? "border-green-500/30 bg-green-500/10 text-green-600" : "border-red-500/30 bg-red-500/10 text-red-500"}`}>
+          {msg}
+        </div>
+      )}
+
       {workingToday.length > 0 && (
         <div className="border-t border-[var(--border-color)] px-4 pt-4 pb-24">
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--text-secondary)]">
@@ -243,15 +297,10 @@ export function ScheduleAdmin({ onBack }: { onBack?: () => void }) {
           </h2>
           <div className="space-y-2">
             {workingToday.map((w) => (
-              <div
-                key={w.id}
-                className="flex items-center justify-between rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-4 py-3"
-              >
+              <div key={w.id} className="flex items-center justify-between rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-4 py-3">
                 <div>
                   <p className="text-sm font-medium text-[var(--text-primary)]">{w.full_name}</p>
-                  {w.position && (
-                    <p className="text-xs text-[var(--text-secondary)]">{w.position}</p>
-                  )}
+                  {w.position && <p className="text-xs text-[var(--text-secondary)]">{w.position}</p>}
                 </div>
                 {w.clock_in ? (
                   <span className="flex items-center gap-1.5">

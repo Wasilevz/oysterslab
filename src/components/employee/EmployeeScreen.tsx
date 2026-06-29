@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
 import { ru } from "date-fns/locale";
 import { ro } from "date-fns/locale";
@@ -12,11 +12,11 @@ import { getEmployeeStats } from "@/actions/salaryActions";
 import { ShiftTimer } from "@/components/shared/ShiftTimer";
 import { EmployeeSalary } from "@/components/employee/EmployeeSalary";
 import { ScheduleEmployee } from "@/components/employee/ScheduleEmployee";
+import { FABShift } from "@/components/shared/FABShift";
 import { Onboarding } from "@/components/employee/Onboarding";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useI18n } from "@/lib/i18n";
-import { hapticImpact, hapticNotification } from "@/lib/haptic";
-import { useToast } from "@/store/toastStore";
+import { hapticImpact } from "@/lib/haptic";
 import { useUserStore } from "@/store/userStore";
 import { SHIFT_HISTORY_LIMIT } from "@/lib/constants";
 import type { EmployeeStats, Shift } from "@/types/database";
@@ -50,11 +50,9 @@ const STATUS_COLORS: Record<string, string> = {
 export function EmployeeScreen() {
   const { t, locale, setLocale } = useI18n();
   const user = useUserStore((s) => s.user);
-  const show = useToast((s) => s.show);
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
   const [stats, setStats] = useState<EmployeeStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isPending, startTransition] = useTransition();
 
   const dateLocale = locale === "ro" ? ro : ru;
   const [showOnboarding, setShowOnboarding] = useState(() => {
@@ -91,36 +89,9 @@ export function EmployeeScreen() {
     return () => controller.abort();
   }, [loadData]);
 
-  const handleToggleShift = () => {
-    if (!user) return;
-    const action = activeShift ? "clockOut" : "clockIn";
-    hapticImpact("medium");
-
-    startTransition(async () => {
-      try {
-        const res = await fetch("/api/clock", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: user.id, action, initData: useUserStore.getState().initData }),
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          hapticNotification("error");
-          show(data.error ?? t("common.operationError"), "error");
-          return;
-        }
-
-        hapticNotification("success");
-        show(action === "clockOut" ? t("shift.closed") : t("shift.opened"), "success");
-        void loadData();
-      } catch {
-        hapticNotification("error");
-        show(t("common.networkError"), "error");
-      }
-    });
-  };
+  const reloadAfterToggle = useCallback(() => {
+    void loadData();
+  }, [loadData]);
 
   const openShiftHistory = async (period: PeriodType) => {
     if (!user) return;
@@ -185,7 +156,8 @@ export function EmployeeScreen() {
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col p-4 pb-24">
+    <div className="flex min-h-full flex-1 flex-col p-4 pb-32">
+      <FABShift isOnShift={isOnShift} onToggled={reloadAfterToggle} />
       {/* Header */}
       <header className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -199,17 +171,14 @@ export function EmployeeScreen() {
             <h1 className="text-lg font-bold text-[var(--text-primary)]">{user?.full_name}</h1>
           </div>
         </div>
-        <button
-          onClick={handleToggleShift}
-          disabled={isPending}
-          className={`rounded-[1440px] px-6 py-3 text-sm font-bold uppercase tracking-wider transition-all active:scale-[0.98] disabled:opacity-50 ${
-            isOnShift
-              ? "bg-[var(--color-error)]/15 text-[var(--color-error)] hover:bg-[var(--color-error)]/25"
-              : "bg-[var(--brand-primary)]/15 text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/25"
-          }`}
-        >
-          {isPending ? <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> : isOnShift ? t("shift.end") : t("shift.start")}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button onClick={() => setLocale("ru")} className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${locale === "ru" ? "bg-[var(--brand-primary)] text-white" : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--border-color)]"}`}>
+            RU
+          </button>
+          <button onClick={() => setLocale("ro")} className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${locale === "ro" ? "bg-[var(--brand-primary)] text-white" : "bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:bg-[var(--border-color)]"}`}>
+            RO
+          </button>
+        </div>
       </header>
 
       {/* Карточка смены — главный элемент */}
@@ -232,7 +201,6 @@ export function EmployeeScreen() {
                   {t("shift.onShift")}
                 </p>
               </div>
-
               <ShiftTimer
                 clockIn={activeShift.clock_in}
                 className="font-mono text-5xl font-black tabular-nums tracking-tight text-[var(--text-primary)]"
@@ -303,22 +271,12 @@ export function EmployeeScreen() {
         </div>
       )}
 
-      <EmployeeSalary />
+      <div className="mt-5">
+        <EmployeeSalary />
+      </div>
 
-      <ScheduleEmployee />
-
-      <div className="mt-6">
-        <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--bg-surface)] p-4">
-          <p className="mb-3 text-sm font-semibold text-[var(--text-primary)]">{t("settings.language")}</p>
-          <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => setLocale("ru")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ru" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
-              {t("lang.ru")}
-            </button>
-            <button onClick={() => setLocale("ro")} className={`rounded-[1440px] border py-2.5 text-sm font-semibold transition-colors ${locale === "ro" ? "border-[var(--brand-primary)]/30 bg-[var(--brand-primary)]/10 text-[var(--brand-primary)]" : "border-[var(--border-color)] text-[var(--text-secondary)]"}`}>
-              {t("lang.ro")}
-            </button>
-          </div>
-        </div>
+      <div className="mt-5">
+        <ScheduleEmployee />
       </div>
 
       {/* Модалка со списком смен */}

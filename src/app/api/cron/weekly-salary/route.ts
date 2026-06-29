@@ -10,10 +10,12 @@ export async function GET(request: Request) {
 
   try {
     const now = new Date();
+    const chisinauStr = now.toLocaleString("en-US", { timeZone: "Europe/Chisinau" });
+    const nowLocal = new Date(chisinauStr);
 
-    const mondayOffset = (now.getDay() + 6) % 7;
-    const lastWeekStart = new Date(now);
-    lastWeekStart.setDate(now.getDate() - mondayOffset - 7);
+    const mondayOffset = (nowLocal.getDay() + 6) % 7;
+    const lastWeekStart = new Date(nowLocal);
+    lastWeekStart.setDate(nowLocal.getDate() - mondayOffset - 7);
     lastWeekStart.setHours(0, 0, 0, 0);
 
     const lastWeekEnd = new Date(lastWeekStart);
@@ -65,8 +67,8 @@ export async function GET(request: Request) {
         .from("fines")
         .select("amount")
         .eq("user_id", emp.id)
-        .gte("period_start", periodStart)
-        .lte("period_end", periodEnd);
+        .lte("period_start", periodEnd)
+        .gte("period_end", periodStart);
 
       const totalFines = (finesData ?? []).reduce((s, f) => s + Number(f.amount), 0);
       const finalAmount = Math.max(0, Math.round((totalHours * emp.hourly_rate - totalFines) * 100) / 100);
