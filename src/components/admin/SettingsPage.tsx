@@ -76,11 +76,8 @@ export function SettingsPage({ onBack }: { onBack?: () => void }) {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      await loadSettings();
-    })();
-    return () => { cancelled = true; };
+    void loadSettings();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
   }, [loadSettings]);
 
   const loadLogs = useCallback(async () => {
